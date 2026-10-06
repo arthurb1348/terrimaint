@@ -53,7 +53,7 @@ jobs:
         with:
           persist-credentials: false
       - name: Installer Node LTS
-        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           # Même version exacte que celle vérifiée localement et déclarée pour le projet.
           node-version-file: .nvmrc
