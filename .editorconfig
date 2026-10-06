@@ -1,3 +1,4 @@
+# Harmonise l'encodage, les retours à la ligne et l'indentation dans les éditeurs.
 root = true
 
 [*]

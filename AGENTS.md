@@ -38,7 +38,20 @@ No blanket pause for routine reversible edits. Ask only for a missing business d
 an expansion of scope, or an action not authorized by the task.
 Initial repository bootstrap may create the first commit on `main`; subsequent changes use PRs.
 
-## Quality
+## Commentaires pédagogiques en français
+
+- Documenter en français chaque fichier de code écrit ou modifié : son rôle, les classes
+  et fonctions, leurs paramètres, résultats et éventuels effets de bord.
+- Expliquer les étapes importantes, les choix techniques, les erreurs et leur traitement.
+  Pour les tests, préciser le comportement observé et les cas d'échec vérifiés.
+- Garder les identifiants en anglais et les commentaires utiles à une présentation orale,
+  sans paraphraser chaque ligne ni laisser des explications devenues fausses.
+- Pour les formats sans commentaires (notamment JSON), documenter les clés, leur rôle
+  et les liens entre fichiers dans `docs/code-guide.md`.
+- Sur le code existant, une tâche de commentaires conserve le comportement et limite
+  les modifications aux commentaires et à la documentation.
+
+## Contrôles de qualité
 
 - Tests cover observable behavior and important failure cases; do not mirror implementation.
 - Never remove tests or weaken CI just to obtain a green result.

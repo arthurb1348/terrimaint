@@ -1,3 +1,4 @@
+# Propose des PR hebdomadaires pour les dépendances ; aucune fusion automatique.
 version: 2
 updates:
   - package-ecosystem: uv

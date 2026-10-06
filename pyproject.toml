@@ -1,3 +1,4 @@
+# Métadonnées et dépendances de l'API ; uv.lock conserve les versions exactes.
 [project]
 name = "terrimaint-api"
 version = "0.1.0"
@@ -24,10 +25,12 @@ build-backend = "hatchling.build"
 packages = ["backend/src/terrimaint_api"]
 
 [tool.pytest.ini_options]
+# Pytest cherche les tests HTTP dans ce dossier, sans dépendre d'un serveur lancé.
 testpaths = ["backend/tests"]
 addopts = "-ra"
 
 [tool.ruff]
+# Le lint et le format ciblent la syntaxe Python 3.12, identique en local et en CI.
 target-version = "py312"
 line-length = 100
 

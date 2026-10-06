@@ -1,3 +1,4 @@
+# Hooks Python locaux : corrigent le lint et le format avant la création du commit.
 repos:
   - repo: local
     hooks:

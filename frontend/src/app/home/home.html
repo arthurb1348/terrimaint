@@ -1,0 +1,57 @@
+<!-- Accueil responsive commun aux deux rôles ; aucun écran métier n'est simulé. -->
+<div class="page">
+  <header class="brand">
+    <span class="brand-mark" aria-hidden="true">T</span>
+    <span>TerriMaint</span>
+    <span class="brand-note">Maintenance des collectivités</span>
+  </header>
+  <main id="main-content">
+    <section class="intro" aria-labelledby="welcome-title">
+      <p class="eyebrow">Au service du quotidien</p>
+      <h1 id="welcome-title">Du terrain<br />à la décision<span>.</span></h1>
+      <p class="description">
+        Un point de départ commun pour suivre les équipements, signaler les incidents et organiser
+        la maintenance de votre collectivité.
+      </p>
+      <p class="project-note">
+        TerriMaint se construit progressivement. Cet accueil vérifie la connexion à l’API avant les
+        prochains parcours.
+      </p>
+    </section>
+    <section class="health-card" aria-labelledby="health-title">
+      <p class="eyebrow">Connexion au service</p>
+      <h2 id="health-title">État de l’API</h2>
+      <!-- Annonce les changements sans déplacer le focus ni dépendre de la couleur. -->
+      <div class="health-result" role="status" aria-live="polite" aria-atomic="true">
+        @switch (state()) {
+          @case ('checking') {
+            <p class="status checking">
+              <span class="status-dot" aria-hidden="true"></span>Vérification en cours…
+            </p>
+            <p>Nous vérifions que le service répond.</p>
+          }
+          @case ('available') {
+            <p class="status available">
+              <span class="status-dot" aria-hidden="true"></span>API disponible
+            </p>
+            <p>Le service répond. La connexion est établie.</p>
+          }
+          @case ('unavailable') {
+            <p class="status unavailable">
+              <span class="status-dot" aria-hidden="true"></span>API indisponible
+            </p>
+            <p>Le service ne répond pas correctement. Vous pouvez réessayer.</p>
+          }
+        }
+      </div>
+      <!-- Désactiver pendant l'appel évite les demandes simultanées au clic. -->
+      <button type="button" (click)="refresh()" [disabled]="state() === 'checking'">
+        Vérifier à nouveau <span aria-hidden="true">↗</span>
+      </button>
+      <p class="health-note">Ce contrôle vérifie la réponse de l’API, pas la base de données.</p>
+    </section>
+  </main>
+  <footer>
+    TerriMaint <span aria-hidden="true">·</span> Le lien entre vos équipes et votre territoire.
+  </footer>
+</div>

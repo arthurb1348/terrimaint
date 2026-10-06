@@ -1,3 +1,4 @@
+# Vérifie chaque PR et chaque commit de main ; les deux jobs sont indépendants.
 name: CI
 
 on:
@@ -7,14 +8,17 @@ on:
   workflow_dispatch:
 
 permissions:
+  # Les contrôles peuvent lire le code mais ne peuvent ni pousser ni fusionner.
   contents: read
 
 concurrency:
+  # Une nouvelle exécution du même parcours remplace l'ancienne devenue inutile.
   group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   backend:
+    # Le nom public Backend correspond au contrôle exigé par le ruleset actuel.
     name: Backend
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -34,3 +38,40 @@ jobs:
         run: uv sync --locked
       - name: Vérifier le backend
         run: uv run --locked python scripts/check.py
+
+  frontend:
+    # Frontend sera rendu obligatoire dans une tâche distante après observation du job.
+    name: Frontend
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Installer Node LTS
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          # Même version exacte que celle vérifiée localement et déclarée pour le projet.
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Installer les dépendances verrouillées
+        run: npm ci
+      - name: Vérifier TypeScript et les templates
+        run: npm run lint
+      - name: Tester l'accueil et les réponses HTTP
+        run: npm test
+      - name: Construire pour la production
+        run: npm run build
+      - name: Conserver le build pour la relecture
+        # Permet de vérifier le résultat compilé sans réinstaller les outils Angular.
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: frontend-build
+          path: frontend/dist/terrimaint/browser
+          retention-days: 7
+          if-no-files-found: error
