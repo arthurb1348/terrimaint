@@ -1,3 +1,4 @@
+# Ignore environnements, caches, builds et secrets ; garde les exemples .env.example.
 .venv/
 __pycache__/
 *.py[cod]

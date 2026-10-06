@@ -1,0 +1,20 @@
+/* Palette du projet et polices locales avec repli, sans téléchargement externe. */
+:root {
+  --green: #234e3f;
+  --accent: #c3823e;
+  --surface: #e4ece8;
+  --border: #d5dfd9;
+  --muted: #53635a;
+  --serif: 'Source Serif 4', Georgia, serif;
+  font-family: Inter, system-ui, sans-serif;
+  color: #263a30;
+  background: #f5f5f5;
+  font-synthesis: none;
+}
+/* Inclure bordures et marges internes simplifie le dimensionnement responsive. */
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}

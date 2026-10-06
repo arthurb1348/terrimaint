@@ -1,3 +1,4 @@
+# Stocke le texte avec des fins de ligne LF ; laisse les fichiers binaires intacts.
 * text=auto eol=lf
 *.png binary
 *.jpg binary

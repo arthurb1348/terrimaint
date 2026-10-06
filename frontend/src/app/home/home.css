@@ -1,0 +1,187 @@
+/* Accueil : deux colonnes sur grand écran, une seule sur mobile. */
+:host {
+  display: block;
+}
+.page {
+  width: min(1120px, calc(100% - 48px));
+  margin: 0 auto;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 32px 0;
+  color: var(--green);
+  font-size: 1.3rem;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--green);
+  color: white;
+}
+.brand-note {
+  margin-left: auto;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+main {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 72px;
+  align-items: center;
+  min-height: 68vh;
+  padding: 72px 0;
+}
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--green);
+}
+h1 {
+  margin: 20px 0 28px;
+  font-family: var(--serif);
+  font-size: clamp(2.8rem, 5vw, 4.5rem);
+  font-weight: 500;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  color: var(--green);
+}
+h1 span {
+  color: var(--accent);
+}
+.description {
+  max-width: 470px;
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+.project-note {
+  max-width: 450px;
+  margin-top: 28px;
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.7;
+}
+.health-card {
+  padding: 32px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 12px 40px #234e3f08;
+}
+h2 {
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  font-weight: 500;
+  margin: 12px 0 28px;
+}
+.health-result {
+  min-height: 132px;
+  padding: 20px;
+  border-radius: 12px;
+  background: var(--surface);
+}
+.health-result p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+.health-result .status {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+/* Le libellé double la couleur pour les personnes daltoniennes. */
+.status-dot {
+  flex-shrink: 0;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.available {
+  color: var(--green);
+}
+.unavailable {
+  color: #8a382d;
+}
+.checking {
+  color: #525e57;
+}
+button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 48px;
+  margin-top: 24px;
+  padding: 12px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--green);
+  color: white;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+button:hover:enabled {
+  background: #183e31;
+}
+button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+/* Un repère visible conserve la navigation au clavier. */
+button:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+.health-note {
+  margin: 16px 0 0;
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+footer span {
+  margin: 0 10px;
+}
+@media (max-width: 760px) {
+  .page {
+    width: calc(100% - 32px);
+  }
+  .brand {
+    padding: 20px 0;
+  }
+  .brand-note {
+    display: none;
+  }
+  main {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 40px 0;
+  }
+  .health-card {
+    padding: 24px;
+  }
+  footer {
+    line-height: 1.7;
+  }
+}

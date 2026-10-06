@@ -1,12 +1,37 @@
-# Frontend Angular — prochaine tâche
+# Frontend TerriMaint
 
-L'application Angular n'est pas encore générée. Cet emplacement est réservé à la PWA.
+Accueil Angular 22.2.1 strict et standalone, avec routage et état de l'API.
+Node 24.21.0 LTS et npm 11.19.0 ; versions déclarées dans .nvmrc à la racine,
+.node-version et package.json. package-lock.json verrouille l'installation.
 
-La première issue frontend doit initialiser Angular/TypeScript en mode strict, ajouter
-un démarrage local, le lint, les tests et un build reproductible, puis ajouter le job `Frontend`
-à la CI et à la protection de `main`.
-Choisir les versions Node/Angular compatibles depuis la documentation officielle et les verrouiller.
-L'interface initiale peut se limiter à un écran d'accueil et un appel à l'endpoint de santé de l'API.
+Depuis ce dossier :
 
-Respecter les deux rôles fonctionnels et leur usage sur mobile comme sur ordinateur.
-La stratégie hors connexion doit être introduite ensuite sur un parcours précis.
+```sh
+npm ci
+npm start
+```
+
+Depuis la racine, dans un second terminal :
+
+```sh
+uv run --locked uvicorn terrimaint_api.main:app --reload
+```
+
+Ouvrir http://localhost:4200. Le proxy redirige /api/** vers http://127.0.0.1:8000.
+L'accueil vérifie la santé à l'ouverture ou au clic, avec un délai maximal de cinq secondes.
+
+```sh
+npm run lint
+npm test
+npm run build
+```
+
+Les tests Vitest sont sans watch et ne nécessitent pas l'API. npm run test:watch surveille
+les changements. Le build de production est dans dist/terrimaint/browser.
+
+Vérification manuelle : constater API disponible avec Uvicorn lancé, arrêter l'API,
+cliquer sur Vérifier à nouveau et constater API indisponible. Relancer le serveur et
+réessayer. Vérifier aussi l'affichage mobile (375 px) et la navigation au clavier.
+
+Les explications des sources, tests et JSON sont dans [le guide pédagogique](../docs/code-guide.md).
+Les instructions communes sont dans [le README racine](../README.md).
