@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "openai.chatgpt",
+    "ms-python.python",
+    "charliermarsh.ruff",
+    "angular.ng-template"
+  ]
+}

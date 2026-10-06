@@ -1,0 +1,23 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "TerriMaint: vérifier",
+      "type": "process",
+      "command": "uv",
+      "args": ["run", "--locked", "python", "scripts/check.py"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "group": {"kind": "test", "isDefault": true},
+      "problemMatcher": [],
+      "presentation": {"reveal": "always", "panel": "dedicated"}
+    },
+    {
+      "label": "TerriMaint: démarrer API",
+      "type": "process",
+      "command": "uv",
+      "args": ["run", "--locked", "uvicorn", "terrimaint_api.main:app", "--reload"],
+      "options": {"cwd": "${workspaceFolder}"},
+      "problemMatcher": []
+    }
+  ]
+}

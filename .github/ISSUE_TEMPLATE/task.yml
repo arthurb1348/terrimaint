@@ -1,0 +1,31 @@
+name: Tâche de développement
+description: Un besoin précis, prêt à être confié à Codex.
+title: "[Tâche] "
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Besoin et résultat attendu
+      description: Décrire le problème, l'utilisateur concerné et le comportement attendu.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Critères d'acceptation
+      description: Des résultats observables que l'on pourra vérifier.
+      placeholder: "- [ ] ..."
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Périmètre et références
+      description: Maquette, règle métier, fichiers concernés et limites utiles.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Vérifications attendues
+      description: Parcours manuel, tests utiles et points à expliquer lors de la relecture.

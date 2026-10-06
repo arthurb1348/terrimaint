@@ -1,0 +1,35 @@
+[project]
+name = "terrimaint-api"
+version = "0.1.0"
+description = "TerriMaint — Du terrain à la décision"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "uvicorn>=0.30,<1.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.27,<1.0",
+    "pre-commit>=4,<6",
+    "pytest>=8,<10",
+    "ruff>=0.9,<1.0",
+]
+
+[build-system]
+requires = ["hatchling>=1.26,<2.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["backend/src/terrimaint_api"]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
