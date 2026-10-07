@@ -2,7 +2,7 @@
 
 ## Context
 
-Read `README.md`, `docs/project.md` and `docs/workflow.md`, then the task or issue.
+Read `README.md`, `docs/project.md`, `docs/project-status.md` and `docs/workflow.md`, then the task or issue.
 TerriMaint is a CDA training project with a real small-municipality use case.
 Arthur owns product decisions, reviews the code and needs to explain it at his exams.
 Communicate in French; use English identifiers in code.
@@ -42,7 +42,9 @@ Initial repository bootstrap may create the first commit on `main`; subsequent c
 
 - Documenter en français chaque fichier de code écrit ou modifié : son rôle, les classes
   et fonctions, leurs paramètres, résultats et éventuels effets de bord.
-- Expliquer les étapes importantes, les choix techniques, les erreurs et leur traitement.
+- Expliquer principalement les intentions, décisions et comportements non évidents,
+  notamment les choix techniques, les erreurs et leur traitement ; éviter les commentaires
+  qui paraphrasent simplement le code. Garder les explications détaillées dans le guide.
   Pour les tests, préciser le comportement observé et les cas d'échec vérifiés.
 - Garder les identifiants en anglais et les commentaires utiles à une présentation orale,
   sans paraphraser chaque ligne ni laisser des explications devenues fausses.
@@ -50,6 +52,20 @@ Initial repository bootstrap may create the first commit on `main`; subsequent c
   et les liens entre fichiers dans `docs/code-guide.md`.
 - Sur le code existant, une tâche de commentaires conserve le comportement et limite
   les modifications aux commentaires et à la documentation.
+
+## Source de vérité et validation pédagogique
+
+- GitHub est la source de vérité du projet. Maintenir `docs/project-status.md` dans les PR
+  qui changent significativement son état ; distinguer code intégré, travail en cours et prévu.
+- Le workflow doit être utilisable depuis cloud/mobile et PC ; ne pas imposer VS Code local.
+  Respecter le cycle branche → PR → contrôles pertinents → relecture → fusion par Arthur.
+- Pour chaque PR significative, fournir le compte rendu pédagogique défini dans
+  `docs/workflow.md` : modifications, fichiers importants, fonctionnement, circulation
+  des données si pertinente, choix techniques, méthode de test, endroits où modifier
+  le comportement, points essentiels à comprendre et deux à trois questions de compréhension.
+- Le code assisté par IA reste compréhensible et maintenable par le développeur.
+  Ne pas assimiler fonctionnement ou CI verte à une validation humaine ; ne pas cocher
+  à la place d'Arthur les critères d'acceptation ou sa compréhension dans la PR.
 
 ## Contrôles de qualité
 
