@@ -8,6 +8,9 @@ Projet fil rouge de formation Concepteur Développeur d'Applications.
 
 ## État du projet
 
+Le [bilan projet versionné](docs/project-status.md) distingue l'état réel, les travaux en cours
+et les intentions documentées, avec leurs sources. GitHub constitue la source de vérité.
+
 Socle initial : API FastAPI minimale, tests HTTP, Ruff, dépendances gérées par uv,
 CI GitHub Actions, modèles d'issues et de pull requests, consignes Codex et configuration VS Code.
 Le frontend Angular strict et standalone fournit un accueil responsive avec l'état de l'API.
@@ -19,7 +22,8 @@ L'endpoint de santé vérifie que l'API répond ; il ne vérifie pas de base de 
 Prérequis : Git, Python 3.12, [uv](https://docs.astral.sh/uv/getting-started/installation/),
 Node **24.21.0 LTS** (`.nvmrc`) et npm **11.19.0**. Le frontend utilise Angular **22.2.1**,
 TypeScript **6.0.3** et Vitest. `uv.lock` et `frontend/package-lock.json` fixent les dépendances.
-Ouvrir la racine du dépôt dans VS Code, puis exécuter dans son terminal :
+Depuis la racine du dépôt, dans un terminal local ou un environnement cloud disposant
+des prérequis (VS Code est facultatif) :
 
 ```sh
 uv sync --locked
@@ -27,7 +31,7 @@ uv run pre-commit install
 uv run --locked python scripts/check.py
 ```
 
-Choisir l'interpréteur de `.venv` dans VS Code. Les hooks locaux se réinstallent après chaque clone.
+Avec VS Code, choisir l'interpréteur de `.venv`. Les hooks locaux se réinstallent après chaque clone.
 Ils corrigent et formatent les fichiers Python au commit ; si des fichiers sont corrigés,
 relire le diff, les ajouter à nouveau puis relancer le commit.
 
@@ -93,6 +97,8 @@ focus visible et libellé de statut lisible sans dépendre de la couleur.
 
 Une issue précise → une branche → implémentation et contrôles → une pull request → relecture et fusion par Arthur.
 Les instructions complètes sont dans [le workflow](docs/workflow.md).
+Ce processus se pilote depuis mobile ou PC avec GitHub et un agent dans un environnement
+cloud ou local. La relecture et la compréhension du développeur complètent les contrôles automatisés.
 Les [décisions](docs/decisions.md) et le [contexte produit](docs/project.md) fixent le cadre.
 Le [guide pédagogique du code](docs/code-guide.md) explique les fichiers et les configurations.
 Pour publier ce socle neuf, utiliser [le guide d'initialisation GitHub](docs/bootstrap.md).
