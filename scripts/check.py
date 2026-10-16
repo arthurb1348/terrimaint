@@ -14,6 +14,7 @@ def main() -> int:
     checks = [
         ("Lint Python", ["ruff", "check", "."]),
         ("Format Python", ["ruff", "format", "--check", "."]),
+        ("Configuration Django", ["django", "check", "--settings=terrimaint_api.settings"]),
         ("Tests API", ["pytest"]),
     ]
     for label, arguments in checks:

@@ -5,15 +5,15 @@ version = "0.1.0"
 description = "TerriMaint — Du terrain à la décision"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.115,<1.0",
-    "uvicorn>=0.30,<1.0",
+    "django>=5.2,<5.3",
+    "djangorestframework>=3.16,<3.17",
 ]
 
 [dependency-groups]
 dev = [
-    "httpx>=0.27,<1.0",
     "pre-commit>=4,<6",
     "pytest>=8,<10",
+    "pytest-django>=4.11,<5",
     "ruff>=0.9,<1.0",
 ]
 
@@ -28,6 +28,7 @@ packages = ["backend/src/terrimaint_api"]
 # Pytest cherche les tests HTTP dans ce dossier, sans dépendre d'un serveur lancé.
 testpaths = ["backend/tests"]
 addopts = "-ra"
+DJANGO_SETTINGS_MODULE = "terrimaint_api.settings"
 
 [tool.ruff]
 # Le lint et le format ciblent la syntaxe Python 3.12, identique en local et en CI.

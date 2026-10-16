@@ -38,7 +38,8 @@ Les actions de gestion qui exigent des données actualisées seront définies au
 
 - Cible backend : Python, Django + Django REST Framework et PostgreSQL ; ORM et migrations Django.
 - Frontend : Angular et TypeScript déjà présents ; PWA à développer ultérieurement.
-- Socle actuel : FastAPI provisoire et pytest, sans base de données ni fonctions métier.
+- Socle de cette branche : Django/DRF et pytest, configuration SQLite locale, sans modèles
+  ni fonctions métier. PostgreSQL reste la prochaine étape de persistance.
 - Tests et sécurité dès la conception : critères, risques, permissions et cas de refus
   à définir pour chaque incrément, selon le [workflow](workflow.md).
 - Qualité : Ruff, Git/GitHub et CI ; conteneurisation et déploiement introduits progressivement.

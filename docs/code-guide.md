@@ -4,7 +4,7 @@ Ce guide détaille le code présent et les configurations. La [revue technique](
 porte la vue d'ensemble, les limites, la cible Django/DRF/PostgreSQL et la préparation CDA.
 Les chemins `src/...` ci-dessous sont relatifs à `frontend/`.
 
-Le navigateur affiche un composant Angular. Un service appelle l'API FastAPI pour demander
+Le navigateur affiche un composant Angular. Un service appelle l'API Django/DRF pour demander
 son état de santé. Les tests vérifient ces comportements sans réseau externe. Les commentaires
 en français expliquent les choix ; les identifiants restent en anglais pour suivre les conventions.
 
@@ -39,12 +39,47 @@ en français expliquent les choix ; les identifiants restent en anglais pour sui
 | Fichier | Rôle et contrat |
 | --- | --- |
 | `backend/src/terrimaint_api/__init__.py` | Déclare le paquet, sans démarrer de serveur. |
-| `backend/src/terrimaint_api/main.py` | `HealthResponse` décrit le JSON `{"status":"ok"}`. `create_app()` sans argument retourne une nouvelle application. La fonction locale `health()` retourne le modèle, sérialisé en JSON HTTP 200 par FastAPI. `app` est l'objet importé par Uvicorn. |
-| `backend/tests/test_health.py` | Le premier test vérifie le code 200 et le JSON exact ; le second vérifie le titre et la présence de la réponse 200 dans OpenAPI. `TestClient` appelle l'API en mémoire. |
-| `scripts/check.py` | `main()` lance Ruff lint, Ruff format puis pytest avec le même interpréteur. Aucun argument ; retourne 0 ou le code du premier échec, transmis au processus et à la CI. |
+| `backend/manage.py` | Lance les commandes Django ; le paquet est installé par uv, sans manipulation de sys.path. |
+| `backend/src/terrimaint_api/settings.py` | Configuration commune : environnement, hôtes, middleware, SQLite et DRF. |
+| `backend/src/terrimaint_api/urls.py` | Inclut les routes de santé sous `/api/v1/`. |
+| `backend/src/terrimaint_api/health/` | Application sans modèle : route exacte `health`, vue GET publique et JSON constant. |
+| `backend/src/terrimaint_api/wsgi.py`, `asgi.py` | Entrées standard pour des serveurs Django futurs ; aucun serveur de production imposé. |
+| `backend/tests/test_health.py` | APIClient appelle Django/DRF en mémoire via pytest-django ; contrat JSON exact, refus POST, anciennes routes absentes, hôte proxy accepté et hôte inconnu refusé. Aucun accès DB autorisé par pytest-django dans ces tests. |
+| `scripts/check.py` | Ruff lint, format, vérification système Django puis pytest ; transmet le premier échec à la CI. |
 
-L'endpoint de santé confirme seulement qu'un processus répond. Il ne vérifie ni base de
-données, ni authentification, ni fonctions métier. Le comportement Python existant est conservé.
+### Configuration et circulation HTTP
+
+Le proxy Angular relaie `/api/v1/health` avec `Host: 127.0.0.1:8000`. Django vérifie
+l'hôte, résout `urls.py`, puis DRF appelle `health()` et sérialise la réponse.
+Le renderer JSON évite une interface navigable DRF et conserve le corps exact
+`{"status":"ok"}`. La santé reste publique, sans authentification, session ou requête SQL.
+Les futurs endpoints métier devront définir et tester leurs permissions avant exposition.
+
+`DJANGO_DEBUG` vaut `true` par défaut pour le développement ; seule la valeur `true`
+(insensible à la casse) active ce mode. En dehors de ce mode, une `DJANGO_SECRET_KEY`
+non vide est obligatoire. Ne pas utiliser la clé publique de développement ailleurs.
+`DJANGO_ALLOWED_HOSTS` sépare les hôtes par des virgules, sans schéma ni port ;
+les valeurs locales par défaut conviennent au proxy. `.env.example` documente ces variables,
+mais n'est pas chargé automatiquement : le processus doit les recevoir de son environnement.
+La configuration SQLite pointe vers `backend/db.sqlite3`, ignoré par Git ; aucun schéma
+ni stockage métier n'est créé. Pour PostgreSQL, modifier `DATABASES` et ajouter pilote,
+variables, migrations et tests dans une tâche dédiée.
+
+### Différences assumées avec FastAPI
+
+- GET santé : URL sans slash final, HTTP 200, JSON et Content-Type conservés.
+- `/openapi.json`, `/docs`, `/redoc` : HTTP 404, aucun consommateur identifié dans le dépôt.
+- POST santé : reste HTTP 405 ; le corps d'erreur et l'en-tête Allow sont ceux de DRF.
+- OPTIONS est géré par DRF (métadonnées) ; HEAD reste refusé en HTTP 405. Ces réponses techniques
+  ne sont pas utilisées par Angular ; aucun contrat FastAPI artificiel n'est ajouté.
+- Les erreurs de routage Django sont HTML ; les erreurs de méthode DRF sont JSON.
+  Le contrôle des hôtes peut refuser une requête inconnue avec HTTP 400.
+- `APPEND_SLASH=False` garde les routes exactes, sans redirection implicite.
+- CORS reste fermé : le proxy Angular suffit ; aucune origine tierce n'est autorisée.
+
+Les tests de `backend/tests/test_settings.py` démarrent des processus indépendants :
+ils vérifient le démarrage local sans secret, le refus hors debug sans secret, et le
+démarrage hors debug avec un secret fourni.
 
 ## Ce que prouvent les tests frontend
 
@@ -69,7 +104,7 @@ que d'insérer des commentaires non reconnus par leurs outils.
 | `frontend/package.json` | `scripts` déclare start/lint/test/build. `dependencies` contient Angular et RxJS ; `devDependencies` les outils CLI, TypeScript, Vitest, jsdom, ESLint et Prettier. `engines` impose Node 24 et npm 11 compatibles ; `packageManager` précise npm 11.19.0. `private` évite une publication npm accidentelle. |
 | `frontend/package-lock.json` | Versions résolues, liens de téléchargement et empreintes d'intégrité. Généré par npm, jamais édité à la main ; `npm ci` exige sa cohérence avec package.json. |
 | `frontend/angular.json` | `projects.terrimaint` décrit l'application. `build` associe main.ts, tsconfig, styles et assets ; la production optimise, nomme les fichiers par empreinte et impose des budgets. `serve` référence le proxy et le build de développement. `test` utilise le runner Vitest natif d'Angular ; `lint` utilise le builder angular-eslint. `cli.analytics=false` désactive la télémétrie. |
-| `frontend/proxy.conf.json` | `/api/**` comprend les sous-chemins avec le serveur Vite de la CLI. `target` vise Uvicorn en IPv4 sur le port 8000 ; `changeOrigin` adapte l'en-tête Host. Ce proxy ne s'applique qu'à `npm start`. |
+| `frontend/proxy.conf.json` | `/api/**` comprend les sous-chemins avec le serveur Vite de la CLI. `target` vise Django en IPv4 sur le port 8000 ; `changeOrigin` adapte l'en-tête Host. Ce proxy ne s'applique qu'à `npm start`. |
 | `frontend/tsconfig.json` | `compilerOptions` active les contrôles stricts TypeScript ; `angularCompilerOptions.strictTemplates` vérifie les templates. Les paramètres de modules/cible suivent Angular CLI 22. |
 | `frontend/tsconfig.app.json` | Hérite de tsconfig.json, compile l'application et exclut les fichiers de tests. |
 | `frontend/tsconfig.spec.json` | Hérite des mêmes règles strictes, inclut les tests et les types Vitest. |
@@ -77,7 +112,7 @@ que d'insérer des commentaires non reconnus par leurs outils.
 | `.github/repository-settings.json` | Prévoit squash uniquement, suppression de la branche après fusion, issues actives, wiki et auto-merge désactivés. Aucun changement distant dans cette issue. |
 | `.github/rulesets/main.json` | `enforcement=active`, cible exacte main, aucun bypass, PR et discussions résolues, historique linéaire, suppression et force push bloqués. `required_status_checks` prévoit Backend et Frontend avec branche actualisée. Le fichier décrit la configuration souhaitée ; la lecture distante du 16 octobre 2026 confirme les deux contrôles obligatoires (voir le [bilan](project-status.md)). |
 | `.vscode/settings.json` | Active pytest et Ruff pour Python ; format et corrections à la sauvegarde. |
-| `.vscode/tasks.json` | Lance le contrôle Python ou Uvicorn à la racine ; les commandes npm se lancent dans frontend. |
+| `.vscode/tasks.json` | Lance le contrôle Python ou Django à la racine ; les commandes npm se lancent dans frontend. |
 | `.vscode/extensions.json` | Recommande les extensions Codex, Python, Ruff et Angular. |
 
 En production, servir le build avec un retour vers `index.html` pour les routes Angular et

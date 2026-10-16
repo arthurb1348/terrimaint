@@ -8,10 +8,10 @@ Arthur décide du produit, relit et doit pouvoir expliquer le code à l'oral.
 Communiquer en français ; conserver les identifiants de code en anglais.
 
 - Un dépôt : `backend/`, `frontend/`, `docs/`, `.github/`.
-- Présent : socle Python/FastAPI provisoire, accueil Angular/TypeScript et tests.
+- Présent sur cette branche : socle Python/Django/DRF, accueil Angular/TypeScript et tests.
 - Cible validée : Django + Django REST Framework (DRF) + PostgreSQL ; voir `docs/decisions.md`.
-  Django, DRF et la persistance ne sont pas encore implémentés. Ne pas prolonger l'ancienne
-  orientation SQLAlchemy/Alembic ; la migration du socle fera l'objet d'une tâche dédiée.
+  PostgreSQL et les modèles métier ne sont pas encore implémentés ; SQLite sert au socle local.
+  Ne pas prolonger l'ancienne orientation SQLAlchemy/Alembic.
 - Frontend Angular responsive pour les rôles Agent et Responsable à développer.
   La PWA et le hors connexion ciblé restent futurs ; consulter `docs/project.md`.
 - Implémenter seulement l'incrément demandé, sans abstraction spéculative ni refonte annexe.
