@@ -15,12 +15,13 @@ en français expliquent les choix ; les identifiants restent en anglais pour sui
 2. `src/main.ts` démarre le composant `App` avec les fournisseurs de `app.config.ts`.
    Les erreurs de démarrage sont journalisées dans la console ; aucun mécanisme
    d’authentification ou de gestion de jetons n’est présent.
-3. `app.ts` et `app.html` accueillent le routeur. `app.routes.ts` associe `/` à `Home`
-   et redirige une URL inconnue vers l'accueil. Les composants sont standalone.
+3. `app.ts`, `app.html` et `app.css` portent le shell commun : en-tête, navigation,
+   contenu routé et pied de page. `app.routes.ts` conserve `/` vers `Home`, charge les cinq
+   rubriques à la demande et redirige les URL inconnues vers l'accueil.
 4. `home/home.ts` vérifie l'API à l'initialisation. Le signal `state` actualise la vue.
    `refresh()` ne prend aucun paramètre et ne retourne rien : il lance une requête et
    stocke son résultat. `takeUntilDestroyed` annule la requête lorsque la page disparaît.
-5. `api-health.ts` encapsule le GET `/api/v1/health`. `check()` retourne un Observable :
+5. `core/api-health.ts` encapsule le GET `/api/v1/health`. `check()` retourne un Observable :
    l'abonnement déclenche le GET puis reçoit `available` ou `unavailable`. Le JSON est
    validé au runtime (`status` doit valoir `ok`) car un type TypeScript ne valide pas un
    serveur. Les erreurs HTTP, réseau ou JSON et le délai de cinq secondes sont transformés
@@ -33,6 +34,76 @@ en français expliquent les choix ; les identifiants restent en anglais pour sui
    Inter et Source Serif 4 sont utilisées si elles sont installées, sinon les polices système
    et Georgia prennent le relais. Aucun téléchargement de police n'est nécessaire.
 8. `public/favicon.svg` définit une icône T vectorielle ; les assets sont copiés au build.
+
+## Cinq concepts Angular à comprendre
+
+### 1. Un composant standalone décrit une partie de l'interface
+
+Un composant associe une classe TypeScript à un template HTML et, si nécessaire, des styles.
+`standalone: true` permet de l'utiliser sans déclarer de NgModule. Son tableau `imports`
+déclare ce que son template utilise : `Agent` importe `RouterLink` pour ses liens ; `App`
+importe `MainNavigation`, `RouterLink` et `RouterOutlet`. Les petites pages gardent leur
+HTML dans `template`, l'accueil et le shell ont des fichiers séparés pour rester lisibles.
+
+### 2. Le routing relie une URL à une page
+
+`app.routes.ts` associe par exemple `/incidents` au composant `Incidents`.
+`provideRouter(routes)` installe le routeur au démarrage, et `<router-outlet />` dans
+`app.html` reçoit la page active. `routerLink="/incidents"` change de page sans recharger
+le document. Le shell reste en place. `title` met à jour le titre du navigateur ;
+`RouterLinkActive` et `ariaCurrentWhenActive="page"` signalent le lien actif.
+La route `**` reste en dernier et renvoie les URL inconnues vers `/`.
+
+### 3. Le lazy loading diffère le téléchargement d'une page
+
+`loadComponent: () => import('./features/incidents/incidents').then((m) => m.Incidents)`
+charge le code de cette page lors de la première navigation vers `/incidents`.
+Le build produit cinq fichiers différés, un par rubrique. `Home` reste importé directement,
+car c'est l'entrée habituelle. Ajouter des fichiers de routes enfants ou une stratégie de
+préchargement n'est pas utile à ce stade. Ce mécanisme optimise le chargement : il ne
+protège pas l'accès à une page et ne met rien hors connexion.
+
+### 4. Un service et l'injection séparent HTTP et affichage
+
+`core/api-health.ts` porte le contrat HTTP ; `Home` utilise `inject(ApiHealth)` sans
+construire le service avec `new`. `providedIn: 'root'` rend ce service disponible dans
+l'application. Lui-même obtient `HttpClient` par injection, grâce à `provideHttpClient()`
+dans `app.config.ts`. Les tests remplacent le transport via `provideHttpClientTesting()`.
+Le parcours reste : `Home.refresh()` → `ApiHealth.check()` → GET `/api/v1/health` →
+JSON validé → signal `state` → texte rendu. Quitter l'accueil annule l'abonnement.
+
+### 5. Les dossiers expriment les responsabilités
+
+| Emplacement dans `src/app/` | Responsabilité actuelle et règle d'évolution |
+| --- | --- |
+| `core/` | Infrastructure globale : service de santé HTTP et son test. Les futurs services de session ou de synchronisation n'arriveront qu'avec leur besoin réel. |
+| `shared/main-navigation/` | Élément d'interface commun au shell, sans état de rôle ni accès HTTP. `shared` n'importe pas les pages métier. Aucun composant générique supplémentaire n'est anticipé. |
+| `features/agent/`, `features/responsable/` | Pages d'entrée des espaces ; elles pointent vers les mêmes rubriques. Le Responsable dispose aussi d'un lien vers l'espace Agent. |
+| `features/equipements/`, `features/incidents/`, `features/interventions/` | Une page d'attente explicite par domaine ; les futurs composants et services propres au domaine y seront regroupés. |
+| `home/` | Accueil existant conservé à son emplacement pour limiter les déplacements ; sa logique API ne change pas. |
+| `app.*` | Assemblage du shell et des routes ; `styles.css` porte palette, focus et présentation commune des petites pages. |
+
+Une fonctionnalité dépend de `core` pour l'infrastructure et de `shared` pour l'interface
+réutilisable. On évite les imports entre domaines tant qu'un besoin concret ne le justifie pas.
+Les espaces ne dupliquent pas les domaines par rôle. Aucune route ne simule une session,
+un guard ou une permission : l'authentification et les contrôles serveur seront un incrément dédié.
+
+### Où modifier et comment vérifier
+
+- Nouvelle page ou URL : `app.routes.ts` et le dossier de fonctionnalité concerné.
+- Liens communs : `shared/main-navigation/main-navigation.html` ; liens d'espace dans `agent.ts` et `responsable.ts`.
+- En-tête et largeur : `app.html` / `app.css` ; palette et focus dans `styles.css`.
+- Contrat de santé et délai : `core/api-health.ts` ; rendu du statut dans `home/`.
+
+Les liens restent visibles sur mobile, avec retour à la ligne et cibles d'au moins 44 px.
+Le lien « Aller au contenu » cible l'unique `main`, focalisable avec `tabindex="-1"`.
+La palette et les polices locales existantes sont conservées. Aucune maquette détaillée
+n'étant versionnée, cette étape reste sobre, sans données, formulaire ou tableau de bord.
+
+Lancer `npm run lint`, `npm test`, `npm run build` dans `frontend/`.
+Dans un navigateur à 375 px et sur desktop : suivre les six liens, vérifier la page active,
+le titre, l'absence de débordement et la navigation clavier (Tab, Entrée, lien d'évitement).
+Vérifier aussi le statut API et sa relance avec Django démarré puis arrêté.
 
 ## Backend et script de contrôle
 
@@ -86,8 +157,8 @@ démarrage hors debug avec un secret fourni.
 | Fichier | Comportements observables |
 | --- | --- |
 | `src/app/home/home.spec.ts` | Attente et bouton désactivé, JSON valide, erreur HTTP, erreur réseau, quatre réponses invalides, récupération après relance et annulation à la destruction. Les helpers lisent le statut rendu et attendent sa mise à jour. |
-| `src/app/api-health.spec.ts` | Sans réponse, aucun résultat avant 5 s puis indisponibilité et annulation du GET. L'horloge fictive est restaurée après le test. |
-| `src/app/app.spec.ts` | La route `/` et une URL inconnue affichent l'accueil et sa réponse HTTP ; le routeur termine sur `/`. |
+| `src/app/core/api-health.spec.ts` | Sans réponse, aucun résultat avant 5 s puis indisponibilité et annulation du GET. L'horloge fictive est restaurée après le test. |
+| `src/app/app.spec.ts` | Accueil et URL inconnues, un seul repère main, lien d'évitement, accès direct aux cinq pages, titres et lien actif, navigation Responsable → Agent → Incidents → Accueil, annulation du GET puis relance au retour. |
 
 `provideHttpClientTesting()` remplace le transport réel après `provideHttpClient()`.
 `expectOne()` contrôle l'URL, `flush()` fournit une réponse et `error()` simule le réseau.

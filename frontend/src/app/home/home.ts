@@ -1,7 +1,7 @@
 /** Relie la vérification HTTP à l'état visible sur l'accueil. */
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ApiAvailability, ApiHealth } from '../api-health';
+import { ApiAvailability, ApiHealth } from '../core/api-health';
 
 @Component({
   selector: 'app-home',

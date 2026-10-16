@@ -1,6 +1,23 @@
 # Décisions techniques
 
-## 2026-10-16 — Migration du socle vers Django/DRF (proposée dans cette PR)
+## 2026-10-16 — Architecture Angular par fonctionnalités (proposée)
+
+Conserver Angular 22 strict/standalone, les signals, Vitest et l'accueil existant.
+Le composant racine porte le shell responsive ; `shared/main-navigation` contient la
+navigation commune sans état métier. Le service HTTP de santé et son test passent dans
+`core/`. `home/` reste en place pour éviter une refonte sans bénéfice fonctionnel.
+
+Les cinq pages `features/agent`, `responsable`, `equipements`, `incidents` et `interventions`
+sont chargées par `loadComponent`. Les deux espaces pointent vers les mêmes domaines ;
+le responsable pourra aussi réaliser les actions terrain. Une page d'entrée explicite suffit
+à chaque domaine : aucun modèle, store, service métier ou composant générique anticipé.
+
+Ces routes sont publiques et ne représentent pas des permissions. Authentification,
+autorisations serveur et éventuels guards d'ergonomie viendront avec des règles testées.
+Le shell garde la charte existante, sans maquette détaillée disponible dans le dépôt,
+sans données simulées ni fonctionnalité hors connexion. Aucun ajout de dépendance.
+
+## 2026-10-16 — Migration du socle vers Django/DRF (fusionnée)
 
 Django 5.2 LTS et DRF 3.16 remplacent FastAPI, Uvicorn et Pydantic ; Python 3.12
 reste la référence. uv verrouille les versions résolues. Le projet `terrimaint_api`

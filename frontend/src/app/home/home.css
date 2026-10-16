@@ -1,43 +1,14 @@
-/* Accueil : deux colonnes sur grand écran, une seule sur mobile. */
+/* Le shell fixe la largeur ; l’accueil conserve ses deux colonnes sur grand écran. */
 :host {
   display: block;
 }
-.page {
-  width: min(1120px, calc(100% - 48px));
-  margin: 0 auto;
-}
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 32px 0;
-  color: var(--green);
-  font-size: 1.3rem;
-  font-weight: 700;
-  border-bottom: 1px solid var(--border);
-}
-.brand-mark {
-  display: grid;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--green);
-  color: white;
-}
-.brand-note {
-  margin-left: auto;
-  font-size: 0.8rem;
-  font-weight: 400;
-  color: var(--muted);
-}
-main {
+.welcome {
   display: grid;
   grid-template-columns: 1.25fr 1fr;
   gap: 72px;
   align-items: center;
-  min-height: 68vh;
-  padding: 72px 0;
+  min-height: 60vh;
+  padding: 48px 0;
 }
 .eyebrow {
   font-size: 0.75rem;
@@ -154,34 +125,13 @@ button:focus-visible {
   color: var(--muted);
   line-height: 1.6;
 }
-footer {
-  border-top: 1px solid var(--border);
-  padding: 24px 0;
-  font-size: 0.8rem;
-  color: var(--muted);
-}
-footer span {
-  margin: 0 10px;
-}
 @media (max-width: 760px) {
-  .page {
-    width: calc(100% - 32px);
-  }
-  .brand {
-    padding: 20px 0;
-  }
-  .brand-note {
-    display: none;
-  }
-  main {
+  .welcome {
     grid-template-columns: 1fr;
     gap: 32px;
-    padding: 40px 0;
+    padding: 32px 0;
   }
   .health-card {
     padding: 24px;
-  }
-  footer {
-    line-height: 1.7;
   }
 }
