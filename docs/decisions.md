@@ -1,5 +1,19 @@
 # Décisions techniques
 
+## 2026-10-07 — Bilan versionné et validation humaine
+
+GitHub constitue la source de vérité. `docs/project-status.md` synthétise l'état réel,
+avec date, commit de référence et liens vers le code, les tests et la documentation.
+Les intentions et PR ouvertes restent distinctes des capacités intégrées sur `main`.
+Les futures documentations et présentations externes seront dérivées de ce bilan ;
+aucun mécanisme de synchronisation externe n'est installé par cette décision.
+
+Le workflow est pilotable depuis cloud/mobile comme depuis PC ; VS Code local est facultatif.
+Chaque PR significative préparée par un agent inclut un compte rendu pédagogique et des
+questions de compréhension. Le fonctionnement et les contrôles automatisés ne remplacent
+pas la compréhension ni la validation humaine. Les commentaires expliquent les intentions
+et comportements non évidents, et le guide porte les détails utiles à l'apprentissage.
+
 ## 2026-10-06 — Un seul dépôt
 
 Regrouper backend, frontend et documentation. Pour un développeur solo et un MVP,
