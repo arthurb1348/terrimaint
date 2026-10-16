@@ -9,7 +9,6 @@ describe('Accueil et santé de l’API', () => {
   let fixture: ComponentFixture<Home>;
   let http: HttpTestingController;
 
-  // Crée une page et remplace le réseau par un serveur fictif ; aucun résultat retourné.
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [Home],
@@ -21,20 +20,17 @@ describe('Accueil et santé de l’API', () => {
     fixture.detectChanges();
   });
 
-  // Vérifie qu'aucune requête n'est oubliée et libère le composant après chaque cas.
   afterEach(() => {
     http.verify();
     fixture.destroy();
   });
 
-  /** Sans paramètre, retourne le texte de la région annoncée aux lecteurs d'écran. */
   function statusText(): string {
     return (
       (fixture.nativeElement as HTMLElement).querySelector('[role="status"]')?.textContent ?? ''
     );
   }
 
-  /** Sans paramètre ni résultat, attend la mise à jour Angular après une réponse. */
   async function renderResponse(): Promise<void> {
     await fixture.whenStable();
     fixture.detectChanges();

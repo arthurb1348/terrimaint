@@ -20,7 +20,6 @@ def test_health_endpoint_is_documented_in_openapi() -> None:
         response = client.get("/openapi.json")
 
     assert response.status_code == 200
-    # Le schéma public doit indiquer le nom de l'API et une réponse de succès.
     schema = response.json()
     assert schema["info"]["title"] == "TerriMaint API"
     assert "200" in schema["paths"]["/api/v1/health"]["get"]["responses"]

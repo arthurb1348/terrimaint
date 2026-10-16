@@ -40,7 +40,7 @@ jobs:
         run: uv run --locked python scripts/check.py
 
   frontend:
-    # Frontend sera rendu obligatoire dans une tâche distante après observation du job.
+    # Backend et Frontend sont obligatoires dans le ruleset actif de main.
     name: Frontend
     runs-on: ubuntu-24.04
     timeout-minutes: 10

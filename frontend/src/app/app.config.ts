@@ -4,7 +4,6 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 
-// L'injection rend HttpClient disponible dans le service de santé sans créer de module.
 export const appConfig: ApplicationConfig = {
   providers: [provideBrowserGlobalErrorListeners(), provideHttpClient(), provideRouter(routes)],
 };

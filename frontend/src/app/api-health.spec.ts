@@ -15,7 +15,6 @@ describe('Délai de santé', () => {
     });
     const http = TestBed.inject(HttpTestingController);
     let result: ApiAvailability | undefined;
-    // L'abonné reçoit le résultat observable du service ; le temps est simulé.
     TestBed.inject(ApiHealth)
       .check()
       .subscribe((availability) => {
