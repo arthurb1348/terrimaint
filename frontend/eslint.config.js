@@ -3,7 +3,6 @@ const eslint = require('@eslint/js');
 const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
 
-// Chaque groupe de fichiers utilise les règles et l'analyseur de son langage.
 module.exports = tseslint.config(
   {
     files: ['src/**/*.ts'],

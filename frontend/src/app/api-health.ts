@@ -6,7 +6,6 @@ import { catchError, map, Observable, of, timeout } from 'rxjs';
 /** Deux résultats terminaux ; « checking » appartient seulement à l'interface. */
 export type ApiAvailability = 'available' | 'unavailable';
 
-/** Service partagé sans paramètre de construction : HttpClient est injecté par Angular. */
 @Injectable({ providedIn: 'root' })
 export class ApiHealth {
   private readonly http = inject(HttpClient);

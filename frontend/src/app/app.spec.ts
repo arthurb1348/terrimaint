@@ -8,7 +8,6 @@ import { App } from './app';
 import { routes } from './app.routes';
 
 describe('Routage de l’accueil', () => {
-  // L'URL est le paramètre du cas testé ; aucune valeur n'est retournée par le test.
   it.each(['/', '/inconnue'])('affiche l’accueil depuis %s', async (url) => {
     await TestBed.configureTestingModule({
       imports: [App],
