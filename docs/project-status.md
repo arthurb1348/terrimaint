@@ -4,7 +4,7 @@
 
 - Date de vérification : 2026-10-16 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `406de5305c4809db82c84e2e97e58ce589061868`.
+- Code de référence : `main`, commit `1990d02c4445648bc364893a2c9927b2b8b8bf6f`.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -22,35 +22,36 @@ interventions, avec un historique partagé entre agents et responsable.
 Ces parcours sont l'objectif produit, pas les capacités actuelles de l'application.
 Source : [contexte produit](project.md).
 
-## Migration proposée (en cours)
+## Architecture Angular proposée (en cours)
 
-Cette branche remplace le backend par Django 5.2.18 / DRF 3.16.1, avec SQLite local,
-sans modèle ni migration. La santé reste HTTP 200 et JSON exact, sans accès DB ; le frontend
-et son proxy sont conservés. Les routes `/openapi.json`, `/docs`, `/redoc` deviennent 404.
-Les 12 tests pytest-django vérifient le HTTP et la configuration des secrets. FastAPI,
-Uvicorn, Pydantic et httpx sont retirés. Ruff et les contrôles système Django passent ;
-les 13 tests frontend, lint et build passent avec Node/npm aux versions du dépôt.
-Un appel HTTP réel direct et via le proxy Angular a confirmé HTTP 200 et le JSON exact.
-Aucun contrôle visuel mobile/clavier n'a été réalisé.
-Les commandes et la structure de cette proposition sont dans le [guide](code-guide.md).
-Cette migration reste **en cours** jusqu'à relecture et fusion ; les sections « actuelle »
-et « implémentées » ci-dessous décrivent le `main` de référence, encore FastAPI.
+La branche `feat/angular-business-architecture` propose un shell responsive commun et
+cinq pages d'entrée différées : `/agent`, `/responsable`, `/equipements`, `/incidents`,
+`/interventions`. Les rubriques partagées n'ont ni données ni actions métier. Les liens
+d'espace n'attribuent aucun rôle ; aucune authentification ni permission n'est simulée.
+Le service de santé est déplacé dans `core/`, la navigation dans `shared/` et les nouvelles
+pages dans `features/`. L'accueil reste dans `home/` avec son contrat API inchangé.
+
+Ces changements restent **en cours** jusqu'à validation et fusion. Les sections suivantes
+constatent le `main` audité ; les liens vers les anciens emplacements Angular sont figés
+sur ce commit pour rester vérifiables après le déplacement proposé.
+Les explications de la branche sont dans le [guide](code-guide.md#cinq-concepts-angular-à-comprendre)
+et la [décision](decisions.md).
 
 ## Architecture actuelle
 
 - Un seul dépôt pour backend, frontend, documentation et contrôles.
-- API FastAPI construite par une fabrique `create_app()`, exécutée avec Uvicorn.
+- API Django/DRF, configuration SQLite locale sans modèle ni migration métier.
 - Client Angular strict, composants standalone, routage et état réactif par signals ;
   sans SSR ni Zone.js.
 - Circulation des données : accueil → service `ApiHealth` → HTTP GET `/api/v1/health`
-  → FastAPI → JSON `{"status":"ok"}` → état affiché.
+  → Django/DRF → JSON `{"status":"ok"}` → état affiché.
 - En développement, le proxy Angular transmet `/api/**` à `http://127.0.0.1:8000`.
 - Aucun stockage persistant, modèle métier, authentification ou système de rôles présent.
   Aucun déploiement de production défini ; l'URL relative de l'API devra être prise en
   charge par l'hébergement choisi ultérieurement.
 
-Sources : [API](https://github.com/arthurb1348/terrimaint/blob/406de5305c4809db82c84e2e97e58ce589061868/backend/src/terrimaint_api/main.py),
-[service HTTP](../frontend/src/app/api-health.ts),
+Sources : [API](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/backend/src/terrimaint_api/health/views.py),
+[service HTTP sur main](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/frontend/src/app/api-health.ts),
 [configuration Angular](../frontend/src/app/app.config.ts),
 [proxy](../frontend/proxy.conf.json).
 
@@ -58,30 +59,30 @@ Sources : [API](https://github.com/arthurb1348/terrimaint/blob/406de5305c4809db8
 
 | Partie | Technologies présentes et versions de référence | Source |
 | --- | --- | --- |
-| Backend | Python 3.12 pour le socle/CI ; FastAPI 0.142.2, Uvicorn 0.54.0 ; Pydantic pour le contrat HTTP | [.python-version](../.python-version), [pyproject.toml](https://github.com/arthurb1348/terrimaint/blob/406de5305c4809db82c84e2e97e58ce589061868/pyproject.toml), [uv.lock](https://github.com/arthurb1348/terrimaint/blob/406de5305c4809db82c84e2e97e58ce589061868/uv.lock) |
-| Qualité Python | uv, pytest 9.1.1, httpx, Ruff 0.16.10, pre-commit | [uv.lock](https://github.com/arthurb1348/terrimaint/blob/406de5305c4809db82c84e2e97e58ce589061868/uv.lock), [hooks](../.pre-commit-config.yaml) |
+| Backend | Python 3.12 pour le socle/CI ; Django 5.2.18, DRF 3.16.1 ; SQLite local configuré, sans persistance métier | [.python-version](../.python-version), [pyproject.toml](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/pyproject.toml), [uv.lock](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/uv.lock) |
+| Qualité Python | uv, pytest 9.1.1, pytest-django 4.14.0, Ruff 0.16.10, pre-commit | [uv.lock](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/uv.lock), [hooks](../.pre-commit-config.yaml) |
 | Frontend | Angular/CLI 22.2.1, TypeScript 6.0.3, RxJS, HTML/CSS | [package.json](../frontend/package.json), [package-lock.json](../frontend/package-lock.json) |
 | Outillage frontend | Node 24.21.0 LTS, npm 11.19.0, ESLint/angular-eslint, Vitest et jsdom | [.nvmrc](../.nvmrc), [package.json](../frontend/package.json) |
 | Suivi et CI | Git/GitHub, GitHub Actions, Dependabot | [CI](../.github/workflows/ci.yml), [Dependabot](../.github/dependabot.yml) |
 
-Django, DRF, PostgreSQL, PWA et IndexedDB sont **prévus**, non installés ou
-implémentés dans ce socle. Les versions effectives des dépendances viennent des lockfiles ;
+PostgreSQL, PWA et IndexedDB sont **prévus**, non installés ou implémentés dans ce socle.
+Les versions effectives des dépendances viennent des lockfiles ;
 les bornes déclarées dans les manifestes ne doivent pas être prises pour des versions exactes.
 
 ## Fonctionnalités implémentées
 
 | Fonctionnalité | Comportement et limites | Preuve |
 | --- | --- | --- |
-| Santé HTTP de l'API | GET `/api/v1/health`, statut 200 et JSON `{"status":"ok"}` ; ne vérifie aucune base de données | [API](https://github.com/arthurb1348/terrimaint/blob/406de5305c4809db82c84e2e97e58ce589061868/backend/src/terrimaint_api/main.py) |
-| Documentation API | OpenAPI et interface FastAPI `/docs` | [tests HTTP](https://github.com/arthurb1348/terrimaint/blob/406de5305c4809db82c84e2e97e58ce589061868/backend/tests/test_health.py) |
+| Santé HTTP de l'API | GET `/api/v1/health`, statut 200 et JSON `{"status":"ok"}` ; ne vérifie aucune base de données | [API](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/backend/src/terrimaint_api/health/views.py) |
+| Anciennes routes API | `/openapi.json`, `/docs` et `/redoc` renvoient 404 ; aucune UI OpenAPI ajoutée | [tests HTTP](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/backend/tests/test_health.py) |
 | Accueil responsive | Signature du projet, statut de l'API et bouton de relance ; attente, disponible ou indisponible | [composant Home](../frontend/src/app/home/home.ts), [template](../frontend/src/app/home/home.html), [styles](../frontend/src/app/home/home.css) |
-| Gestion des échecs HTTP | Validation du JSON, erreurs réseau/HTTP et délai maximal de cinq secondes ; annulation en quittant la page | [service](../frontend/src/app/api-health.ts), [composant](../frontend/src/app/home/home.ts) |
+| Gestion des échecs HTTP | Validation du JSON, erreurs réseau/HTTP et délai maximal de cinq secondes ; annulation en quittant la page | [service proposé](../frontend/src/app/core/api-health.ts), [composant](../frontend/src/app/home/home.ts) |
 | Routage | Accueil sur `/`, redirection des routes inconnues vers l'accueil | [routes](../frontend/src/app/app.routes.ts) |
 
 ## Travaux en cours
 
-La présente PR propose la migration Django/DRF décrite ci-dessus, sans fonction métier.
-Le bilan distingue le `main` audité de cette proposition ; il sera actualisé après fusion.
+La présente PR propose l’architecture Angular décrite ci-dessus. La migration Django/DRF
+est intégrée sur `main` par la [PR #13](https://github.com/arthurb1348/terrimaint/pull/13).
 Le suivi vivant des autres travaux reste dans les [issues](https://github.com/arthurb1348/terrimaint/issues)
 et [PR](https://github.com/arthurb1348/terrimaint/pulls), sans recopier une liste vite périmée.
 
@@ -95,7 +96,7 @@ ni ordre d'implémentation engagé :
 - Suivi/priorisation des incidents et historique partagé.
 - Création, affectation et planification des interventions.
 - Tableau de bord et indications de récurrence.
-- Migration du backend vers Django/DRF puis persistance PostgreSQL avec ORM et migrations Django.
+- Persistance PostgreSQL avec ORM et migrations Django.
 - Hors connexion ciblé : shell PWA, cache d'équipements, scan QR, fiches basiques,
   brouillons/photos et file IndexedDB avec reprise et dédoublonnage.
 - Conteneurisation et déploiement introduits progressivement.
@@ -109,8 +110,8 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 
 | Emplacement | Rôle |
 | --- | --- |
-| `backend/src/terrimaint_api/` | Application et contrat de santé FastAPI |
-| `backend/tests/` | Tests HTTP/OpenAPI |
+| `backend/src/terrimaint_api/` | Projet Django et application de santé DRF |
+| `backend/tests/` | Tests HTTP et configuration Django |
 | `frontend/src/app/` | Racine, routes, service HTTP, accueil et tests Angular |
 | `frontend/public/`, `frontend/src/styles.css` | Ressources publiques et styles globaux |
 | `docs/`, `docs/tasks/` | Contexte, bilan, décisions, workflow, guide et tâche Angular |
@@ -122,16 +123,25 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 
 ## Tests présents
 
-- Backend : **2 tests pytest** dans [test_health.py](https://github.com/arthurb1348/terrimaint/blob/406de5305c4809db82c84e2e97e58ce589061868/backend/tests/test_health.py) :
-  statut/JSON de santé et documentation OpenAPI. Appels en mémoire avec TestClient.
+- Backend : **12 cas pytest-django** dans [test_health.py](../backend/tests/test_health.py)
+  et [test_settings.py](../backend/tests/test_settings.py) : contrat santé JSON, méthodes,
+  routes absentes, hôtes et configuration de la clé secrète. Aucun accès DB métier.
 - Frontend : **13 cas Vitest dans 3 fichiers** :
-  [routage](../frontend/src/app/app.spec.ts),
-  [délai HTTP](../frontend/src/app/api-health.spec.ts),
+  [routage sur main](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/frontend/src/app/app.spec.ts),
+  [délai HTTP sur main](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/frontend/src/app/api-health.spec.ts),
   [accueil](../frontend/src/app/home/home.spec.ts).
   Ils couvrent l'attente, le succès, les JSON invalides, les erreurs HTTP/réseau,
   la relance, l'annulation, le délai de cinq secondes et les routes inconnues.
   HTTP simulé ; aucun serveur réel requis.
-- Aucun test end-to-end navigateur, test de persistance ou test de parcours métier présent.
+- Sur la branche proposée : **21 cas Vitest** réussis ; accès direct, titres, navigation active,
+  lien d'évitement, liens Responsable/Agent et retour à l'accueil ajoutés aux tests existants.
+  `npm run lint`, `npm test`, `npm run build` réussissent avec Node 24.21.0 / npm 11.19.0 ;
+  le build produit cinq chunks différés. Aucun changement de dépendances.
+- Contrôle ponctuel Chromium sur la branche à 375 et 1440 px : six routes, absence de
+  débordement horizontal, lien d'évitement au clavier et navigation Responsable → Agent
+  → Incidents vérifiés. Captures relues pour l'accueil. HTTP intercepté pour ce contrôle ;
+  l'intégration réelle Django/proxy n'a pas été rejouée dans cette PR.
+- Aucun test end-to-end versionné, test de persistance ou test de parcours métier présent.
 - Commandes : `uv run --locked python scripts/check.py` à la racine ;
   `npm run lint`, `npm test`, `npm run build` dans `frontend/`.
 
@@ -154,8 +164,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   Source : [API du ruleset](https://api.github.com/repos/arthurb1348/terrimaint/rulesets/24590632).
   Le fichier local ne suffit pas à prouver les réglages distants ; cette lecture est datée.
 - Les résultats de CI sont attachés à chaque commit/PR : une configuration présente ne
-  prouve pas une exécution réussie. Cette PR documentaire demande des contrôles de liens,
-  cohérence et périmètre ; les résultats GitHub Actions restent à consulter sur la PR.
+  prouve pas une exécution réussie. Les résultats de la proposition Angular sont à consulter sur sa PR.
 
 ## État de la documentation
 
@@ -163,7 +172,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 - [project.md](project.md) : objectifs, périmètre MVP, hors connexion et direction graphique.
 - [decisions.md](decisions.md) : décisions durables et choix de stack.
 - [workflow.md](workflow.md) : travail par issue/branche/PR, cloud/mobile et validation humaine.
-- [technical-review.md](technical-review.md) : vue d’ensemble, limites, backend migré proposé et oral CDA.
+- [technical-review.md](technical-review.md) : vue d’ensemble et oral CDA (certains passages historiques restent à actualiser après la migration).
 - [code-guide.md](code-guide.md) : détail des fichiers présents et des configurations sans commentaires.
 - [bootstrap.md](bootstrap.md) : historique/procédure du socle GitHub ;
   [tâche Angular](tasks/init-angular.md) : critères de l'incrément déjà intégré.
@@ -175,13 +184,13 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 ## Décisions techniques et prochaines étapes
 
 Les [décisions](decisions.md) retiennent le monorepo, Angular/TypeScript et la cible
-**Django + DRF + PostgreSQL**. FastAPI reste le socle du `main` audité ; cette branche propose son remplacement.
+**Django + DRF + PostgreSQL**. Django/DRF est intégré ; PostgreSQL reste futur.
 SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexion ciblé
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire cette documentation et la politique de commentaires ; fusion manuelle après validation.
-2. Relire la migration Django/DRF de cette branche, ses contrats HTTP et ses contrôles.
+1. Relire le shell et l’architecture Angular proposés, puis valider avant fusion manuelle.
+2. Définir les critères du premier parcours métier avant de développer ses écrans et son API.
 3. Préciser le modèle métier et la persistance PostgreSQL avec ORM/migrations Django,
    puis les parcours MVP en petits incréments, avec règles d'accès entre collectivités.
 4. Prévoir la validation des entrées, l'authentification, les autorisations, les tests d'accès
@@ -190,7 +199,7 @@ selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humain
 
 Cet ordre indique des dépendances de travail, sans planning engagé. Aucune de ces protections
 métier n'est implémentée aujourd'hui. Le commentaire du job `Frontend` a été corrigé dans le `main` audité ; aucune configuration
-CI ni protection distante n'est modifiée par cette migration.
+CI ni protection distante n'est modifiée par cette proposition Angular.
 
 ## Règles de mise à jour du bilan
 

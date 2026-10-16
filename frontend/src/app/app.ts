@@ -1,11 +1,12 @@
-/** Point d'entrée visuel : le routeur affiche la page correspondant à l'URL. */
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
+import { MainNavigation } from './shared/main-navigation/main-navigation';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [MainNavigation, RouterLink, RouterOutlet],
   templateUrl: './app.html',
+  styleUrl: './app.css',
 })
 export class App {}

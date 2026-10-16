@@ -18,3 +18,28 @@
 body {
   margin: 0;
 }
+/* Un même repère de focus couvre le shell et toutes les pages. */
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+.feature-page {
+  max-width: 720px;
+  padding: 24px 0;
+  line-height: 1.7;
+}
+.feature-page h1 {
+  color: var(--green);
+  font-family: var(--serif);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 500;
+  line-height: 1.2;
+}
+.feature-page a {
+  display: inline-block;
+  padding: 10px 0;
+  color: var(--green);
+  text-underline-offset: 4px;
+}

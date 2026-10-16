@@ -1,2 +1,17 @@
-<!-- Le routeur insère la page active ici, sans recharger le navigateur. -->
-<router-outlet />
+<a class="skip-link" href="#main-content">Aller au contenu</a>
+<div class="shell">
+  <header class="brand">
+    <a class="brand-link" routerLink="/" aria-label="TerriMaint — Accueil">
+      <span class="brand-mark" aria-hidden="true">T</span>
+      <span>TerriMaint</span>
+    </a>
+    <span class="brand-note">Maintenance des collectivités</span>
+  </header>
+  <app-main-navigation />
+  <main id="main-content" tabindex="-1">
+    <router-outlet />
+  </main>
+  <footer>
+    TerriMaint <span aria-hidden="true">·</span> Le lien entre vos équipes et votre territoire.
+  </footer>
+</div>

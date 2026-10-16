@@ -1,0 +1,32 @@
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  color: var(--green);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+a:hover {
+  background: var(--surface);
+  text-decoration: underline;
+}
+a.active {
+  background: var(--green);
+  color: white;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (max-width: 760px) {
+  a {
+    flex: 1 1 40%;
+  }
+}

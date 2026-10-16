@@ -41,7 +41,7 @@ TypeScript strict aide à détecter des erreurs avant exécution ; il ne valide 
 ## Du clic à la réponse affichée
 
 À l'ouverture ou au clic sur « Vérifier à nouveau », `Home` passe à `checking` et
-s'abonne à l'Observable renvoyé par [ApiHealth](../frontend/src/app/api-health.ts).
+s'abonne à l'Observable renvoyé par [ApiHealth](../frontend/src/app/core/api-health.ts).
 Cet abonnement déclenche `GET /api/v1/health` via `HttpClient`.
 
 Avec `npm start`, le [proxy local](../frontend/proxy.conf.json) transmet la requête à
@@ -74,7 +74,7 @@ sont correctement appliqués : ils nécessiteront des règles serveur et des tes
 - **Backend, pytest** : [test_health.py](../backend/tests/test_health.py) vérifie statut/JSON
   et routes de documentation absentes. `APIClient` appelle Django en mémoire sans serveur.
 - **Frontend, Vitest** : les tests d’[accueil](../frontend/src/app/home/home.spec.ts),
-  de [service](../frontend/src/app/api-health.spec.ts) et de [routage](../frontend/src/app/app.spec.ts)
+  de [service](../frontend/src/app/core/api-health.spec.ts) et de [routage](../frontend/src/app/app.spec.ts)
   vérifient les états affichés, les erreurs, JSON invalides, délai, relance, annulation et routes.
   Le transport HTTP est simulé : ils n'appellent pas un vrai backend.
 - **Lint et build** : détectent des problèmes de règles, de typage et de compilation ; ils

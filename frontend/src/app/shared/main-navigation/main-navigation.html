@@ -1,0 +1,21 @@
+<!-- Ces liens désignent des espaces, sans sélectionner ni attribuer un rôle. -->
+<nav aria-label="Navigation principale">
+  <a
+    routerLink="/"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
+    ariaCurrentWhenActive="page"
+    >Accueil</a
+  >
+  <a routerLink="/agent" routerLinkActive="active" ariaCurrentWhenActive="page">Agent</a>
+  <a routerLink="/responsable" routerLinkActive="active" ariaCurrentWhenActive="page"
+    >Responsable</a
+  >
+  <a routerLink="/equipements" routerLinkActive="active" ariaCurrentWhenActive="page"
+    >Équipements</a
+  >
+  <a routerLink="/incidents" routerLinkActive="active" ariaCurrentWhenActive="page">Incidents</a>
+  <a routerLink="/interventions" routerLinkActive="active" ariaCurrentWhenActive="page"
+    >Interventions</a
+  >
+</nav>
