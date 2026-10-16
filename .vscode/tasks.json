@@ -15,7 +15,7 @@
       "label": "TerriMaint: démarrer API",
       "type": "process",
       "command": "uv",
-      "args": ["run", "--locked", "uvicorn", "terrimaint_api.main:app", "--reload"],
+      "args": ["run", "--locked", "python", "backend/manage.py", "runserver"],
       "options": {"cwd": "${workspaceFolder}"},
       "problemMatcher": []
     }

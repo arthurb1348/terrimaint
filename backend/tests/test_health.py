@@ -1,25 +1,48 @@
-"""Vérifie le contrat HTTP de santé et sa présence dans la documentation OpenAPI."""
+"""Contrats publics et différences assumées après le remplacement de FastAPI."""
 
-from fastapi.testclient import TestClient
-from terrimaint_api.main import create_app
+import pytest
+from rest_framework.test import APIClient
 
 
 def test_health_endpoint_returns_ok() -> None:
-    """Sans paramètre ni résultat, vérifie le statut 200 et le JSON exact attendu."""
-    # TestClient appelle l'application en mémoire : aucun serveur réseau n'est nécessaire.
-    with TestClient(create_app()) as client:
-        response = client.get("/api/v1/health")
+    response = APIClient().get("/api/v1/health")
 
     assert response.status_code == 200
+    assert response["Content-Type"] == "application/json"
+    assert response.content == b'{"status":"ok"}'
+
+
+def test_health_remains_json_for_browser_accept_header() -> None:
+    response = APIClient().get("/api/v1/health", HTTP_ACCEPT="text/html,application/json")
+
+    assert response.status_code == 200
+    assert response["Content-Type"] == "application/json"
     assert response.json() == {"status": "ok"}
 
 
-def test_health_endpoint_is_documented_in_openapi() -> None:
-    """Sans paramètre ni résultat, vérifie que le contrat de santé est documenté."""
-    with TestClient(create_app()) as client:
-        response = client.get("/openapi.json")
+def test_health_rejects_post() -> None:
+    response = APIClient().post("/api/v1/health", {}, format="json")
+
+    assert response.status_code == 405
+
+
+@pytest.mark.parametrize("path", ["/openapi.json", "/docs", "/redoc", "/api/v1/health/"])
+def test_unexposed_routes_return_404(path: str) -> None:
+    assert APIClient().get(path).status_code == 404
+
+
+def test_health_via_angular_proxy_host() -> None:
+    response = APIClient().get(
+        "/api/v1/health", HTTP_HOST="127.0.0.1:8000", HTTP_ORIGIN="http://localhost:4200"
+    )
 
     assert response.status_code == 200
-    schema = response.json()
-    assert schema["info"]["title"] == "TerriMaint API"
-    assert "200" in schema["paths"]["/api/v1/health"]["get"]["responses"]
+    # Angular passe par son proxy : aucune autorisation CORS globale à ajouter.
+    assert "Access-Control-Allow-Origin" not in response
+
+
+def test_unknown_host_is_rejected(settings) -> None:
+    settings.DEBUG = False
+    settings.ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
+    assert APIClient().get("/api/v1/health", HTTP_HOST="untrusted.example").status_code == 400

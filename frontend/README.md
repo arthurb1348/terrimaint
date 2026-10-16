@@ -14,7 +14,7 @@ npm start
 Depuis la racine, dans un second terminal :
 
 ```sh
-uv run --locked uvicorn terrimaint_api.main:app --reload
+uv run --locked python backend/manage.py runserver
 ```
 
 Ouvrir http://localhost:4200. Le proxy redirige /api/** vers http://127.0.0.1:8000.
@@ -29,7 +29,7 @@ npm run build
 Les tests Vitest sont sans watch et ne nécessitent pas l'API. npm run test:watch surveille
 les changements. Le build de production est dans dist/terrimaint/browser.
 
-Vérification manuelle : constater API disponible avec Uvicorn lancé, arrêter l'API,
+Vérification manuelle : constater API disponible avec Django lancé, arrêter l'API,
 cliquer sur Vérifier à nouveau et constater API indisponible. Relancer le serveur et
 réessayer. Vérifier aussi l'affichage mobile (375 px) et la navigation au clavier.
 

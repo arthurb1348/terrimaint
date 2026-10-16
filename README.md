@@ -11,11 +11,11 @@ Projet fil rouge de formation Concepteur Développeur d'Applications.
 Le [bilan projet versionné](docs/project-status.md) distingue l'état réel, les travaux en cours
 et les intentions documentées, avec leurs sources. GitHub constitue la source de vérité.
 
-Socle initial : API FastAPI minimale, tests HTTP, Ruff, dépendances gérées par uv,
+Socle initial : API Django/DRF minimale, tests HTTP, Ruff, dépendances gérées par uv,
 CI GitHub Actions, modèles d'issues et de pull requests, consignes Codex et configuration VS Code.
 Le frontend Angular strict et standalone fournit un accueil responsive avec l'état de l'API.
-La cible validée est Django + Django REST Framework + PostgreSQL ; la migration du socle
-et les fonctions métier restent à développer par petites tâches. La PWA et le hors connexion
+Le socle utilise Django + Django REST Framework ; PostgreSQL et les fonctions métier
+restent à développer par petites tâches. La PWA et le hors connexion
 ciblé ne sont pas encore implémentés. Voir les [décisions techniques](docs/decisions.md).
 L'endpoint de santé vérifie que l'API répond ; il ne vérifie pas de base de données.
 
@@ -40,11 +40,23 @@ relire le diff, les ajouter à nouveau puis relancer le commit.
 ## Démarrer l'API
 
 ```sh
-uv run --locked uvicorn terrimaint_api.main:app --reload
+uv run --locked python backend/manage.py runserver
 ```
 
-- Documentation interactive : <http://127.0.0.1:8000/docs>
 - Santé de l'API : <http://127.0.0.1:8000/api/v1/health>
+
+La configuration par défaut est réservée au développement local. Les variables sont
+présentées dans [.env.example](.env.example) ; Django ne charge pas ce fichier automatiquement.
+Définir les variables dans le terminal ou l'environnement cloud. `DJANGO_DEBUG=false`
+désactive le débogage et exige une `DJANGO_SECRET_KEY` propre à l'environnement ;
+`DJANGO_ALLOWED_HOSTS` accepte une liste d'hôtes séparés par des virgules.
+SQLite est configuré localement dans `backend/db.sqlite3` (ignoré par Git) ; la santé
+n'y accède pas et aucune migration n'est nécessaire pour démarrer ce socle sans modèles.
+Ce serveur de développement ne définit pas un déploiement de production.
+
+Les anciennes routes FastAPI `/openapi.json`, `/docs` et `/redoc` renvoient désormais 404.
+Aucun consommateur n'a été identifié dans le dépôt ; aucun schéma ou UI de remplacement
+n'est ajouté. Les détails et différences HTTP sont dans le [guide du code](docs/code-guide.md).
 
 ## Démarrer le frontend
 
@@ -79,7 +91,7 @@ Les deux contrôles sont obligatoires dans le ruleset actif, vérifié sur GitHu
 16 octobre 2026 ; voir le [bilan et ses sources](docs/project-status.md).
 
 Pour une vérification manuelle : démarrer les deux services, constater « API disponible »,
-arrêter Uvicorn puis cliquer sur le bouton pour voir « API indisponible ». Relancer l'API
+arrêter Django puis cliquer sur le bouton pour voir « API indisponible ». Relancer l'API
 et vérifier à nouveau. Tester à 375 px et au clavier : contenu sans débordement,
 focus visible et libellé de statut lisible sans dépendre de la couleur.
 
@@ -87,7 +99,7 @@ focus visible et libellé de statut lisible sans dépendre de la couleur.
 
 | Dossier ou fichier | Rôle |
 | --- | --- |
-| `backend/src/terrimaint_api/` | Application FastAPI |
+| `backend/src/terrimaint_api/` | Projet Django et application de santé DRF |
 | `backend/tests/` | Tests du contrat HTTP et futurs tests métier |
 | `frontend/` | Accueil Angular strict, routage, état de l'API et contrôles |
 | `docs/` | Contexte, décisions et workflow |

@@ -1,5 +1,21 @@
 # Décisions techniques
 
+## 2026-10-16 — Migration du socle vers Django/DRF (proposée dans cette PR)
+
+Django 5.2 LTS et DRF 3.16 remplacent FastAPI, Uvicorn et Pydantic ; Python 3.12
+reste la référence. uv verrouille les versions résolues. Le projet `terrimaint_api`
+sépare configuration, routage, entrées WSGI/ASGI et application `health`, sans couche métier.
+Le contrat GET `/api/v1/health` reste HTTP 200, JSON `{"status":"ok"}`, sans accès DB.
+Le proxy Angular conserve l'origine du navigateur : aucune ouverture CORS n'est ajoutée.
+Les tests passent à pytest-django/APIClient et vérifient explicitement les anciennes routes
+OpenAPI/UI en 404 : aucun consommateur n'a été trouvé dans le dépôt.
+
+SQLite local suffit à la configuration Django et aux futurs essais ; aucun modèle,
+migration, compte, session ou PostgreSQL n'est introduit. La configuration DB est centralisée
+pour le prochain incrément PostgreSQL. Les variables d'environnement pilotent le mode debug,
+la clé secrète et les hôtes autorisés ; hors debug, une clé est obligatoire.
+La CI existante garde la même commande ; le frontend conserve son code et son proxy.
+
 ## 2026-10-16 — Architecture cible et qualité dès la conception
 
 - **Django + Django REST Framework** : un cadre commun pour les modèles, migrations,
@@ -16,11 +32,8 @@
 - **Tests et sécurité intégrés dès la conception** : définir critères, risques et permissions
   avant de coder, puis tester succès et refus. Les contrôles CI complètent la relecture humaine.
 
-Cette décision remplace l'ancienne cible FastAPI/SQLAlchemy/Alembic. Le code présent reste
-un socle FastAPI provisoire : ni Django, ni DRF, ni PostgreSQL ne sont installés dans le dépôt.
-La migration sera une tâche distincte, avec vérification du contrat HTTP consommé par Angular,
-remplacement des tests liés à FastAPI et adaptation des commandes et dépendances.
-Aucune migration ni nouvelle architecture n'est créée par cette PR documentaire.
+Cette décision remplace l'ancienne cible FastAPI/SQLAlchemy/Alembic. Au moment de cette décision documentaire, le socle
+était encore FastAPI. La migration Django/DRF est décrite ci-dessus ; PostgreSQL reste futur.
 
 La politique de commentaires d’[AGENTS.md](../AGENTS.md) privilégie la lisibilité et le pourquoi ;
 les explications longues vont dans `docs/`, sans commentaire automatique à chaque bloc.

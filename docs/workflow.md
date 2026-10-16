@@ -57,8 +57,9 @@ stockage et droits de consultation. Pour le hors connexion, définir données co
 effacement à la déconnexion, reprise, conflits et doublons de synchronisation.
 Ces protections sont à construire et à tester ; le socle actuel ne les implémente pas.
 
-La cible est Django/DRF/PostgreSQL, tandis que les commandes du README lancent encore
-FastAPI. La migration devra préserver ou faire évoluer explicitement les contrats testés.
+Le socle de cette branche utilise Django/DRF ; PostgreSQL reste à raccorder. Les commandes
+du README lancent Django. Toute évolution doit préserver ou faire évoluer explicitement
+les contrats testés, notamment la santé consommée par Angular.
 
 ## Une tâche
 
