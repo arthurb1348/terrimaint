@@ -14,7 +14,9 @@ et les intentions documentées, avec leurs sources. GitHub constitue la source d
 Socle initial : API FastAPI minimale, tests HTTP, Ruff, dépendances gérées par uv,
 CI GitHub Actions, modèles d'issues et de pull requests, consignes Codex et configuration VS Code.
 Le frontend Angular strict et standalone fournit un accueil responsive avec l'état de l'API.
-La base PostgreSQL et les fonctions métier seront ajoutées par petites tâches.
+La cible validée est Django + Django REST Framework + PostgreSQL ; la migration du socle
+et les fonctions métier restent à développer par petites tâches. La PWA et le hors connexion
+ciblé ne sont pas encore implémentés. Voir les [décisions techniques](docs/decisions.md).
 L'endpoint de santé vérifie que l'API répond ; il ne vérifie pas de base de données.
 
 ## Installation
@@ -73,8 +75,8 @@ npm run build
 `npm test` lance Vitest sans mode watch et sans serveur réel. `npm run test:watch` est
 disponible pour développer. Le build de production sort dans `frontend/dist/terrimaint/browser`.
 La CI exécute les jobs `Backend` et `Frontend` sur les PR et sur `main`.
-Le fichier de ruleset prévoit les deux contrôles ; l'activation distante de `Frontend`
-reste une tâche dédiée après observation de ce job.
+Les deux contrôles sont obligatoires dans le ruleset actif, vérifié sur GitHub le
+16 octobre 2026 ; voir le [bilan et ses sources](docs/project-status.md).
 
 Pour une vérification manuelle : démarrer les deux services, constater « API disponible »,
 arrêter Uvicorn puis cliquer sur le bouton pour voir « API indisponible ». Relancer l'API
@@ -100,8 +102,9 @@ Les instructions complètes sont dans [le workflow](docs/workflow.md).
 Ce processus se pilote depuis mobile ou PC avec GitHub et un agent dans un environnement
 cloud ou local. La relecture et la compréhension du développeur complètent les contrôles automatisés.
 Les [décisions](docs/decisions.md) et le [contexte produit](docs/project.md) fixent le cadre.
-Le [guide pédagogique du code](docs/code-guide.md) explique les fichiers et les configurations.
-Pour publier ce socle neuf, utiliser [le guide d'initialisation GitHub](docs/bootstrap.md).
+La [revue technique](docs/technical-review.md) explique l'ensemble pour l'oral CDA ;
+le [guide du code](docs/code-guide.md) détaille les fichiers et configurations.
+Le [guide d'initialisation GitHub](docs/bootstrap.md) conserve la procédure historique du bootstrap terminé.
 
 ## Vérifier et formater
 

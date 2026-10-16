@@ -1,83 +1,91 @@
-# TerriMaint — instructions for coding agents
+# TerriMaint — consignes pour les agents
 
-## Context
+## Contexte et périmètre
 
-Read `README.md`, `docs/project.md`, `docs/project-status.md` and `docs/workflow.md`, then the task or issue.
-TerriMaint is a CDA training project with a real small-municipality use case.
-Arthur owns product decisions, reviews the code and needs to explain it at his exams.
-Communicate in French; use English identifiers in code.
+Lire `README.md`, `docs/project.md`, `docs/project-status.md` et `docs/workflow.md`,
+puis la tâche. TerriMaint est un projet de formation CDA pour les petites collectivités.
+Arthur décide du produit, relit et doit pouvoir expliquer le code à l'oral.
+Communiquer en français ; conserver les identifiants de code en anglais.
 
-## Stack and scope
+- Un dépôt : `backend/`, `frontend/`, `docs/`, `.github/`.
+- Présent : socle Python/FastAPI provisoire, accueil Angular/TypeScript et tests.
+- Cible validée : Django + Django REST Framework (DRF) + PostgreSQL ; voir `docs/decisions.md`.
+  Django, DRF et la persistance ne sont pas encore implémentés. Ne pas prolonger l'ancienne
+  orientation SQLAlchemy/Alembic ; la migration du socle fera l'objet d'une tâche dédiée.
+- Frontend Angular responsive pour les rôles Agent et Responsable à développer.
+  La PWA et le hors connexion ciblé restent futurs ; consulter `docs/project.md`.
+- Implémenter seulement l'incrément demandé, sans abstraction spéculative ni refonte annexe.
+  Consigner les décisions d'architecture durables dans `docs/decisions.md`.
 
-- One repository: `backend/`, `frontend/`, `docs/`, `.github/`.
-- Backend: Python / FastAPI; PostgreSQL, SQLAlchemy, Alembic planned next.
-- Frontend: Angular / TypeScript, responsive for both Agent and Responsable roles.
-- Offline support is targeted at critical field actions; consult `docs/project.md`.
-- Build only the requested slice. Avoid speculative abstractions and unrelated refactors.
-- Record substantial architecture decisions in `docs/decisions.md`.
+## Accord de travail
 
-## Working agreement
+1. Vérifier l'état Git et la branche ; préserver les modifications de l'utilisateur.
+2. Partir du dernier `main` distant vérifié ; créer une branche par tâche
+   (`feat/...`, `fix/...`, `chore/...`, `docs/...`).
+3. Annoncer un plan court et les critères d'acceptation ; identifier risques et permissions.
+4. Réaliser les modifications, contrôles et corrections nécessaires sans demander une
+   autorisation à chaque étape courante. Expliquer les changements de dépendances nécessaires.
+5. Pour du Python, lancer `uv run --locked python scripts/check.py` avant remise.
+   Pour le frontend : lint, tests et build décrits dans le README. Après réussite, ne relancer
+   que si une modification ou un problème non résolu le justifie. Pour la documentation seule,
+   vérifier liens, faits et cohérence sans ajouter de tests applicatifs artificiels.
+6. Avec un accès GitHub configuré, les commits, la publication de la branche et l'ouverture
+   d'une PR en brouillon sont autorisés. Limiter les commits à la tâche, utiliser le modèle
+   de PR et lier l'issue si elle existe. Garder l'identité Git existante sans réglage global.
+7. S'arrêter à une PR révisable : Arthur choisit la fusion et le déploiement.
+   Ne jamais contourner les protections ni modifier les permissions pour finir une tâche.
+8. Rapporter le résultat, les fichiers importants, les vérifications réellement exécutées
+   et leurs limites, ainsi qu'une explication pédagogique proportionnée.
 
-1. Check `git status` and the current branch. Preserve existing user changes.
-2. Use one task branch (`feat/...`, `fix/...`, `chore/...`, `docs/...`); work off `main`.
-3. Announce a short plan and the acceptance criteria, then implement the agreed scope.
-4. You may edit files, run commands, format code, add necessary tests and correct failures
-   without requesting approval for every routine step. Explain necessary dependency changes.
-5. Run `uv run --locked python scripts/check.py` before handing off Python changes.
-   Once checks pass, rerun only when further edits or unresolved failures justify it.
-   Documentation-only changes need link/consistency checks, not new application tests.
-6. With a configured GitHub remote, you may commit the task changes, push the task branch
-   and open a draft pull request. Link the issue and use the PR template.
-   Scope commits to your changes. Use the existing Git identity; do not change global Git config.
-7. Stop at the reviewable pull request. Arthur chooses when to merge and deploy.
-   Never bypass branch protections or change permissions to finish a task.
-8. Report the resulting behavior, important files, exact checks and any checks not run.
-   Add a short explanation of the code Arthur needs to understand.
+Demander une précision pour une décision métier manquante, un élargissement de périmètre
+ou une action non autorisée. Les étapes courantes et réversibles ne demandent pas de pause.
+Le bootstrap initial pouvait créer le premier commit sur `main` ; il est terminé.
 
-No blanket pause for routine reversible edits. Ask only for a missing business decision,
-an expansion of scope, or an action not authorized by the task.
-Initial repository bootstrap may create the first commit on `main`; subsequent changes use PRs.
+## Politique de commentaires
 
-## Commentaires pédagogiques en français
+Cette politique s'applique aux prochaines tâches Codex ; elle ne demande pas de nettoyer
+les commentaires du code existant dans une PR documentaire.
 
-- Documenter en français chaque fichier de code écrit ou modifié : son rôle, les classes
-  et fonctions, leurs paramètres, résultats et éventuels effets de bord.
-- Expliquer principalement les intentions, décisions et comportements non évidents,
-  notamment les choix techniques, les erreurs et leur traitement ; éviter les commentaires
-  qui paraphrasent simplement le code. Garder les explications détaillées dans le guide.
-  Pour les tests, préciser le comportement observé et les cas d'échec vérifiés.
-- Garder les identifiants en anglais et les commentaires utiles à une présentation orale,
-  sans paraphraser chaque ligne ni laisser des explications devenues fausses.
-- Pour les formats sans commentaires (notamment JSON), documenter les clés, leur rôle
-  et les liens entre fichiers dans `docs/code-guide.md`.
-- Sur le code existant, une tâche de commentaires conserve le comportement et limite
-  les modifications aux commentaires et à la documentation.
+- Rendre le code lisible d'abord par des noms explicites et des fonctions bien structurées.
+- Les commentaires, en français, expliquent le **pourquoi** plutôt que paraphraser le **quoi**.
+- Conserver les explications utiles sur les règles métier, la sécurité, les contraintes
+  techniques, les compromis et les comportements non évidents ; corriger celles devenues fausses.
+- Placer les explications pédagogiques longues dans `docs/` : la revue technique pour la
+  vue d'ensemble, le guide du code pour les détails de fichiers et configurations.
+- Ne pas ajouter automatiquement un commentaire à chaque fonction, classe, fichier ou bloc.
+- Ne pas supprimer les docstrings ou commentaires nécessaires aux contrats publics,
+  notamment paramètres, résultats, erreurs et effets de bord utiles à l'appelant.
+- Pour les formats sans commentaires comme JSON, documenter les clés utiles dans
+  `docs/code-guide.md`. Une tâche limitée aux commentaires conserve le comportement.
 
 ## Source de vérité et validation pédagogique
 
-- GitHub est la source de vérité du projet. Maintenir `docs/project-status.md` dans les PR
-  qui changent significativement son état ; distinguer code intégré, travail en cours et prévu.
-- Le workflow doit être utilisable depuis cloud/mobile et PC ; ne pas imposer VS Code local.
-  Respecter le cycle branche → PR → contrôles pertinents → relecture → fusion par Arthur.
-- Pour chaque PR significative, fournir le compte rendu pédagogique défini dans
-  `docs/workflow.md` : modifications, fichiers importants, fonctionnement, circulation
-  des données si pertinente, choix techniques, méthode de test, endroits où modifier
-  le comportement, points essentiels à comprendre et deux à trois questions de compréhension.
-- Le code assisté par IA reste compréhensible et maintenable par le développeur.
-  Ne pas assimiler fonctionnement ou CI verte à une validation humaine ; ne pas cocher
-  à la place d'Arthur les critères d'acceptation ou sa compréhension dans la PR.
+- GitHub est la source de vérité. Maintenir `docs/project-status.md` dans les PR qui changent
+  significativement l'état ; distinguer code intégré, travail en cours et prévu.
+- Le workflow fonctionne depuis cloud/mobile et PC ; VS Code local reste facultatif.
+  Respecter branche → PR → contrôles → relecture → fusion par Arthur.
+- Chaque PR significative suit le compte rendu de `docs/workflow.md` : résultat, fichiers,
+  fonctionnement, circulation des données si pertinente, choix, tests, endroits à modifier,
+  points à maîtriser et deux à trois questions de compréhension.
+- Une CI verte ne vaut pas validation humaine. Ne pas cocher pour Arthur les critères
+  d'acceptation ou sa compréhension. Le code assisté reste compréhensible et maintenable.
 
-## Contrôles de qualité
+## Qualité, sécurité et relecture
 
-- Tests cover observable behavior and important failure cases; do not mirror implementation.
-- Never remove tests or weaken CI just to obtain a green result.
-- Keep the API typed, validate request data and return consistent errors as endpoints grow.
-- Add the frontend checks to CI when the Angular app is initialized.
-- Keep secrets in ignored local configuration and use fictional demonstration data.
+Appliquer le cycle de `docs/workflow.md` : critères d'acceptation → risques et permissions
+→ implémentation avec tests adaptés → vérification de la CI et relecture de la PR.
 
-## Code Review Rules
-
-Prioritize correctness, authorization, data integrity and regressions.
-Check role boundaries and organization scoping when those features are introduced.
-For field workflows, review the effect of network loss, retry and duplicate synchronization.
-Use CI for formatting; keep review findings focused on behavior and concrete risks.
+- Tester les comportements observables et les échecs importants, sans recopier l'implémentation.
+  Ne jamais supprimer des tests ni affaiblir la CI pour obtenir du vert.
+- Les jobs `Backend` et `Frontend` existent et sont obligatoires dans le ruleset actif
+  vérifié le 16 octobre 2026 ; relire GitHub si leur état doit être confirmé ultérieurement.
+- Pour les futurs parcours métier, prévoir validation serveur, authentification, autorisations,
+  isolation entre collectivités et tests des accès refusés, y compris par identifiant direct.
+- Définir les limites de fichiers/photos (type, taille, accès, stockage) et la gestion des
+  données hors connexion (conservation, déconnexion, reprise, conflits et doublons).
+- Ces protections métier ne sont pas présentes dans le socle actuel. Ne pas les annoncer
+  comme acquises parce que Django/DRF les rend possibles.
+- Garder les secrets dans une configuration locale ignorée et utiliser des données fictives.
+- En relecture, privilégier exactitude, autorisations, intégrité des données et régressions.
+  Vérifier les frontières de rôles/collectivités et les effets des pertes réseau et reprises
+  lorsqu'ils seront implémentés. Réserver le formatage aux outils automatisés.

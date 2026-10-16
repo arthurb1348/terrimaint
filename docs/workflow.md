@@ -42,6 +42,24 @@ relit, demande des explications et prend la décision d'intégration.
 | Relire le comportement et le diff, décider la fusion | Arthur |
 | Décider un déploiement | Arthur, une fois un workflow de déploiement défini |
 
+## Cycle qualité et sécurité
+
+1. Définir le résultat observable et les critères d'acceptation.
+2. Identifier risques, données et permissions avant de coder : qui peut consulter ou modifier quoi ?
+3. Implémenter l'incrément avec les tests adaptés aux succès, erreurs et accès refusés.
+4. Vérifier les contrôles CI du commit proposé et relire la PR avant toute fusion par Arthur.
+
+Pour les futures fonctions métier, préciser la validation des entrées côté serveur,
+les mécanismes d'authentification et les autorisations par rôle et par collectivité.
+Tester qu'un utilisateur ne peut pas accéder aux données d'une autre collectivité,
+y compris via un identifiant ou un fichier direct. Définir types et tailles des photos/fichiers,
+stockage et droits de consultation. Pour le hors connexion, définir données conservées,
+effacement à la déconnexion, reprise, conflits et doublons de synchronisation.
+Ces protections sont à construire et à tester ; le socle actuel ne les implémente pas.
+
+La cible est Django/DRF/PostgreSQL, tandis que les commandes du README lancent encore
+FastAPI. La migration devra préserver ou faire évoluer explicitement les contrats testés.
+
 ## Une tâche
 
 1. Créer une issue avec un résultat observable, des critères d'acceptation et un périmètre.
@@ -98,17 +116,18 @@ Utiliser un profil qui autorise les modifications et les commandes dans ce dép�
 avec les demandes d'autorisation conservées pour les actions hors de ce périmètre.
 Les noms des profils peuvent évoluer : vérifier la configuration de l'extension installée.
 `AGENTS.md` guide le comportement de l'agent ; les protections GitHub imposent les conditions de fusion.
-Redémarrer la session Codex après une modification de ses instructions de projet.
+Vérifier que la session Codex prend en compte la version actuelle d’`AGENTS.md` ;
+redémarrer la session si nécessaire.
 
 ## Protection de main
 
-Réglages souhaités pour le ruleset actif sur `main` :
+État du ruleset actif sur `main`, lu sur GitHub le 16 octobre 2026
+([preuve et référence](project-status.md#cicd-présente)) :
 
 - Passage par une pull request.
-- Contrôles `Backend` et `Frontend` prévus dans le fichier du ruleset ; l'activation distante
-  de `Frontend` est une tâche dédiée. Lire les réglages GitHub pour connaître les protections réelles.
+- Contrôles `Backend` et `Frontend` obligatoires, avec branche actualisée.
 - Discussions résolues, force push et suppression de la branche bloqués.
-- Aucun bypass ; fusion manuelle, en squash.
+- Aucun bypass. Convention du projet : fusion manuelle, en squash.
 - Zéro approbation tierce obligatoire pendant le développement solo.
 
 Arthur ne peut pas approuver une PR dont il est l'auteur. Sa validation consiste donc à relire

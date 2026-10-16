@@ -1,7 +1,8 @@
 # Terminer la création du dépôt depuis VS Code
 
-Le dépôt est préparé localement. Tant qu'aucune création distante n'a abouti,
-les règles JSON sont une configuration à appliquer, pas des protections actives sur GitHub.
+Document historique : le dépôt GitHub existe et le bootstrap est terminé. Ne pas rejouer
+ces commandes sur le dépôt existant. L'état actuel des protections est décrit dans le
+[bilan](project-status.md) ; les règles JSON seules ne prouvent pas leur activation distante.
 
 ## Premier prompt pour Codex
 

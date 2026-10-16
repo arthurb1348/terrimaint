@@ -27,6 +27,7 @@ doit être précisé dans une issue avant implémentation.
 
 ## Hors connexion ciblé
 
+Ce périmètre est futur : aucun service worker ni stockage hors connexion n’est implémenté.
 Prévoir le shell de la PWA, les équipements utiles en cache, le scan QR et la consultation
 basique d'une fiche, les brouillons et la déclaration d'incident avec photos.
 La géolocalisation est utilisée si elle est disponible. Une file IndexedDB permettra
@@ -35,10 +36,14 @@ Les actions de gestion qui exigent des données actualisées seront définies au
 
 ## Technologies retenues
 
-- Python : FastAPI, PostgreSQL, SQLAlchemy, Alembic et pytest.
-- Frontend : Angular et TypeScript, PWA.
+- Cible backend : Python, Django + Django REST Framework et PostgreSQL ; ORM et migrations Django.
+- Frontend : Angular et TypeScript déjà présents ; PWA à développer ultérieurement.
+- Socle actuel : FastAPI provisoire et pytest, sans base de données ni fonctions métier.
+- Tests et sécurité dès la conception : critères, risques, permissions et cas de refus
+  à définir pour chaque incrément, selon le [workflow](workflow.md).
 - Qualité : Ruff, Git/GitHub et CI ; conteneurisation et déploiement introduits progressivement.
 
+Les [décisions techniques](decisions.md) donnent les raisons et distinguent cible et existant.
 Python maintient la cohérence avec la trajectoire Data/IA d'Arthur. Java/Spring reste étudié
 pendant la formation. Les fonctions IA, OCR, transcription ou détection d'anomalies
 sont des extensions futures : elles ne sont pas des prérequis au MVP.

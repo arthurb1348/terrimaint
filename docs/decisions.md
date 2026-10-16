@@ -1,5 +1,30 @@
 # Décisions techniques
 
+## 2026-10-16 — Architecture cible et qualité dès la conception
+
+- **Django + Django REST Framework** : un cadre commun pour les modèles, migrations,
+  validation et API, avec les mécanismes d'authentification et de permissions à configurer
+  et tester. Ce choix réduit l'assemblage d'outils pour un développeur solo et reste en Python.
+- **PostgreSQL** : une base relationnelle adaptée aux liens équipements/incidents/interventions,
+  aux contraintes d'intégrité et aux transactions. Aucune persistance n'est encore implémentée.
+- **Angular + TypeScript** : conserver le frontend déjà initialisé ; composants, routage,
+  typage strict et tests soutiennent des parcours maintenables. Le typage ne remplace pas
+  la validation des réponses reçues ni celle des entrées côté serveur.
+- **PWA avec hors connexion ciblé** : répondre aux pertes réseau du terrain sans promettre
+  que toute l'application fonctionnera hors ligne. Cache, brouillons/photos et synchronisation
+  restent à développer, avec règles de conservation, conflits et dédoublonnage explicites.
+- **Tests et sécurité intégrés dès la conception** : définir critères, risques et permissions
+  avant de coder, puis tester succès et refus. Les contrôles CI complètent la relecture humaine.
+
+Cette décision remplace l'ancienne cible FastAPI/SQLAlchemy/Alembic. Le code présent reste
+un socle FastAPI provisoire : ni Django, ni DRF, ni PostgreSQL ne sont installés dans le dépôt.
+La migration sera une tâche distincte, avec vérification du contrat HTTP consommé par Angular,
+remplacement des tests liés à FastAPI et adaptation des commandes et dépendances.
+Aucune migration ni nouvelle architecture n'est créée par cette PR documentaire.
+
+La politique de commentaires d’[AGENTS.md](../AGENTS.md) privilégie la lisibilité et le pourquoi ;
+les explications longues vont dans `docs/`, sans commentaire automatique à chaque bloc.
+
 ## 2026-10-07 — Bilan versionné et validation humaine
 
 GitHub constitue la source de vérité. `docs/project-status.md` synthétise l'état réel,
@@ -20,7 +45,7 @@ Regrouper backend, frontend et documentation. Pour un développeur solo et un MV
 une PR peut ainsi réunir le contrat API, le code et les tests du même parcours.
 Chaque partie conserve son propre emplacement et ses commandes de contrôle.
 
-## Stack validée avant l'initialisation
+## Historique — Stack validée avant l'initialisation (remplacée le 2026-10-16)
 
 Backend Python/FastAPI avec PostgreSQL, SQLAlchemy et Alembic ; frontend Angular/TypeScript.
 La PWA couvrira des usages hors connexion ciblés sur le terrain.
@@ -49,4 +74,6 @@ Le service de santé valide le JSON reçu et limite l'attente à cinq secondes. 
 affiche un résultat lisible et permet de réessayer sans développer de parcours métier.
 Le proxy local garde une URL relative, sans modifier le contrat backend ni ajouter CORS.
 Les commentaires français et le guide du code servent la présentation orale du projet.
-Le fichier ruleset prévoit Frontend ; son activation distante attend une tâche dédiée.
+À cette date, le fichier ruleset prévoyait Frontend et son activation distante restait à faire.
+La lecture GitHub du 16 octobre 2026 confirme désormais les deux contrôles obligatoires ;
+voir le [bilan](project-status.md).
