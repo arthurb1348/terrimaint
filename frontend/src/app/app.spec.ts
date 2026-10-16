@@ -29,6 +29,7 @@ describe('Shell et routage', () => {
   afterEach(() => {
     http.verify();
     fixture.destroy();
+    element.remove();
   });
 
   async function navigate(url: string): Promise<void> {
@@ -150,5 +151,102 @@ describe('Shell et routage', () => {
     expect(element.querySelector('nav')?.getAttribute('aria-label')).toBe('Navigation Responsable');
     expect(element.textContent).not.toMatch(/Synchronisé|Sophie Martin|Ville de Montfaucon/);
     http.expectNone('/api/v1/health');
+  });
+  it('limite les destinations principales Agent à Accueil, Matériel, Scanner et Plus', async () => {
+    await navigate('/agent');
+    expect(
+      Array.from(element.querySelectorAll('nav > a'), (link) => link.textContent?.trim()),
+    ).toEqual(['Accueil', 'Matériel', 'Scanner']);
+    const toggle = element.querySelector<HTMLButtonElement>('.more-toggle')!;
+    expect(toggle.textContent?.trim()).toBe('Plus');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    toggle.click();
+    fixture.detectChanges();
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    const menu = element.querySelector('#agent-secondary-navigation')!;
+    expect(toggle.getAttribute('aria-controls')).toBe(menu.id);
+    expect(Array.from(menu.querySelectorAll('a'), (link) => link.getAttribute('href'))).toEqual([
+      '/agent/incidents',
+      '/agent/profil',
+    ]);
+  });
+
+  it.each([
+    ['/agent/incidents', 'Incidents'],
+    ['/agent/profil', 'Profil'],
+  ])('signale dans Plus la rubrique active en accès direct : %s', async (url, label) => {
+    await navigate(url);
+    const toggle = element.querySelector<HTMLButtonElement>('.more-toggle')!;
+    expect(toggle.classList.contains('active')).toBe(true);
+    expect(toggle.getAttribute('aria-label')).toContain(label);
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(
+      element.querySelector('.secondary-links a[aria-current="page"]')?.getAttribute('href'),
+    ).toBe(url);
+    await navigate('/agent/equipements');
+    expect(toggle.classList.contains('active')).toBe(false);
+  });
+
+  it('ferme Plus avec Échap ou Fermer et rend le focus au bouton', async () => {
+    document.body.appendChild(element);
+    await navigate('/agent');
+    const toggle = element.querySelector<HTMLButtonElement>('.more-toggle')!;
+    // jsdom ne résout pas les media queries : rendre visible le bouton mobile pour tester le focus.
+    toggle.style.display = 'flex';
+    toggle.click();
+    fixture.detectChanges();
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    fixture.detectChanges();
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(toggle);
+    toggle.click();
+    fixture.detectChanges();
+    element.querySelector<HTMLButtonElement>('.close-more')?.click();
+    fixture.detectChanges();
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(toggle);
+    element.remove();
+  });
+
+  it('ferme Plus sur un appui extérieur et lorsque le focus quitte le groupe', async () => {
+    await navigate('/agent');
+    const toggle = element.querySelector<HTMLButtonElement>('.more-toggle')!;
+    toggle.click();
+    fixture.detectChanges();
+    document.dispatchEvent(new Event('pointerdown', { bubbles: true }));
+    fixture.detectChanges();
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    toggle.click();
+    fixture.detectChanges();
+    element
+      .querySelector('.more-group')
+      ?.dispatchEvent(new FocusEvent('focusout', { bubbles: true, relatedTarget: null }));
+    fixture.detectChanges();
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    element.querySelector('.more-group')?.dispatchEvent(
+      new FocusEvent('focusout', {
+        bubbles: true,
+        relatedTarget: element.querySelector('main'),
+      }),
+    );
+    fixture.detectChanges();
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+  });
+
+  it('navigue depuis Plus puis ferme le menu en plaçant le focus sur le contenu', async () => {
+    document.body.appendChild(element);
+    await navigate('/agent');
+    const toggle = element.querySelector<HTMLButtonElement>('.more-toggle')!;
+    toggle.click();
+    fixture.detectChanges();
+    element
+      .querySelector<HTMLAnchorElement>('.secondary-links a[href="/agent/incidents"]')
+      ?.click();
+    await fixture.whenStable();
+    expect(router.url).toBe('/agent/incidents');
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle.classList.contains('active')).toBe(true);
+    expect(document.activeElement).toBe(element.querySelector('main'));
+    element.remove();
   });
 });

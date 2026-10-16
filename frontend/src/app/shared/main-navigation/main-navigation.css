@@ -35,6 +35,14 @@ nav a {
   line-height: 1rem;
   overflow-wrap: anywhere;
 }
+.more-group,
+.secondary-links {
+  display: contents;
+}
+.more-toggle,
+.close-more {
+  display: none;
+}
 nav a.active {
   background: var(--surface);
   color: var(--green);
@@ -137,6 +145,81 @@ img {
   }
 }
 @media (max-width: 760px) {
+  .navigation:not(.sidebar) nav > a,
+  .more-toggle {
+    white-space: nowrap;
+    overflow-wrap: normal;
+  }
+  .more-group {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .more-toggle {
+    display: flex;
+    width: 100%;
+    min-height: 64px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px;
+    border: 0;
+    border-radius: 8px;
+    background: white;
+    color: var(--muted);
+    font: inherit;
+    font-size: 0.75rem;
+    line-height: 1rem;
+    cursor: pointer;
+  }
+  .more-toggle.active,
+  .more-toggle:hover {
+    background: var(--surface);
+    color: var(--green);
+  }
+  .more-toggle.active {
+    font-weight: 600;
+  }
+  .secondary-links {
+    display: none;
+    position: absolute;
+    bottom: 100%;
+    right: 8px;
+    width: min(256px, calc(100vw - 16px));
+    max-height: calc(100dvh - 104px - env(safe-area-inset-bottom));
+    overflow-y: auto;
+    padding: 8px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 -4px 24px #234e3f18;
+  }
+  .secondary-links.open {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .secondary-links a {
+    flex: none;
+    flex-direction: row;
+    justify-content: flex-start;
+    min-height: 48px;
+    gap: 12px;
+    padding: 8px 12px;
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+  .close-more {
+    display: block;
+    min-height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: white;
+    color: var(--green);
+    font: inherit;
+    cursor: pointer;
+  }
   .sidebar {
     position: static;
     min-height: auto;

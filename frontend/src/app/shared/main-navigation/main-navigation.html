@@ -36,5 +36,40 @@
         <span>{{ destination.label }}</span>
       </a>
     }
+    @if (space() === 'agent') {
+      <div class="more-group" (focusout)="onMoreFocusOut($event)">
+        <button
+          class="more-toggle"
+          type="button"
+          [class.active]="activeSecondary()"
+          [attr.aria-label]="
+            activeSecondary() ? 'Plus — ' + activeSecondary()!.label + ' actif' : 'Plus'
+          "
+          [attr.aria-expanded]="moreOpen()"
+          aria-controls="agent-secondary-navigation"
+          (click)="moreOpen.set(!moreOpen())"
+        >
+          <img src="/icons/menu.svg" alt="" width="24" height="24" />
+          <span>Plus</span>
+        </button>
+        <div id="agent-secondary-navigation" class="secondary-links" [class.open]="moreOpen()">
+          @for (destination of secondaryDestinations; track destination.path) {
+            <a
+              [routerLink]="destination.path"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              ariaCurrentWhenActive="page"
+              (click)="closeNavigation()"
+            >
+              <span class="icon-circle"
+                ><img [src]="'/icons/' + destination.icon + '.svg'" alt="" width="24" height="24"
+              /></span>
+              <span>{{ destination.label }}</span>
+            </a>
+          }
+          <button class="close-more" type="button" (click)="closeMore()">Fermer</button>
+        </div>
+      </div>
+    }
   </nav>
 </div>
