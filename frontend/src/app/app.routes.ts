@@ -1,35 +1,77 @@
 import { Routes } from '@angular/router';
 import { Home } from './home/home';
 
+const equipmentPage = () => import('./features/equipements/equipements').then((m) => m.Equipements);
+const incidentsPage = () => import('./features/incidents/incidents').then((m) => m.Incidents);
+const interventionsPage = () =>
+  import('./features/interventions/interventions').then((m) => m.Interventions);
+const upcomingPage = () =>
+  import('./shared/upcoming-page/upcoming-page').then((m) => m.UpcomingPage);
+
 export const routes: Routes = [
-  { path: '', component: Home, title: 'TerriMaint — Du terrain à la décision' },
-  // L'accueil reste immédiat ; chaque rubrique est téléchargée à sa première visite.
+  {
+    path: '',
+    component: Home,
+    title: 'TerriMaint — Du terrain à la décision',
+    data: { label: 'TerriMaint' },
+  },
   {
     path: 'agent',
     loadComponent: () => import('./features/agent/agent').then((m) => m.Agent),
-    title: 'Espace Agent — TerriMaint',
+    title: 'Accueil Agent — TerriMaint',
+    data: { label: 'Accueil' },
   },
   {
     path: 'responsable',
     loadComponent: () => import('./features/responsable/responsable').then((m) => m.Responsable),
-    title: 'Espace Responsable — TerriMaint',
+    title: 'Tableau de bord — TerriMaint',
+    data: { label: 'Tableau de bord' },
   },
+  ...(['agent', 'responsable'] as const).flatMap((space): Routes => [
+    {
+      path: `${space}/equipements`,
+      loadComponent: equipmentPage,
+      title: 'Matériel — TerriMaint',
+      data: { label: 'Matériel' },
+    },
+    {
+      path: `${space}/incidents`,
+      loadComponent: incidentsPage,
+      title: 'Incidents — TerriMaint',
+      data: { label: 'Incidents' },
+    },
+  ]),
   {
-    path: 'equipements',
-    loadComponent: () => import('./features/equipements/equipements').then((m) => m.Equipements),
-    title: 'Équipements — TerriMaint',
-  },
-  {
-    path: 'incidents',
-    loadComponent: () => import('./features/incidents/incidents').then((m) => m.Incidents),
-    title: 'Incidents — TerriMaint',
-  },
-  {
-    path: 'interventions',
-    loadComponent: () =>
-      import('./features/interventions/interventions').then((m) => m.Interventions),
+    path: 'responsable/interventions',
+    loadComponent: interventionsPage,
     title: 'Interventions — TerriMaint',
+    data: { label: 'Interventions' },
   },
-  // La route générique reste en dernier afin de ne pas masquer les routes connues.
+  ...[
+    {
+      path: 'agent/scanner',
+      label: 'Scanner',
+      description: 'Le scan QR et la saisie du code seront disponibles dans un prochain incrément.',
+    },
+    {
+      path: 'agent/profil',
+      label: 'Profil',
+      description: 'Le profil sera disponible après la mise en place de l’authentification.',
+    },
+    {
+      path: 'responsable/agents',
+      label: 'Agents',
+      description: 'La consultation des intervenants sera développée dans un prochain incrément.',
+    },
+  ].map(({ path, label, description }) => ({
+    path,
+    loadComponent: upcomingPage,
+    title: `${label} — TerriMaint`,
+    data: { label, description },
+  })),
+  // Les anciennes URL restent accessibles ; les nouvelles conservent le contexte de navigation.
+  { path: 'equipements', redirectTo: 'agent/equipements', pathMatch: 'full' },
+  { path: 'incidents', redirectTo: 'agent/incidents', pathMatch: 'full' },
+  { path: 'interventions', redirectTo: 'responsable/interventions', pathMatch: 'full' },
   { path: '**', redirectTo: '' },
 ];

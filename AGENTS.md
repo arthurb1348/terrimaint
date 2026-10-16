@@ -14,6 +14,11 @@ Communiquer en français ; conserver les identifiants de code en anglais.
   Ne pas prolonger l'ancienne orientation SQLAlchemy/Alembic.
 - Frontend Angular responsive pour les rôles Agent et Responsable à développer.
   La PWA et le hors connexion ciblé restent futurs ; consulter `docs/project.md`.
+- Référence UX prioritaire : les parcours de la page Prototype du fichier Figma TerriMaint
+  [Agent (188:3)](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-3) et
+  [Responsable (188:6)](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-6).
+  Ils prévalent sur les anciennes maquettes et bibliothèques, sous réserve des décisions
+  métier validées dans `docs/decisions.md`, qui priment en cas de contradiction.
 - Implémenter seulement l'incrément demandé, sans abstraction spéculative ni refonte annexe.
   Consigner les décisions d'architecture durables dans `docs/decisions.md`.
 

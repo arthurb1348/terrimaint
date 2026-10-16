@@ -223,3 +223,29 @@ des lockfiles et de `.nvmrc`, pas des outils installés dans un environnement de
 - [Tests des requêtes HTTP Angular](https://angular.dev/guide/http/testing)
 - [Proxy du serveur de développement](https://angular.dev/tools/cli/serve)
 - [angular-eslint et compatibilité des versions majeures](https://github.com/angular-eslint/angular-eslint)
+
+
+## Navigation du prototype (proposition)
+
+`app.routes.ts` associe chaque URL à une page et à un libellé de barre supérieure. Les URL
+`/agent/…` et `/responsable/…` permettent de conserver l'espace en navigation et en accès
+direct. Les mêmes composants équipement et incident sont réutilisés dans les deux espaces.
+`loadComponent` télécharge une page métier à sa première visite ; l'accueil reste immédiat.
+
+`App` observe la fin des navigations du Router. `toSignal` transforme cet événement RxJS en
+état Angular ; `computed` en déduit l'espace, le libellé et l'accueil général. Il ne s'agit
+pas d'un rôle authentifié. `MainNavigation` reçoit cet espace par `input`, calcule les liens
+et utilise un `signal` pour l'ouverture du menu mobile Responsable. `RouterLinkActive`
+ajoute l'état visuel actif et `aria-current="page"`, avec une correspondance exacte.
+
+Les composants standalone déclarent directement leurs dépendances dans `imports`.
+`UpcomingPage` partage uniquement la présentation des trois destinations non implémentées
+(scanner, profil, agents), à partir des données de route. Aucun service métier n'est ajouté.
+
+Pour modifier l'apparence : `app.css` porte la grille du shell, `shared/main-navigation/`
+les deux navigations, `styles.css` la palette et les styles communs. Les icônes SVG locales
+proviennent des instances des prototypes ; leurs dimensions originales sont conservées.
+Les adaptations mobiles utilisent des media queries CSS ; elles n'attribuent aucun droit.
+Le menu Responsable annonce son état avec `aria-expanded` et ferme après un clic ; le focus
+rejoint le contenu lorsque le lien mobile disparaît. Le lien d'évitement mène au seul `main`.
+Le contrôle de santé et son service restent inchangés et accessibles depuis l'accueil général.

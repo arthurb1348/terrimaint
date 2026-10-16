@@ -4,7 +4,7 @@
 
 - Date de vérification : 2026-10-16 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `1990d02c4445648bc364893a2c9927b2b8b8bf6f`.
+- Code de référence : `main`, commit `793c65fe1a90259d185c2e1263690e3495e41803`.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -22,20 +22,27 @@ interventions, avec un historique partagé entre agents et responsable.
 Ces parcours sont l'objectif produit, pas les capacités actuelles de l'application.
 Source : [contexte produit](project.md).
 
-## Architecture Angular proposée (en cours)
+## Navigation Prototype proposée (en cours)
 
-La branche `feat/angular-business-architecture` propose un shell responsive commun et
-cinq pages d'entrée différées : `/agent`, `/responsable`, `/equipements`, `/incidents`,
-`/interventions`. Les rubriques partagées n'ont ni données ni actions métier. Les liens
-d'espace n'attribuent aucun rôle ; aucune authentification ni permission n'est simulée.
-Le service de santé est déplacé dans `core/`, la navigation dans `shared/` et les nouvelles
-pages dans `features/`. L'accueil reste dans `home/` avec son contrat API inchangé.
+La branche `feat/prototype-navigation` propose les navigations des prototypes Agent et
+Responsable : barre basse Agent, barre latérale Responsable sur ordinateur et menu repliable
+sur mobile. Les deux espaces restent accessibles sur chaque format. Les liens actifs,
+repères de focus et lien d'évitement sont conservés. Les pages restent des espaces réservés,
+sans formulaire, authentification, modèle métier ou API supplémentaire. Le contrôle de santé
+reste sur l'accueil général ; aucun statut de synchronisation n'est simulé.
 
-Ces changements restent **en cours** jusqu'à validation et fusion. Les sections suivantes
-constatent le `main` audité ; les liens vers les anciens emplacements Angular sont figés
-sur ce commit pour rester vérifiables après le déplacement proposé.
-Les explications de la branche sont dans le [guide](code-guide.md#cinq-concepts-angular-à-comprendre)
-et la [décision](decisions.md).
+Les nouvelles URL sous `/agent/…` et `/responsable/…` partagent les composants équipement et
+incident. Les anciennes URL redirigent. Scanner, profil et agents affichent seulement une
+explication de fonctionnalité à venir. Les décisions validées sur l'immobilisation réservée
+au Responsable et le retrait du type d'incident sont dans [decisions.md](decisions.md).
+Cette proposition reste **en cours** jusqu'à validation et fusion.
+
+## Architecture Angular intégrée
+
+La [PR #15](https://github.com/arthurb1348/terrimaint/pull/15) a intégré sur `main` le shell
+responsive et cinq pages d'entrée différées : `/agent`, `/responsable`, `/equipements`,
+`/incidents`, `/interventions`. `core/` porte le service de santé, `shared/` la navigation,
+`features/` les pages métier encore sans données ni actions. Ces liens ne confèrent aucun rôle.
 
 ## Architecture actuelle
 
@@ -76,12 +83,12 @@ les bornes déclarées dans les manifestes ne doivent pas être prises pour des 
 | Santé HTTP de l'API | GET `/api/v1/health`, statut 200 et JSON `{"status":"ok"}` ; ne vérifie aucune base de données | [API](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/backend/src/terrimaint_api/health/views.py) |
 | Anciennes routes API | `/openapi.json`, `/docs` et `/redoc` renvoient 404 ; aucune UI OpenAPI ajoutée | [tests HTTP](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/backend/tests/test_health.py) |
 | Accueil responsive | Signature du projet, statut de l'API et bouton de relance ; attente, disponible ou indisponible | [composant Home](../frontend/src/app/home/home.ts), [template](../frontend/src/app/home/home.html), [styles](../frontend/src/app/home/home.css) |
-| Gestion des échecs HTTP | Validation du JSON, erreurs réseau/HTTP et délai maximal de cinq secondes ; annulation en quittant la page | [service proposé](../frontend/src/app/core/api-health.ts), [composant](../frontend/src/app/home/home.ts) |
-| Routage | Accueil sur `/`, redirection des routes inconnues vers l'accueil | [routes](../frontend/src/app/app.routes.ts) |
+| Gestion des échecs HTTP | Validation du JSON, erreurs réseau/HTTP et délai maximal de cinq secondes ; annulation en quittant la page | [service intégré](../frontend/src/app/core/api-health.ts), [composant](../frontend/src/app/home/home.ts) |
+| Routage | Accueil sur `/`, cinq entrées métier différées et retour des URL inconnues à l’accueil | [routes](../frontend/src/app/app.routes.ts) |
 
 ## Travaux en cours
 
-La présente PR propose l’architecture Angular décrite ci-dessus. La migration Django/DRF
+La présente PR propose la navigation issue du prototype décrite ci-dessus. La migration Django/DRF
 est intégrée sur `main` par la [PR #13](https://github.com/arthurb1348/terrimaint/pull/13).
 Le suivi vivant des autres travaux reste dans les [issues](https://github.com/arthurb1348/terrimaint/issues)
 et [PR](https://github.com/arthurb1348/terrimaint/pulls), sans recopier une liste vite périmée.
@@ -133,14 +140,14 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   Ils couvrent l'attente, le succès, les JSON invalides, les erreurs HTTP/réseau,
   la relance, l'annulation, le délai de cinq secondes et les routes inconnues.
   HTTP simulé ; aucun serveur réel requis.
-- Sur la branche proposée : **21 cas Vitest** réussis ; accès direct, titres, navigation active,
-  lien d'évitement, liens Responsable/Agent et retour à l'accueil ajoutés aux tests existants.
-  `npm run lint`, `npm test`, `npm run build` réussissent avec Node 24.21.0 / npm 11.19.0 ;
-  le build produit cinq chunks différés. Aucun changement de dépendances.
-- Contrôle ponctuel Chromium sur la branche à 375 et 1440 px : six routes, absence de
-  débordement horizontal, lien d'évitement au clavier et navigation Responsable → Agent
-  → Incidents vérifiés. Captures relues pour l'accueil. HTTP intercepté pour ce contrôle ;
-  l'intégration réelle Django/proxy n'a pas été rejouée dans cette PR.
+- L'architecture intégrée par la PR #15 comporte **21 cas Vitest** ; la proposition de
+  navigation Prototype porte ce total à **32 cas**, incluant URL directes et historiques,
+  contexte partagé, ouverture/fermeture du menu et absence de synchronisation fictive.
+- Sur cette proposition : lint, 32 tests et build réussissent avec Node 24.21.0 / npm 11.19.0.
+  Contrôle ponctuel Chromium sur 11 routes à 320, 390, 768 et 1440 px : absence de débordement,
+  lien actif unique, icônes locales chargées en 24 × 24 px, menu mobile, changement d'espace
+  et lien d'évitement au clavier vérifiés. Captures Agent mobile et Responsable desktop relues.
+  HTTP intercepté pour ce contrôle ; l'intégration réelle Django/proxy n'a pas été rejouée.
 - Aucun test end-to-end versionné, test de persistance ou test de parcours métier présent.
 - Commandes : `uv run --locked python scripts/check.py` à la racine ;
   `npm run lint`, `npm test`, `npm run build` dans `frontend/`.
@@ -189,7 +196,7 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire le shell et l’architecture Angular proposés, puis valider avant fusion manuelle.
+1. Valider la navigation issue du prototype proposée, puis décider sa fusion manuelle.
 2. Définir les critères du premier parcours métier avant de développer ses écrans et son API.
 3. Préciser le modèle métier et la persistance PostgreSQL avec ORM/migrations Django,
    puis les parcours MVP en petits incréments, avec règles d'accès entre collectivités.

@@ -1,4 +1,34 @@
-# Décisions techniques
+# Décisions techniques et métier
+
+## 2026-10-16 — Immobilisation et déclaration simplifiée (validées)
+
+L'immobilisation officielle et la remise en service d'un équipement sont réservées au
+Responsable. L'Agent peut signaler un risque ou une impossibilité d'utilisation ; son
+signalement ne change jamais directement le statut de l'équipement. Ces règles devront
+être imposées côté serveur lors de l'implémentation métier.
+
+Le type d'incident est retiré du MVP. La déclaration conserve une qualification par priorité,
+sans champ de type. La première détection de récurrences pourra rapprocher les incidents
+successifs d'un même équipement ; elle ne prétend pas reconnaître automatiquement une panne
+identique. Le seuil et la période de rapprochement restent à préciser avant son implémentation.
+
+Ces décisions priment sur les éléments contradictoires des prototypes Figma.
+
+## 2026-10-16 — Navigation issue du prototype (proposée)
+
+Les parcours Prototype Agent `188:3` et Responsable `188:6` guident l'UX avant les anciennes
+maquettes et bibliothèques. Le shell reprend leurs navigations et styles en CSS natif, avec
+une adaptation responsive pour chaque espace. Les URL sous `/agent` et `/responsable`
+conservent le contexte ; les pages équipement et incident partagent les mêmes composants.
+Les anciennes URL redirigent vers les nouvelles. Aucun lien ne confère de permission.
+
+La navigation basse Agent et la barre latérale Responsable ont des destinations accessibles,
+encore explicitement réservées aux prochains incréments. Recherche, notifications, identité
+connectée et synchronisation ne sont pas simulées. Le contrôle de santé HTTP reste sur
+l'accueil général et ne prouve ni persistance ni synchronisation. Les icônes originales sont
+exportées depuis les instances du prototype, conservées localement dans `frontend/public/icons/`.
+Aucune dépendance applicative ajoutée.
+
 
 ## 2026-10-16 — Architecture Angular par fonctionnalités (proposée)
 
