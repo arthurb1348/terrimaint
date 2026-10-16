@@ -1,17 +1,21 @@
 <a class="skip-link" href="#main-content">Aller au contenu</a>
-<div class="shell">
-  <header class="brand">
-    <a class="brand-link" routerLink="/" aria-label="TerriMaint — Accueil">
-      <span class="brand-mark" aria-hidden="true">T</span>
-      <span>TerriMaint</span>
-    </a>
-    <span class="brand-note">Maintenance des collectivités</span>
+<div class="shell" [class.responsable]="space() === 'responsable'">
+  <header class="app-bar">
+    <a class="brand-link" routerLink="/" aria-label="TerriMaint — Accueil général">TerriMaint</a>
+    <p class="screen-title">{{ label() }}</p>
+    <details class="space-menu" #spaceMenu>
+      <summary>
+        <img src="/icons/menu.svg" alt="" width="24" height="24" />
+        <span class="space-menu-label">Changer d’espace</span>
+      </summary>
+      <div class="space-links">
+        <a routerLink="/agent" (click)="spaceMenu.open = false">Espace Agent</a>
+        <a routerLink="/responsable" (click)="spaceMenu.open = false">Espace Responsable</a>
+        <a routerLink="/" (click)="spaceMenu.open = false">Accueil général · état de l’API</a>
+      </div>
+    </details>
   </header>
-  <app-main-navigation />
-  <main id="main-content" tabindex="-1">
-    <router-outlet />
-  </main>
-  <footer>
-    TerriMaint <span aria-hidden="true">·</span> Le lien entre vos équipes et votre territoire.
-  </footer>
+  <app-main-navigation [space]="space()" [landing]="landing()" />
+  <main id="main-content" tabindex="-1"><router-outlet /></main>
+  <footer>TerriMaint · Du terrain à la décision.</footer>
 </div>

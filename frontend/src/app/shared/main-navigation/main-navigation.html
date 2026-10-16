@@ -1,21 +1,75 @@
-<!-- Ces liens désignent des espaces, sans sélectionner ni attribuer un rôle. -->
-<nav aria-label="Navigation principale">
-  <a
-    routerLink="/"
-    routerLinkActive="active"
-    [routerLinkActiveOptions]="{ exact: true }"
-    ariaCurrentWhenActive="page"
-    >Accueil</a
+<div class="navigation" [class.sidebar]="space() === 'responsable'">
+  @if (space() === 'responsable') {
+    <a class="organization" routerLink="/responsable">
+      <span class="icon-circle"
+        ><img src="/icons/building.svg" alt="" width="24" height="24"
+      /></span>
+      <span>TerriMaint<br /><small>Espace Responsable</small></span>
+    </a>
+    <button
+      class="menu-toggle"
+      type="button"
+      [attr.aria-expanded]="expanded()"
+      aria-controls="primary-navigation"
+      (click)="expanded.set(!expanded())"
+    >
+      <img src="/icons/menu.svg" alt="" width="24" height="24" />
+      {{ expanded() ? 'Fermer la navigation' : 'Ouvrir la navigation' }}
+    </button>
+  }
+  <nav
+    id="primary-navigation"
+    [attr.aria-label]="space() === 'agent' ? 'Navigation Agent' : 'Navigation Responsable'"
+    [class.expanded]="expanded()"
   >
-  <a routerLink="/agent" routerLinkActive="active" ariaCurrentWhenActive="page">Agent</a>
-  <a routerLink="/responsable" routerLinkActive="active" ariaCurrentWhenActive="page"
-    >Responsable</a
-  >
-  <a routerLink="/equipements" routerLinkActive="active" ariaCurrentWhenActive="page"
-    >Équipements</a
-  >
-  <a routerLink="/incidents" routerLinkActive="active" ariaCurrentWhenActive="page">Incidents</a>
-  <a routerLink="/interventions" routerLinkActive="active" ariaCurrentWhenActive="page"
-    >Interventions</a
-  >
-</nav>
+    @for (destination of destinations(); track destination.path) {
+      <a
+        [routerLink]="destination.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        ariaCurrentWhenActive="page"
+        (click)="closeNavigation()"
+      >
+        <span class="icon-circle"
+          ><img [src]="'/icons/' + destination.icon + '.svg'" alt="" width="24" height="24"
+        /></span>
+        <span>{{ destination.label }}</span>
+      </a>
+    }
+    @if (space() === 'agent') {
+      <div class="more-group" (focusout)="onMoreFocusOut($event)">
+        <button
+          class="more-toggle"
+          type="button"
+          [class.active]="activeSecondary()"
+          [attr.aria-label]="
+            activeSecondary() ? 'Plus — ' + activeSecondary()!.label + ' actif' : 'Plus'
+          "
+          [attr.aria-expanded]="moreOpen()"
+          aria-controls="agent-secondary-navigation"
+          (click)="moreOpen.set(!moreOpen())"
+        >
+          <img src="/icons/menu.svg" alt="" width="24" height="24" />
+          <span>Plus</span>
+        </button>
+        <div id="agent-secondary-navigation" class="secondary-links" [class.open]="moreOpen()">
+          @for (destination of secondaryDestinations; track destination.path) {
+            <a
+              [routerLink]="destination.path"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              ariaCurrentWhenActive="page"
+              (click)="closeNavigation()"
+            >
+              <span class="icon-circle"
+                ><img [src]="'/icons/' + destination.icon + '.svg'" alt="" width="24" height="24"
+              /></span>
+              <span>{{ destination.label }}</span>
+            </a>
+          }
+          <button class="close-more" type="button" (click)="closeMore()">Fermer</button>
+        </div>
+      </div>
+    }
+  </nav>
+</div>

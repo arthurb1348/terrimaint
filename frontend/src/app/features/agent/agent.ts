@@ -7,12 +7,12 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink],
   template: `
     <section class="feature-page" aria-labelledby="agent-title">
-      <h1 id="agent-title">Espace Agent</h1>
+      <h1 id="agent-title">Accueil</h1>
       <p>Les parcours terrain seront développés progressivement dans ces rubriques.</p>
       <ul>
-        <li><a routerLink="/equipements">Équipements</a></li>
-        <li><a routerLink="/incidents">Incidents</a></li>
-        <li><a routerLink="/interventions">Interventions</a></li>
+        <li><a routerLink="/agent/equipements">Matériel</a></li>
+        <li><a routerLink="/agent/incidents">Incidents</a></li>
+        <li><a routerLink="/agent/scanner">Scanner un QR code</a></li>
       </ul>
     </section>
   `,

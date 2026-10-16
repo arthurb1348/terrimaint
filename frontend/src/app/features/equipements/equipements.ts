@@ -5,7 +5,7 @@ import { Component } from '@angular/core';
   standalone: true,
   template: `
     <section class="feature-page" aria-labelledby="equipements-title">
-      <h1 id="equipements-title">Équipements</h1>
+      <h1 id="equipements-title">Matériel</h1>
       <p>
         Les fiches équipements et leur accès par QR code seront développés dans une prochaine étape.
       </p>

@@ -7,12 +7,12 @@ import { RouterLink } from '@angular/router';
   imports: [RouterLink],
   template: `
     <section class="feature-page" aria-labelledby="responsable-title">
-      <h1 id="responsable-title">Espace Responsable</h1>
+      <h1 id="responsable-title">Tableau de bord</h1>
       <p>Le suivi et la planification seront développés progressivement dans ces rubriques.</p>
       <ul>
-        <li><a routerLink="/equipements">Équipements</a></li>
-        <li><a routerLink="/incidents">Incidents</a></li>
-        <li><a routerLink="/interventions">Interventions</a></li>
+        <li><a routerLink="/responsable/equipements">Matériel</a></li>
+        <li><a routerLink="/responsable/incidents">Incidents</a></li>
+        <li><a routerLink="/responsable/interventions">Interventions</a></li>
       </ul>
       <p>Le responsable pourra également effectuer les actions de terrain.</p>
       <a routerLink="/agent">Accéder à l’espace Agent</a>
