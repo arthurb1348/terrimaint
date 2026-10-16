@@ -1,3 +1,7 @@
+Document historique de l’incrément Angular intégré. L’activation distante de `Frontend`
+est désormais confirmée au 16 octobre 2026 ; voir le [bilan](../project-status.md).
+Les critères ci-dessous conservent la demande d’origine, sans valider à la place d’Arthur.
+
 ## Besoin
 
 Initialiser la partie frontend de TerriMaint afin de pouvoir développer les premiers parcours

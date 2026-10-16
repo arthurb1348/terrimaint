@@ -1,4 +1,8 @@
-# Comprendre le socle à l'oral
+# Guide des fichiers et configurations
+
+Ce guide détaille le code présent et les configurations. La [revue technique](technical-review.md)
+porte la vue d'ensemble, les limites, la cible Django/DRF/PostgreSQL et la préparation CDA.
+Les chemins `src/...` ci-dessous sont relatifs à `frontend/`.
 
 Le navigateur affiche un composant Angular. Un service appelle l'API FastAPI pour demander
 son état de santé. Les tests vérifient ces comportements sans réseau externe. Les commentaires
@@ -9,7 +13,8 @@ en français expliquent les choix ; les identifiants restent en anglais pour sui
 1. `frontend/src/index.html` déclare la langue française, la largeur mobile, le titre,
    l'icône et le point de montage `<app-root>`. `<base href="/">` sert au routage.
 2. `src/main.ts` démarre le composant `App` avec les fournisseurs de `app.config.ts`.
-   Les erreurs de démarrage sont journalisées dans la console, sans révéler un jeton.
+   Les erreurs de démarrage sont journalisées dans la console ; aucun mécanisme
+   d’authentification ou de gestion de jetons n’est présent.
 3. `app.ts` et `app.html` accueillent le routeur. `app.routes.ts` associe `/` à `Home`
    et redirige une URL inconnue vers l'accueil. Les composants sont standalone.
 4. `home/home.ts` vérifie l'API à l'initialisation. Le signal `state` actualise la vue.
@@ -70,7 +75,7 @@ que d'insérer des commentaires non reconnus par leurs outils.
 | `frontend/tsconfig.spec.json` | Hérite des mêmes règles strictes, inclut les tests et les types Vitest. |
 | `frontend/.prettierrc` | Définit largeur, quotes et parsing des templates HTML pour garder un code lisible. |
 | `.github/repository-settings.json` | Prévoit squash uniquement, suppression de la branche après fusion, issues actives, wiki et auto-merge désactivés. Aucun changement distant dans cette issue. |
-| `.github/rulesets/main.json` | `enforcement=active`, cible exacte main, aucun bypass, PR et discussions résolues, historique linéaire, suppression et force push bloqués. `required_status_checks` prévoit Backend et Frontend avec branche actualisée. Le fichier décrit la configuration souhaitée ; le ruleset distant garde Backend seul jusqu'à une tâche dédiée. |
+| `.github/rulesets/main.json` | `enforcement=active`, cible exacte main, aucun bypass, PR et discussions résolues, historique linéaire, suppression et force push bloqués. `required_status_checks` prévoit Backend et Frontend avec branche actualisée. Le fichier décrit la configuration souhaitée ; la lecture distante du 16 octobre 2026 confirme les deux contrôles obligatoires (voir le [bilan](project-status.md)). |
 | `.vscode/settings.json` | Active pytest et Ruff pour Python ; format et corrections à la sauvegarde. |
 | `.vscode/tasks.json` | Lance le contrôle Python ou Uvicorn à la racine ; les commandes npm se lancent dans frontend. |
 | `.vscode/extensions.json` | Recommande les extensions Codex, Python, Ruff et Angular. |
@@ -103,8 +108,8 @@ embarqué dans le build. Aucun déploiement ni configuration CORS distante n'est
 ## Versions et sources officielles
 
 Choix vérifié le 6 octobre 2026 : Angular/CLI 22.2.1 stable et Node 24.21.0 LTS.
-Node 26 installé sur le poste était encore Current ; les contrôles de cette tâche utilisent
-une copie portable de Node 24 sans modifier cette installation.
+Ce relevé est historique ; les versions de référence du dépôt viennent des manifestes,
+des lockfiles et de `.nvmrc`, pas des outils installés dans un environnement de travail.
 
 - [Compatibilité Angular / Node / TypeScript](https://angular.dev/reference/versions)
 - [Statuts des versions Node](https://nodejs.org/en/about/previous-releases)

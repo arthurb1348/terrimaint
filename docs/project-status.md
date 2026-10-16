@@ -2,9 +2,9 @@
 
 ## Référence et usage
 
-- Date de vérification : 2026-10-07 (Europe/Paris).
+- Date de vérification : 2026-10-16 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `a7c5e4c9a01b21cee178c7c21d3672368116d600`.
+- Code de référence : `main`, commit `2451a9009977ff3568b5e15c09f1459fa7c681d2`.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -50,7 +50,7 @@ Sources : [API](../backend/src/terrimaint_api/main.py),
 | Outillage frontend | Node 24.21.0 LTS, npm 11.19.0, ESLint/angular-eslint, Vitest et jsdom | [.nvmrc](../.nvmrc), [package.json](../frontend/package.json) |
 | Suivi et CI | Git/GitHub, GitHub Actions, Dependabot | [CI](../.github/workflows/ci.yml), [Dependabot](../.github/dependabot.yml) |
 
-PostgreSQL, SQLAlchemy, Alembic, PWA et IndexedDB sont **prévus**, non installés ou
+Django, DRF, PostgreSQL, PWA et IndexedDB sont **prévus**, non installés ou
 implémentés dans ce socle. Les versions effectives des dépendances viennent des lockfiles ;
 les bornes déclarées dans les manifestes ne doivent pas être prises pour des versions exactes.
 
@@ -66,15 +66,11 @@ les bornes déclarées dans les manifestes ne doivent pas être prises pour des 
 
 ## Travaux en cours
 
-- Ce bilan et les principes de travail sont proposés par la présente branche de
-  documentation ; ils deviennent la référence de `main` après validation et fusion.
-- Au relevé du 2026-10-07, les seules autres PR ouvertes sont les propositions Dependabot
-  [#4](https://github.com/arthurb1348/terrimaint/pull/4) (upload-artifact) et
-  [#5](https://github.com/arthurb1348/terrimaint/pull/5) (setup-node).
-  Elles ne sont pas intégrées et ne changent pas la stack constatée ci-dessus.
-- Aucun parcours métier en cours d'implémentation n'est identifié dans les issues/PR
-  ouvertes consultées. L'initialisation Angular [#1](https://github.com/arthurb1348/terrimaint/issues/1)
-  a été intégrée par la [PR #3](https://github.com/arthurb1348/terrimaint/pull/3).
+La présente PR propose l'actualisation documentaire et la politique de commentaires.
+Elle ne livre aucune fonctionnalité métier ni migration. Ce bilan décrit le code du commit
+ci-dessus et les décisions proposées ; elles rejoindront `main` après validation et fusion.
+Le suivi vivant des autres travaux reste dans les [issues](https://github.com/arthurb1348/terrimaint/issues)
+et [PR](https://github.com/arthurb1348/terrimaint/pulls), sans recopier une liste vite périmée.
 
 ## Fonctionnalités prévues et non implémentées
 
@@ -86,7 +82,7 @@ ni ordre d'implémentation engagé :
 - Suivi/priorisation des incidents et historique partagé.
 - Création, affectation et planification des interventions.
 - Tableau de bord et indications de récurrence.
-- Persistance PostgreSQL avec SQLAlchemy et migrations Alembic.
+- Migration du backend vers Django/DRF puis persistance PostgreSQL avec ORM et migrations Django.
 - Hors connexion ciblé : shell PWA, cache d'équipements, scan QR, fiches basiques,
   brouillons/photos et file IndexedDB avec reprise et dédoublonnage.
 - Conteneurisation et déploiement introduits progressivement.
@@ -134,17 +130,19 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   via `scripts/check.py`.
 - `Frontend` : Node fixé par `.nvmrc`, `npm ci`, lint, tests et build de production.
   Artifact `frontend-build` conservé sept jours.
-- Dernière preuve sur le commit de référence :
-  [CI de main réussie](https://github.com/arthurb1348/terrimaint/actions/runs/37507475618).
-  Ce résultat daté ne garantit pas les exécutions futures.
 - Dependabot propose des PR hebdomadaires pour uv et GitHub Actions ; aucune entrée npm
   n'est configurée et aucune fusion automatique n'est prévue par le workflow.
 - **CD non présente** : aucun workflow de déploiement.
 - Le [ruleset versionné](../.github/rulesets/main.json) prévoit `Backend` et `Frontend`.
-  Lecture GitHub au 2026-10-07 : ruleset `24590632` actif sur `main`, PR exigée,
-  force pushes et suppression bloqués ; seul `Backend` est obligatoire.
-  L'activation distante de `Frontend` reste une tâche dédiée. Un JSON versionné ne prouve
-  pas que tous ses paramètres sont appliqués sur GitHub.
+  Lecture distante au 2026-10-16 : [ruleset 24590632](https://github.com/arthurb1348/terrimaint/rules/24590632)
+  actif sur `main`, PR et discussions résolues exigées, **Backend et Frontend obligatoires**,
+  branche actualisée, historique linéaire, force pushes et suppression bloqués, aucun bypass.
+  Zéro approbation tierce obligatoire ; la relecture par Arthur reste nécessaire.
+  Source : [API du ruleset](https://api.github.com/repos/arthurb1348/terrimaint/rulesets/24590632).
+  Le fichier local ne suffit pas à prouver les réglages distants ; cette lecture est datée.
+- Les résultats de CI sont attachés à chaque commit/PR : une configuration présente ne
+  prouve pas une exécution réussie. Cette PR documentaire demande des contrôles de liens,
+  cohérence et périmètre ; les résultats GitHub Actions restent à consulter sur la PR.
 
 ## État de la documentation
 
@@ -152,7 +150,8 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 - [project.md](project.md) : objectifs, périmètre MVP, hors connexion et direction graphique.
 - [decisions.md](decisions.md) : décisions durables et choix de stack.
 - [workflow.md](workflow.md) : travail par issue/branche/PR, cloud/mobile et validation humaine.
-- [code-guide.md](code-guide.md) : fonctionnement et explication des configurations sans commentaires.
+- [technical-review.md](technical-review.md) : vue d’ensemble, limites, migration future et oral CDA.
+- [code-guide.md](code-guide.md) : détail des fichiers présents et des configurations sans commentaires.
 - [bootstrap.md](bootstrap.md) : historique/procédure du socle GitHub ;
   [tâche Angular](tasks/init-angular.md) : critères de l'incrément déjà intégré.
 - Ce bilan : synthèse factuelle réutilisable, maintenue avec le dépôt.
@@ -160,25 +159,27 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   son emplacement externe n'est pas établi par ce bilan. Aucun mécanisme de mise à jour
   de Google Docs/Slides, Gemini ou Apps Script présent ou ajouté.
 
-## Décisions techniques identifiables
+## Décisions techniques et prochaines étapes
 
-Les [décisions](decisions.md) retiennent le monorepo, le backend Python/FastAPI,
-les incréments progressifs, les dépendances verrouillées, les contrôles automatisés
-et la fusion humaine. L'accueil Angular utilise standalone/strict, signals,
-HttpClient, Vitest et un proxy local pour conserver un contrat HTTP relatif.
-PostgreSQL et la PWA restent des orientations, pas des capacités du socle actuel.
-Le [workflow](workflow.md) précise désormais GitHub comme source de vérité et un
-processus utilisable depuis cloud/mobile, avec compte rendu pédagogique pour chaque PR significative.
+Les [décisions](decisions.md) retiennent le monorepo, Angular/TypeScript et la cible
+**Django + DRF + PostgreSQL**. FastAPI reste le socle provisoire effectivement installé ;
+SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexion ciblé
+restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
+selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-## Prochaines étapes connues
+1. Relire cette documentation et la politique de commentaires ; fusion manuelle après validation.
+2. Définir une issue de migration du socle vers Django/DRF, avec critères sur le contrat HTTP,
+   les tests, les dépendances et les commandes ; aucune migration exécutée ici.
+3. Préciser le modèle métier et la persistance PostgreSQL avec ORM/migrations Django,
+   puis les parcours MVP en petits incréments, avec règles d'accès entre collectivités.
+4. Prévoir la validation des entrées, l'authentification, les autorisations, les tests d'accès
+   refusés, les fichiers/photos et la conservation/synchronisation hors connexion.
+5. Définir l'hébergement et les contrôles d'intégration/navigateur au fil des parcours.
 
-1. Relire et valider ce bilan ainsi que les règles, puis fusionner la PR de documentation.
-2. Traiter séparément l'activation distante du contrôle `Frontend` déjà prévue au dépôt.
-3. Examiner les propositions Dependabot ouvertes, sans fusion automatique.
-4. Définir des issues avec critères d'acceptation pour la persistance et les parcours MVP
-   documentés ; aucun ordre détaillé ni planning n'est fixé.
-5. Définir ultérieurement la consommation de ce bilan par la documentation et la présentation
-   externes. Cette tâche ne réalise aucune connexion ni automatisation externe.
+Cet ordre indique des dépendances de travail, sans planning engagé. Aucune de ces protections
+métier n'est implémentée aujourd'hui. Le commentaire du job `Frontend` dans le workflow CI
+annonce encore une activation future : il est périmé, mais laissé intact dans cette PR limitée
+aux documents et consignes ; une tâche distincte pourra le corriger.
 
 ## Règles de mise à jour du bilan
 
