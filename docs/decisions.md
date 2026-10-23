@@ -12,7 +12,8 @@ Le workflow `Responsive` publie rapport, captures et traces d'échec pendant sep
 Il n'est pas ajouté au ruleset obligatoire au départ ; ses échecs restent visibles, sans
 `continue-on-error`. Les contrôles `Backend` et `Frontend` restent inchangés. Les captures
 servent à la relecture humaine, sans comparaison automatique pixel par pixel à ce stade.
-Cette proposition devient intégrée après fusion de sa PR par Arthur.
+Ces tests sont intégrés par la [PR #19 fusionnée](https://github.com/arthurb1348/terrimaint/pull/19)
+le 23 octobre 2026.
 
 ## 2026-10-16 — Adapter la navigation Agent aux petits écrans (validée)
 
