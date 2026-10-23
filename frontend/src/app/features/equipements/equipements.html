@@ -1,0 +1,40 @@
+<section class="feature-page" aria-labelledby="equipements-title">
+  <h1 id="equipements-title">Matériel</h1>
+  <p class="demo-label">Données de démonstration</p>
+  <p>Six équipements fictifs pour découvrir la liste. Aucune donnée n’est enregistrée.</p>
+
+  <label for="equipment-search">Rechercher par nom ou identifiant</label>
+  <div class="search-controls">
+    <input
+      #searchInput
+      id="equipment-search"
+      type="search"
+      [value]="search()"
+      (input)="search.set(searchInput.value)"
+    />
+    <button type="button" (click)="search.set(''); searchInput.focus()">
+      Effacer la recherche
+    </button>
+  </div>
+
+  <p role="status">
+    @if (filteredEquipment().length === 0) {
+      Aucun équipement ne correspond à votre recherche. Essayez un autre nom ou identifiant, ou
+      effacez la recherche.
+    } @else {
+      {{ filteredEquipment().length }} équipement(s) affiché(s).
+    }
+  </p>
+
+  @if (filteredEquipment().length > 0) {
+    <ul class="equipment-list" aria-label="Équipements">
+      @for (equipment of filteredEquipment(); track equipment.id) {
+        <li>
+          <h2>{{ equipment.name }}</h2>
+          <p class="equipment-id">{{ equipment.id }}</p>
+          <p>Emplacement : {{ equipment.location }}</p>
+        </li>
+      }
+    </ul>
+  }
+</section>

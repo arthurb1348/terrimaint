@@ -72,6 +72,51 @@ for (const path of routes) {
   });
 }
 
+for (const space of ['agent', 'responsable']) {
+  test(`La recherche Matériel fonctionne au clavier dans l’espace ${space}`, async ({
+    page,
+  }, info) => {
+    await page.goto(`/${space}/equipements`);
+    const main = page.getByRole('main');
+    const input = main.getByRole('searchbox', { name: 'Rechercher par nom ou identifiant' });
+    const items = main.getByRole('list', { name: 'Équipements' }).getByRole('listitem');
+    const clear = main.getByRole('button', { name: 'Effacer la recherche' });
+
+    await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+    await expect(items).toHaveCount(6);
+    await input.focus();
+    await page.keyboard.type('  tONDeUSE  ');
+    await expect(items).toHaveCount(1);
+    await expect(items.first()).toContainText('Tondeuse autoportée');
+    await expectNoHorizontalOverflow(page);
+    await capture(page, info, 'recherche-nom');
+
+    await input.fill('  eq-veh-0042  ');
+    await expect(items).toHaveCount(1);
+    await expect(items.first()).toContainText('Fourgon de voirie');
+    await input.fill('   ');
+    await expect(items).toHaveCount(6);
+
+    await input.fill('Équipement introuvable '.repeat(15));
+    await expect(items).toHaveCount(0);
+    await expect(main.getByRole('status')).toContainText('Aucun équipement ne correspond');
+    await expectNoHorizontalOverflow(page);
+    await capture(page, info, 'recherche-sans-resultat');
+    await page.keyboard.press('Tab');
+    await expect(clear).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue('');
+    await expect(items).toHaveCount(6);
+    await expect(page).toHaveURL(new RegExp(`/${space}/equipements$`));
+    await expect(page.locator('nav a[aria-current="page"]')).toHaveAttribute(
+      'href',
+      `/${space}/equipements`,
+    );
+    await expectNoHorizontalOverflow(page);
+  });
+}
+
 test('La navigation Agent conserve ses destinations selon la taille', async ({ page }, info) => {
   await page.goto('/agent');
   const navigation = page.getByRole('navigation', { name: 'Navigation Agent' });

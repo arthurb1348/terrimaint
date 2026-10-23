@@ -79,7 +79,8 @@ JSON validé → signal `state` → texte rendu. Quitter l'accueil annule l'abon
 | `core/` | Infrastructure globale : service de santé HTTP et son test. Les futurs services de session ou de synchronisation n'arriveront qu'avec leur besoin réel. |
 | `shared/main-navigation/` | Élément d'interface commun au shell, sans état de rôle ni accès HTTP. `shared` n'importe pas les pages métier. Aucun composant générique supplémentaire n'est anticipé. |
 | `features/agent/`, `features/responsable/` | Pages d'entrée des espaces ; elles pointent vers les mêmes rubriques. Le Responsable dispose aussi d'un lien vers l'espace Agent. |
-| `features/equipements/`, `features/incidents/`, `features/interventions/` | Une page d'attente explicite par domaine ; les futurs composants et services propres au domaine y seront regroupés. |
+| `features/equipements/` | Liste locale de démonstration et recherche, partagées par les deux espaces. Le futur accès API restera dans ce domaine. |
+| `features/incidents/`, `features/interventions/` | Pages d'attente explicites ; les futurs composants et services propres au domaine y seront regroupés. |
 | `home/` | Accueil existant conservé à son emplacement pour limiter les déplacements ; sa logique API ne change pas. |
 | `app.*` | Assemblage du shell et des routes ; `styles.css` porte palette, focus et présentation commune des petites pages. |
 
@@ -97,13 +98,92 @@ un guard ou une permission : l'authentification et les contrôles serveur seront
 
 Les liens restent visibles sur mobile, avec retour à la ligne et cibles d'au moins 44 px.
 Le lien « Aller au contenu » cible l'unique `main`, focalisable avec `tabindex="-1"`.
-La palette et les polices locales existantes sont conservées. Aucune maquette détaillée
-n'étant versionnée, cette étape reste sobre, sans données, formulaire ou tableau de bord.
+La palette et les polices locales existantes sont conservées. La liste Matériel utilise
+des données fictives identifiées ; les autres pages métier restent des espaces réservés.
 
 Lancer `npm run lint`, `npm test`, `npm run build` dans `frontend/`.
 Dans un navigateur à 375 px et sur desktop : suivre les six liens, vérifier la page active,
 le titre, l'absence de débordement et la navigation clavier (Tab, Entrée, lien d'évitement).
 Vérifier aussi le statut API et sa relance avec Django démarré puis arrêté.
+
+## Matériel : première liste de démonstration
+
+Les URL `/agent/equipements` et `/responsable/equipements` chargent le même composant
+standalone `Equipements`. Le shell et le routeur conservent le contexte de navigation.
+Comme un composant Vue, un composant Angular associe une logique, un template et des styles ;
+ici les trois fichiers sont séparés pour faciliter leur lecture. Aucun NgModule (ancien
+conteneur de déclarations Angular) n'est nécessaire.
+
+| Fichier | Rôle dans cet incrément |
+| --- | --- |
+| `src/app/features/equipements/equipment.ts` | L'interface TypeScript `Equipment` décrit un objet affiché : `id`, `name`, `location`, tous des textes (`string`). Elle vérifie les usages à la compilation et ne valide pas un JSON reçu du réseau. |
+| `src/app/features/equipements/equipements-demo.ts` | Source des six équipements fictifs, avec identifiants stables. `readonly` interdit les modifications via ces types, sans figer les objets à l'exécution. |
+| `src/app/features/equipements/equipements.ts` | État local de la recherche et calcul de la liste filtrée. Aucune requête ni sauvegarde. |
+| `src/app/features/equipements/equipements.html` | Titre, mention de démonstration, champ étiqueté, bouton d'effacement, résultat annoncé et liste. |
+| `src/app/features/equipements/equipements.css` | Palette existante, focus du champ, contrôles qui passent à la ligne et cartes : une colonne jusqu'à 760 px, deux au-delà. Les textes longs peuvent revenir à la ligne. |
+| `src/app/features/equipements/equipements.spec.ts` | Tests des comportements visibles via saisie et clic : données initiales, nom/identifiant, casse, espaces, aucun résultat et effacement/focus. |
+| `e2e/responsive.pw.ts` | Ajoute la recherche dans les deux espaces aux quatre formats, avec effacement au clavier, contexte et débordement contrôlés. |
+| `docs/project-status.md`, `docs/decisions.md` | Bilan de cet incrément en cours et correction du statut des tests responsive déjà intégrés par la PR #19. |
+
+### De la saisie aux cartes
+
+1. `search = signal('')` conserve la saisie. Un **signal** est une valeur réactive : Angular
+   sait actualiser la vue quand elle change. Le rapprochement Vue est `ref('')` ; Angular
+   lit avec `search()` et écrit avec `search.set(...)`, là où le script Vue utilise `.value`.
+2. `[value]="search()"` relie la valeur du champ au signal. `(input)` reçoit l'événement
+   de saisie et appelle `search.set(searchInput.value)`. `#searchInput` est une référence
+   au champ HTML dans ce template, comparable à une template ref Vue. Cela correspond
+   à `:value="search"` et `@input="search = $event.target.value"` côté template Vue,
+   avec le typage de l'événement à adapter en TypeScript. On n'utilise pas ici de liaison
+   bidirectionnelle telle que `v-model`.
+3. `computed(...)` définit une valeur **dérivée** de `search`, comme `computed()` dans Vue.
+   Angular mémorise son résultat et le recalcule au besoin quand le signal lu change.
+   `trim()` enlève les espaces de début et de fin ; `toLowerCase()` normalise la casse.
+   `includes()` cherche une sous-chaîne dans le nom **ou** l'identifiant. Les espaces internes
+   et les accents ne sont pas supprimés. L'emplacement reste une information affichée.
+4. `filter()` retourne un nouveau tableau contenant les objets qui correspondent. La
+   **source** `DEMO_EQUIPMENT` garde toujours ses six objets ; `filteredEquipment()` est
+   seulement la sélection affichée. Toute chaîne contient la chaîne vide : une recherche
+   vide, même après `trim()`, restitue donc toute la liste sans cas spécial.
+5. `@for (...; track equipment.id)` rend les cartes, comme `v-for` avec `:key="equipment.id"`
+   dans Vue. `track` permet à Angular de reconnaître un même équipement malgré le filtrage ;
+   l'index du tableau ne serait pas une identité stable. `@if` joue le rôle de `v-if` pour
+   afficher la liste ou le message vide. Le paragraphe `role="status"` annonce le résultat
+   aux technologies d'assistance sans déplacer le focus pendant la saisie.
+6. Effacer remet le signal à `''`, met à jour la valeur du champ et la liste, puis rend le
+   focus au champ pour continuer au clavier. Quitter la page détruit cet état local : la
+   recherche n'est conservée ni dans l'URL, ni dans un stockage, ni dans un store global.
+
+### Où changer les données et le comportement
+
+Pour modifier les exemples, intervenir dans `equipements-demo.ts`. Pour changer les champs
+affichés, adapter `Equipment` et le template ; pour changer la recherche, adapter le `computed`
+et ses tests. Pour le futur raccordement, remplacer l'import de `DEMO_EQUIPMENT` dans le
+composant par une source réactive alimentée par une API propre aux équipements. Le filtre
+pourra lire cette source plutôt que la constante. Il faudra alors définir le contrat JSON,
+valider les réponses, gérer chargement/erreur et tester les autorisations serveur ; l'interface
+TypeScript seule n'assure aucune de ces protections. Aucun service générique n'est anticipé.
+
+Figma a été consulté en lecture seule : fiche matériel Agent `188:29` dans le parcours
+`188:3`, et présentation des équipements du parcours Responsable `188:6` (écran `188:10487`).
+Ces parcours ne présentent pas de liste Matériel dédiée. Les cartes reprennent leur hiérarchie
+nom/référence/emplacement et la charte existante ; il ne s'agit pas d'une fidélité vérifiée
+à un prototype complet de cette liste. Les actions de fiche, statuts et synchronisation
+restent hors de cet incrément.
+
+### Essai manuel court et compréhension
+
+Avec `npm start` dans `frontend/`, ouvrir chacune des deux URL Matériel. Vérifier les six
+équipements et la mention de démonstration aux largeurs 320, 390, 768 et 1440 px. Saisir
+`  tONDeUSE  `, puis `eq-veh-0042`, puis seulement des espaces et enfin `introuvable`.
+Vérifier respectivement un résultat par nom, un par identifiant, six résultats et le message
+vide. Depuis le champ, utiliser Tab puis Entrée sur « Effacer la recherche » : les six cartes
+reviennent et le focus rejoint le champ. Vérifier le lien Matériel actif, les navigations
+existantes et l'absence de défilement horizontal. Django n'est pas requis pour cette liste.
+
+1. Pourquoi modifier `search` suffit-il à actualiser les cartes sans appeler une fonction de rendu ?
+2. Pourquoi l'effacement peut-il retrouver les six équipements après un résultat vide ?
+3. Quels fichiers et quelles vérifications faudrait-il faire évoluer pour recevoir les équipements d'une API ?
 
 ## Backend et script de contrôle
 
@@ -159,6 +239,7 @@ démarrage hors debug avec un secret fourni.
 | `src/app/home/home.spec.ts` | Attente et bouton désactivé, JSON valide, erreur HTTP, erreur réseau, quatre réponses invalides, récupération après relance et annulation à la destruction. Les helpers lisent le statut rendu et attendent sa mise à jour. |
 | `src/app/core/api-health.spec.ts` | Sans réponse, aucun résultat avant 5 s puis indisponibilité et annulation du GET. L'horloge fictive est restaurée après le test. |
 | `src/app/app.spec.ts` | Accueil et URL inconnues, un seul repère main, lien d'évitement, accès direct aux cinq pages, titres et lien actif, navigation Responsable → Agent → Incidents → Accueil, annulation du GET puis relance au retour. |
+| `src/app/features/equipements/equipements.spec.ts` | Liste locale, démonstration, recherche par nom/identifiant, casse et espaces, emplacement exclu, résultat vide et effacement avec retour du focus. |
 
 `provideHttpClientTesting()` remplace le transport réel après `provideHttpClient()`.
 `expectOne()` contrôle l'URL, `flush()` fournit une réponse et `error()` simule le réseau.
@@ -266,6 +347,11 @@ coupure. Les scénarios couvrent aussi Plus au toucher, Échap et retour du focu
 appui extérieur, navigation vers Incidents/Profil et maintien de l'espace Responsable.
 Le lien d'évitement est essayé au clavier. Toute erreur JavaScript non gérée fait échouer
 le scénario.
+
+Deux scénarios Matériel, chacun exécuté aux quatre formats, vérifient aussi le filtrage par
+nom et identifiant, la casse et les espaces, le message vide, l'effacement par Tab/Entrée,
+le retour du focus et le maintien de l'URL et du lien actif dans chaque espace. Ils contrôlent
+le débordement après saisie, y compris une recherche très longue, et après effacement.
 
 La fixture `page` intercepte uniquement `/api/v1/health` et répond `{"status":"ok"}`.
 L'objectif est la mise en page et la navigation : aucun serveur Django ni authentification

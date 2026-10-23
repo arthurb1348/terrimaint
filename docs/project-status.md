@@ -4,7 +4,7 @@
 
 - Date de vérification : 2026-10-23 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `ef741c1d5995b5dfe5fa78b907361a22136e6bd0`.
+- Code de référence : `main`, commit `8d715edfeaebe70d2d02a2cde6065874591f5e4f`.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -45,7 +45,8 @@ essai sur petit écran est consignée dans [decisions.md](decisions.md).
 La [PR #15](https://github.com/arthurb1348/terrimaint/pull/15) a intégré sur `main` le shell
 responsive et cinq pages d'entrée différées : `/agent`, `/responsable`, `/equipements`,
 `/incidents`, `/interventions`. `core/` porte le service de santé, `shared/` la navigation,
-`features/` les pages métier encore sans données ni actions. Ces liens ne confèrent aucun rôle.
+`features/` les pages métier. Sur ce `main`, elles restent sans données ni actions.
+Ces liens ne confèrent aucun rôle.
 
 ## Architecture actuelle
 
@@ -61,7 +62,7 @@ responsive et cinq pages d'entrée différées : `/agent`, `/responsable`, `/equ
   charge par l'hébergement choisi ultérieurement.
 
 Sources : [API](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/backend/src/terrimaint_api/health/views.py),
-[service HTTP sur main](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/frontend/src/app/api-health.ts),
+[service HTTP](../frontend/src/app/core/api-health.ts),
 [configuration Angular](../frontend/src/app/app.config.ts),
 [proxy](../frontend/proxy.conf.json).
 
@@ -69,8 +70,8 @@ Sources : [API](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc
 
 | Partie | Technologies présentes et versions de référence | Source |
 | --- | --- | --- |
-| Backend | Python 3.12 pour le socle/CI ; Django 5.2.18, DRF 3.16.1 ; SQLite local configuré, sans persistance métier | [.python-version](../.python-version), [pyproject.toml](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/pyproject.toml), [uv.lock](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/uv.lock) |
-| Qualité Python | uv, pytest 9.1.1, pytest-django 4.14.0, Ruff 0.16.10, pre-commit | [uv.lock](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/uv.lock), [hooks](../.pre-commit-config.yaml) |
+| Backend | Python 3.12 pour le socle/CI ; Django 5.2.18, DRF 3.18.3 ; SQLite local configuré, sans persistance métier | [.python-version](../.python-version), [pyproject.toml](../pyproject.toml), [uv.lock](../uv.lock) |
+| Qualité Python | uv, pytest 9.1.1, pytest-django 4.14.0, Ruff 0.17.1, pre-commit | [uv.lock](../uv.lock), [hooks](../.pre-commit-config.yaml) |
 | Frontend | Angular/CLI 22.2.1, TypeScript 6.0.3, RxJS, HTML/CSS | [package.json](../frontend/package.json), [package-lock.json](../frontend/package-lock.json) |
 | Outillage frontend | Node 24.21.0 LTS, npm 11.19.0, ESLint/angular-eslint, Vitest et jsdom | [.nvmrc](../.nvmrc), [package.json](../frontend/package.json) |
 | Suivi et CI | Git/GitHub, GitHub Actions, Dependabot | [CI](../.github/workflows/ci.yml), [Dependabot](../.github/dependabot.yml) |
@@ -91,9 +92,22 @@ les bornes déclarées dans les manifestes ne doivent pas être prises pour des 
 
 ## Travaux en cours
 
-La présente PR propose les tests navigateur responsive décrits ci-dessous ; ils restent
-**en cours** jusqu'à fusion. La navigation et la migration Django/DRF sont intégrées sur `main`
-par les [PR #16](https://github.com/arthurb1348/terrimaint/pull/16) et
+La présente PR propose une **interface de démonstration en cours** : la page Matériel
+commune à `/agent/equipements` et `/responsable/equipements` affiche six équipements fictifs,
+avec identifiant stable, nom et emplacement textuel. Une mention visible identifie les données
+de démonstration. La recherche locale porte sur le nom et l'identifiant, ignore la casse et
+les espaces de début/fin ; une recherche vide affiche tout. Le message vide et l'effacement
+avec retour du focus au champ sont inclus. La source typée est séparée du composant.
+
+Cet incrément reste en cours jusqu'à fusion. Il ne constitue pas un parcours connecté à une
+API métier : aucune requête d'équipements, sauvegarde, fiche, CRUD, authentification, permission,
+scan QR ou synchronisation. Les navigations existantes sont conservées. Le [guide du code](code-guide.md#matériel--première-liste-de-démonstration)
+explique les fichiers, le filtrage et le futur point de raccordement API.
+
+Les tests responsive sont déjà **intégrés** par la
+[PR #19](https://github.com/arthurb1348/terrimaint/pull/19), fusionnée le 23 octobre 2026
+(commit `7b5d56fe8bf2bb588ca4205fc50f546306e5f079`). La navigation et la migration Django/DRF
+sont intégrées par les [PR #16](https://github.com/arthurb1348/terrimaint/pull/16) et
 [#13](https://github.com/arthurb1348/terrimaint/pull/13).
 Le suivi vivant des autres travaux reste dans les [issues](https://github.com/arthurb1348/terrimaint/issues)
 et [PR](https://github.com/arthurb1348/terrimaint/pulls), sans recopier une liste vite périmée.
@@ -103,7 +117,7 @@ et [PR](https://github.com/arthurb1348/terrimaint/pulls), sans recopier une list
 Le [contexte produit](project.md) documente les intentions suivantes, sans échéance
 ni ordre d'implémentation engagé :
 
-- Fiches équipements et accès par QR code.
+- Liste d’équipements connectée à une API métier, fiches et accès par QR code.
 - Déclaration d'incidents par agent ou responsable, pièces jointes et localisation.
 - Suivi/priorisation des incidents et historique partagé.
 - Création, affectation et planification des interventions.
@@ -147,26 +161,25 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   HTTP simulé ; aucun serveur réel requis.
 - La navigation intégrée inclut URL directes et historiques, contexte partagé,
   ouverture/fermeture des menus, focus et absence de synchronisation fictive.
-- Vérification locale de cette PR : lint, **38 tests unitaires** et build réussis avec
-  Node 24.21.0 / npm 11.19.0. Historique PR #16 :
-  contrôle ponctuel Chromium sur 11 routes à 320, 390, 768 et 1440 px, absence de débordement,
-  lien actif unique, icônes locales chargées en 24 × 24 px, menu mobile, changement d'espace
-  et lien d'évitement au clavier vérifiés. Captures Agent mobile et Responsable desktop relues.
-  HTTP intercepté pour ce contrôle ; l'intégration réelle Django/proxy n'a pas été rejouée.
-- Ajout de cette PR : [configuration Playwright](../frontend/playwright.config.ts) et
-  [56 scénarios navigateur](../frontend/e2e/responsive.pw.ts), soit 11 pages et trois parcours
-  de navigation/clavier dans quatre formats : 320 × 568, 390 × 844, 768 × 1024 et 1440 × 1024.
-  Contrôles de débordement, libellés Agent non coupés, menus, navigation tactile, focus,
-  lien d'évitement et erreurs JavaScript ; captures jointes au rapport. La santé HTTP est
-  simulée : cela ne prouve pas l'intégration Django/proxy, les permissions ni un parcours métier.
-  Contrôle local : **56 scénarios réussis** avec Playwright 1.64.1, Node 24.21.0 et npm 11.19.0,
-  en utilisant un Chromium 153 temporaire hors dépôt. Le téléchargement du Chromium 156
-  fourni par Playwright a renvoyé une archive invalide dans cet environnement ; la configuration
-  versionnée et la CI utilisent le navigateur standard de Playwright. Leur exécution distante
-  doit être vérifiée sur la PR. Aucun contournement local n'est ajouté aux dépendances du projet.
+- Intégré par la [PR #19](https://github.com/arthurb1348/terrimaint/pull/19) :
+  [configuration Playwright](../frontend/playwright.config.ts) et
+  [56 scénarios navigateur de référence](https://github.com/arthurb1348/terrimaint/blob/7b5d56fe8bf2bb588ca4205fc50f546306e5f079/frontend/e2e/responsive.pw.ts),
+  soit 11 pages et trois parcours de navigation/clavier dans quatre formats : 320 × 568,
+  390 × 844, 768 × 1024 et 1440 × 1024. Débordement, libellés Agent, menus, toucher, focus,
+  lien d'évitement et erreurs JavaScript sont contrôlés ; captures jointes au rapport.
+  La santé HTTP est simulée, sans preuve d'intégration Django/proxy ou de permissions.
+  La CI du dernier commit de la PR #19 (`6bf22293cdff49970a2685c4cf3327dbc6847194`)
+  a été consultée : [CI réussie](https://github.com/arthurb1348/terrimaint/actions/runs/39932815516)
+  et [Responsive réussi](https://github.com/arthurb1348/terrimaint/actions/runs/39932815661).
+- La présente PR ajoute **12 cas Vitest** pour Matériel (soit **50 dans quatre fichiers**)
+  et deux parcours Playwright dans quatre formats (soit **64 scénarios**). Les scénarios
+  Matériel contrôlent la recherche dans les deux espaces, le résultat vide, l'effacement au
+  clavier, le focus, le contexte et le débordement après saisie/effacement.
+  Les résultats effectivement exécutés et les limites de l'environnement figurent dans
+  la description de PR ; ces ajouts restent en cours jusqu'à fusion.
 - Aucun test de persistance ou de parcours métier complet présent.
 - Commandes : `uv run --locked python scripts/check.py` à la racine ;
-  `npm run lint`, `npm test`, `npm run build` dans `frontend/`.
+  `npm run lint`, `npm test`, `npm run build`, `npm run test:responsive` dans `frontend/`.
 
 ## CI/CD présente
 
@@ -176,10 +189,10 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   via `scripts/check.py`.
 - `Frontend` : Node fixé par `.nvmrc`, `npm ci`, lint, tests et build de production.
   Artifact `frontend-build` conservé sept jours.
-- Ajout de cette PR : workflow [Responsive](../.github/workflows/responsive.yml) séparé,
+- Intégré par la PR #19 : workflow [Responsive](../.github/workflows/responsive.yml) séparé,
   sur PR, push de `main` et lancement manuel. Installation Chromium puis contrôle des types
   et tests Playwright. Rapport HTML, captures et traces d'échec conservés sept jours dans
-  `responsive-report`. Le nouveau contrôle est informatif, sans `continue-on-error` et sans
+  `responsive-report`. Ce contrôle est informatif, sans `continue-on-error` et sans
   modification du ruleset ; les jobs `Backend` et `Frontend` restent obligatoires.
 - Dependabot propose des PR hebdomadaires pour uv et GitHub Actions ; aucune entrée npm
   n'est configurée et aucune fusion automatique n'est prévue par le workflow.
@@ -192,7 +205,8 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   Source : [API du ruleset](https://api.github.com/repos/arthurb1348/terrimaint/rulesets/24590632).
   Le fichier local ne suffit pas à prouver les réglages distants ; cette lecture est datée.
 - Les résultats de CI sont attachés à chaque commit/PR : une configuration présente ne
-  prouve pas une exécution réussie. Les résultats distants des tests responsive sont à consulter sur leur PR.
+  prouve pas une exécution réussie. Les résultats de la PR #19 sont liés ci-dessus ;
+  chaque nouveau commit demande sa propre vérification.
 
 ## État de la documentation
 
@@ -217,7 +231,7 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire la PR des tests responsive, ses preuves et ses captures, puis décider sa fusion manuelle.
+1. Relire la PR de la liste Matériel de démonstration, ses tests et captures, puis décider sa fusion manuelle.
 2. Définir les critères du premier parcours métier avant de développer ses écrans et son API.
 3. Préciser le modèle métier et la persistance PostgreSQL avec ORM/migrations Django,
    puis les parcours MVP en petits incréments, avec règles d'accès entre collectivités.
@@ -226,8 +240,8 @@ selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humain
 5. Définir l'hébergement et les contrôles d'intégration/navigateur au fil des parcours.
 
 Cet ordre indique des dépendances de travail, sans planning engagé. Aucune de ces protections
-métier n'est implémentée aujourd'hui. Cette PR ajoute un workflow de tests responsive séparé ;
-elle ne modifie ni les jobs `Backend`/`Frontend` ni les protections distantes.
+métier n'est implémentée aujourd'hui. Le workflow responsive est déjà intégré ; cette PR
+complète ses scénarios sans modifier les jobs `Backend`/`Frontend` ni les protections distantes.
 
 ## Règles de mise à jour du bilan
 
