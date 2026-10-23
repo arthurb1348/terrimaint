@@ -225,7 +225,7 @@ des lockfiles et de `.nvmrc`, pas des outils installés dans un environnement de
 - [angular-eslint et compatibilité des versions majeures](https://github.com/angular-eslint/angular-eslint)
 
 
-## Navigation du prototype (proposition)
+## Navigation du prototype (intégrée par la PR #16)
 
 `app.routes.ts` associe chaque URL à une page et à un libellé de barre supérieure. Les URL
 `/agent/…` et `/responsable/…` permettent de conserver l'espace en navigation et en accès
@@ -249,3 +249,40 @@ Les adaptations mobiles utilisent des media queries CSS ; elles n'attribuent auc
 Le menu Responsable annonce son état avec `aria-expanded` et ferme après un clic ; le focus
 rejoint le contenu lorsque le lien mobile disparaît. Le lien d'évitement mène au seul `main`.
 Le contrôle de santé et son service restent inchangés et accessibles depuis l'accueil général.
+
+## Tests navigateur responsive
+
+`frontend/playwright.config.ts` démarre Angular sur le port 4173 et définit quatre projets
+Chromium : 320 × 568 et 390 × 844 avec toucher mobile, 768 × 1024 avec toucher, puis
+1440 × 1024 sur ordinateur. Chaque test utilise une page et un contexte de navigateur neufs.
+Les tests `.pw.ts` restent séparés des `.spec.ts` de Vitest ; `tsconfig.e2e.json` vérifie
+leurs types avant leur exécution, et ESLint analyse aussi ces fichiers et la configuration.
+
+`frontend/e2e/responsive.pw.ts` parcourt les 11 URL présentes. Il attend le contenu réellement
+rendu puis mesure le débordement du document, avec un pixel de tolérance pour les arrondis.
+Le menu Agent vérifie séparément que les quatre libellés mobiles tiennent dans leurs boutons
+sur une ligne : une simple largeur de document correcte ne suffirait pas à détecter leur
+coupure. Les scénarios couvrent aussi Plus au toucher, Échap et retour du focus, Fermer,
+appui extérieur, navigation vers Incidents/Profil et maintien de l'espace Responsable.
+Le lien d'évitement est essayé au clavier. Toute erreur JavaScript non gérée fait échouer
+le scénario.
+
+La fixture `page` intercepte uniquement `/api/v1/health` et répond `{"status":"ok"}`.
+L'objectif est la mise en page et la navigation : aucun serveur Django ni authentification
+n'est utilisé. Les captures de chaque page et des menus ouverts sont jointes au rapport HTML.
+Une capture et une trace sont également conservées en cas d'échec. Il n'y a pas de comparaison
+automatique d'images de référence ; il faut encore relire les captures pour juger l'apparence.
+Ces vérifications Chromium ne remplacent pas les essais sur téléphone physique ou Safari.
+
+Depuis `frontend/`, installer le navigateur avec `npx playwright install chromium` (sous Linux,
+`--with-deps` ajoute les bibliothèques système), puis lancer `npm run test:responsive`.
+`npm run test:responsive:report` ouvre le dernier rapport. `.github/workflows/responsive.yml`
+exécute la même commande sur chaque PR, sur `main` ou manuellement et conserve l'artifact
+`responsive-report` sept jours, y compris après un échec de test. Les résultats générés sont
+ignorés par Git. Le ruleset n'est pas modifié : `Responsive` est informatif au départ, tandis
+que ses échecs restent rouges. Pour ajouter une page, compléter `routes` ; pour changer les
+formats, modifier les projets Playwright ; pour changer l'interface, modifier ses composants.
+
+Sources : [configuration CI Playwright](https://playwright.dev/docs/ci-intro),
+[émulation](https://playwright.dev/docs/emulation),
+[serveur de test](https://playwright.dev/docs/test-webserver).
