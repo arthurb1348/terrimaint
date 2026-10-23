@@ -34,6 +34,9 @@ Communiquer en français ; conserver les identifiants de code en anglais.
    Pour le frontend : lint, tests et build décrits dans le README. Après réussite, ne relancer
    que si une modification ou un problème non résolu le justifie. Pour la documentation seule,
    vérifier liens, faits et cohérence sans ajouter de tests applicatifs artificiels.
+   Pour une évolution d'interface ou de navigation, lancer aussi `npm run test:responsive`
+   dans `frontend/` et adapter ses parcours si nécessaire. Distinguer ces tests avec santé
+   HTTP simulée des essais d'intégration Django et d'une validation sur appareil réel.
 6. Avec un accès GitHub configuré, les commits, la publication de la branche et l'ouverture
    d'une PR en brouillon sont autorisés. Limiter les commits à la tâche, utiliser le modèle
    de PR et lier l'issue si elle existe. Garder l'identité Git existante sans réglage global.

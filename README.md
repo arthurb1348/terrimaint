@@ -90,6 +90,27 @@ La CI exécute les jobs `Backend` et `Frontend` sur les PR et sur `main`.
 Les deux contrôles sont obligatoires dans le ruleset actif, vérifié sur GitHub le
 16 octobre 2026 ; voir le [bilan et ses sources](docs/project-status.md).
 
+Les tests navigateur responsive se lancent également depuis `frontend/` :
+
+```sh
+npx playwright install chromium
+npm run test:responsive
+npm run test:responsive:report
+```
+
+Sous Linux, `npx playwright install --with-deps chromium` installe aussi les bibliothèques
+système requises. Playwright démarre Angular automatiquement ; Django n'est pas nécessaire
+car la santé HTTP est simulée. Les tests couvrent les 11 pages et les menus en Chromium à
+320, 390, 768 et 1440 px. Le [guide du code](docs/code-guide.md#tests-navigateur-responsive)
+explique les vérifications et leurs limites.
+
+Le workflow **Responsive** lance ces tests sur chaque PR, sur `main` et manuellement.
+Son artifact **responsive-report**, conservé sept jours dans l'exécution GitHub Actions,
+contient le rapport HTML avec les captures et les traces d'échec. Après extraction, ouvrir
+`playwright-report/index.html` ; en local, la commande de rapport ci-dessus sert le rapport.
+Ce nouveau contrôle n'est pas ajouté aux contrôles obligatoires du ruleset : un échec reste
+visible et doit être examiné avant la décision de fusion.
+
 Pour une vérification manuelle : démarrer les deux services, constater « API disponible »,
 arrêter Django puis cliquer sur le bouton pour voir « API indisponible ». Relancer l'API
 et vérifier à nouveau. Tester à 375 px et au clavier : contenu sans débordement,
