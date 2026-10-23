@@ -7,7 +7,9 @@
     "build": "ng build",
     "lint": "ng lint",
     "test": "ng test --no-watch",
-    "test:watch": "ng test"
+    "test:watch": "ng test",
+    "test:responsive": "tsc --project tsconfig.e2e.json && playwright test",
+    "test:responsive:report": "playwright show-report"
   },
   "private": true,
   "packageManager": "npm@11.19.0",
@@ -26,6 +28,8 @@
     "@angular/cli": "22.2.1",
     "@angular/compiler-cli": "22.2.1",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.64.1",
+    "@types/node": "24.19.2",
     "angular-eslint": "22.5.0",
     "eslint": "^10.12.0",
     "jsdom": "^30.0.0",

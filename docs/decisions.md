@@ -1,5 +1,32 @@
 # Décisions techniques et métier
 
+## 2026-10-23 — Tests responsive reproductibles
+
+Versionner les contrôles Playwright du shell et des navigations avec Chromium, en complément
+des tests Vitest. Les formats 320 × 568, 390 × 844, 768 × 1024 et 1440 × 1024 couvrent petit
+téléphone, mobile, tablette et ordinateur. La santé HTTP est simulée pour isoler l'interface.
+Ces tests vérifient la géométrie et les interactions ; ils ne valident ni Django, ni un appareil
+physique, ni la conformité visuelle complète aux maquettes.
+
+Le workflow `Responsive` publie rapport, captures et traces d'échec pendant sept jours.
+Il n'est pas ajouté au ruleset obligatoire au départ ; ses échecs restent visibles, sans
+`continue-on-error`. Les contrôles `Backend` et `Frontend` restent inchangés. Les captures
+servent à la relecture humaine, sans comparaison automatique pixel par pixel à ce stade.
+Cette proposition devient intégrée après fusion de sa PR par Arthur.
+
+## 2026-10-16 — Adapter la navigation Agent aux petits écrans (validée)
+
+Le test de la PR #16 sur petit téléphone a révélé que cinq entrées rendaient les libellés
+trop serrés. Jusqu'à 760 px, conserver **Accueil, Matériel, Scanner et Plus** sur une rangée,
+avec icônes et textes. Plus donne accès à Incidents et Profil, indique leur état actif et
+se ferme au toucher extérieur, par Échap, par Fermer ou après navigation, avec gestion du focus.
+À partir de 761 px, les cinq destinations Agent restent directement visibles.
+
+Cette adaptation validée privilégie la lisibilité et les accès terrain fréquents par rapport
+au nombre d'entrées du prototype. La déclaration rapide depuis l'accueil ou une fiche reste
+prévue, sans formulaire ajouté par cette décision. La navigation Responsable ne change pas.
+La [PR #16 fusionnée](https://github.com/arthurb1348/terrimaint/pull/16) porte l'implémentation.
+
 ## 2026-10-16 — Immobilisation et déclaration simplifiée (validées)
 
 L'immobilisation officielle et la remise en service d'un équipement sont réservées au
@@ -14,7 +41,7 @@ identique. Le seuil et la période de rapprochement restent à préciser avant s
 
 Ces décisions priment sur les éléments contradictoires des prototypes Figma.
 
-## 2026-10-16 — Navigation issue du prototype (proposée)
+## 2026-10-16 — Navigation issue du prototype (fusionnée)
 
 Les parcours Prototype Agent `188:3` et Responsable `188:6` guident l'UX avant les anciennes
 maquettes et bibliothèques. Le shell reprend leurs navigations et styles en CSS natif, avec
@@ -30,7 +57,7 @@ exportées depuis les instances du prototype, conservées localement dans `front
 Aucune dépendance applicative ajoutée.
 
 
-## 2026-10-16 — Architecture Angular par fonctionnalités (proposée)
+## 2026-10-16 — Architecture Angular par fonctionnalités (fusionnée)
 
 Conserver Angular 22 strict/standalone, les signals, Vitest et l'accueil existant.
 Le composant racine porte le shell responsive ; `shared/main-navigation` contient la
