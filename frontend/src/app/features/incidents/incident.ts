@@ -1,0 +1,17 @@
+export const INCIDENT_PRIORITIES = { low: 'Faible', high: 'Haute', urgent: 'Urgente' } as const;
+export const INCIDENT_STATUSES = {
+  open: 'Ouvert',
+  'in-progress': 'En cours',
+  closed: 'Clôturé',
+} as const;
+
+export interface Incident {
+  readonly id: string;
+  readonly title: string;
+  readonly description?: string;
+  readonly equipmentId: string;
+  readonly priority: keyof typeof INCIDENT_PRIORITIES;
+  readonly status: keyof typeof INCIDENT_STATUSES;
+  readonly reportedOn: string;
+  readonly risk?: boolean;
+}

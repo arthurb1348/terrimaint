@@ -253,8 +253,8 @@ reste correcte. Remplacer l'identifiant par `inconnu` : message explicite et ret
 
 Ce parcours est intégré par la [PR #35 fusionnée](https://github.com/arthurb1348/terrimaint/pull/35),
 après la fiche de la PR #32. Il reste une démonstration sans enregistrement.
-L'ajustement de saisie et des boutons de l'**issue #36 reste en revue jusqu'à fusion** ;
-les règles ci-dessous décrivent cet ajustement proposé.
+L'ajustement de saisie et des boutons de l'issue #36 est intégré par la
+[PR #37 fusionnée](https://github.com/arthurb1348/terrimaint/pull/37).
 Les routes `/agent/incidents/nouveau/:equipmentId` et
 `/responsable/incidents/nouveau/:equipmentId` chargent **le même `IncidentDeclaration`**.
 Le paramètre `equipmentId` sélectionne un objet dans `DEMO_EQUIPMENT`, la seule source de
@@ -372,6 +372,105 @@ Questions pour l'oral :
 1. Comment `formControlName` relie-t-il le champ saisi au validateur puis au récapitulatif ?
 2. Pourquoi Non renseignée doit-il rester un texte d'affichage plutôt qu'une valeur du formulaire ?
 3. Pourquoi transmettre `q` dans les liens, tout en gardant les données d'incident hors de l'URL ?
+
+## Liste et détail des signalements (issue #39, en revue)
+
+La priorité validée est de préparer les parcours frontend pour l'oral de décembre 2026 ;
+PostgreSQL #38 est différé. Ce parcours de consultation reste en revue jusqu'à fusion.
+La [décision](decisions.md) explique l'adaptation des deux prototypes Responsable : la table
+de matériel devient une liste de signalements, avec des statuts d'incident distincts.
+Le shell, les rôles de présentation et la déclaration existante sont conservés.
+
+### Source typée et relation au matériel
+
+`incident.ts` définit l'interface `Incident` et les libellés des priorités/statuts.
+Les clés techniques `low/high/urgent` et `open/in-progress/closed` limitent les valeurs
+TypeScript possibles ; elles produisent les textes Faible/Haute/Urgente et Ouvert/En cours/Clôturé.
+`incidents-demo.ts` contient une seule liste de six objets fixes : référence, intitulé,
+description facultative, `equipmentId`, priorité, statut, date ISO fixe et risque facultatif.
+`readonly` interdit une modification accidentelle dans le code typé ; ce n'est pas une
+permission serveur. Le formulaire de déclaration ne crée ni ne modifie ces objets.
+
+`equipmentId` est la référence vers `DEMO_EQUIPMENT`. Liste et détail cherchent l'objet
+correspondant pour lire son nom et son emplacement, sans dupliquer ces valeurs. Les tests
+vérifient que les six références existent et que les identifiants de signalement sont uniques.
+Une description absente s'affiche Non renseignée, sans créer de texte métier. Les dates
+sont rendues par `DatePipe` au format `dd/MM/yyyy` en UTC pour rester fixes selon le fuseau.
+
+### Filtrage et URL
+
+Le flux est **paramètres de l'URL → filtres lus par `toSignal`/`computed` → combinaison
+recherche + priorité + statut → lignes et compteur → lien détail avec les mêmes paramètres
+→ retour explicite à la liste**. L'objet de filtre et les lignes sont dérivés, sans store ni
+copie persistante. La comparaison de recherche utilise `trim().toLowerCase()` ; la saisie
+originale reste dans le champ et dans `q`. Les quatre champs recherchés sont l'intitulé,
+la référence du signalement, le nom et l'identifiant du matériel.
+
+`incident-filters.ts` est une aide propre à ce parcours, partagée par liste et détail.
+Il interprète `q`, `priority` et `status`. `Object.hasOwn` accepte seulement les clés déclarées,
+y compris face à des valeurs d'URL comme `toString` ; une valeur inconnue devient Toutes/Tous.
+Le lien de retour produit une URL sans filtre inconnu. Il n'y a pas de redirection automatique
+de l'URL saisie : l'affichage applique la règle, puis une interaction produit les paramètres
+valides. Les valeurs par défaut sont omises dans les liens grâce à `null`.
+
+Dans le HTML, chaque option porte `[selected]` selon le filtre de l'URL. Cela applique aussi
+la sélection lorsque `@for` crée les options après le menu : lier seulement la valeur du
+`select` trop tôt laisserait Toutes/Tous affiché au retour, malgré des résultats déjà filtrés.
+
+`updateFilter` conserve les deux autres critères et remplace l'entrée courante de l'historique
+avec `replaceUrl`. Réinitialiser efface les trois critères, attend la navigation puis remet
+le focus sur la recherche. Aucun `localStorage`, sessionStorage, IndexedDB ni appel métier.
+Les composants observent les paramètres : recharger ou revenir par un lien restitue le même état.
+
+### Détail et navigation
+
+`/agent/incidents/:id` et `/responsable/incidents/:id` chargent le même `IncidentDetail`.
+La route spécifique `incidents/nouveau/:equipmentId` reste avant cette route variable.
+Le détail observe `id` pour actualiser le signalement et le matériel quand Angular réutilise
+le composant. Un inconnu affiche Signalement introuvable avec un retour ; il ne garde aucun
+contenu du précédent signalement. Les tests le vérifient sur une même instance.
+
+Retour aux signalements vise explicitement le parent `..`, avec les critères transmis,
+même après accès direct. Voir le matériel vise `../../equipements/:id` dans le même espace,
+**sans paramètres de recherche** : `q` des signalements n'a pas le sens de `q` dans Matériel.
+Incidents reste actif sur le détail, y compris dans Plus sur petit Agent, grâce à la règle
+de sous-chemin déjà intégrée. Les routes publiques ne constituent pas des autorisations.
+
+### Présentation et endroits à modifier
+
+Le tableau et les cartes utilisent **le même DOM**, avec cinq colonnes : signalement
+(référence et intitulé lié), matériel, priorité, statut, date. Les en-têtes restent disponibles
+aux technologies d'assistance ; des libellés visuels accompagnent chaque valeur en carte.
+La condition CSS `@container (min-width: 960px)` mesure le composant, pas la fenêtre : la
+barre Responsable réduit l'espace sur tablette et le contenu Agent reste plus étroit.
+Au-dessus de cette largeur, l'en-tête vert et les lignes alternées reprennent le prototype.
+Les contrôles natifs et les retours à la ligne gardent les informations lisibles sans
+débordement. Les badges conservent leurs textes, sans dépendre de la couleur seule.
+Le focus rejoint le `main` du shell lors de l'entrée et du retour ; Tab mène aux contrôles
+ou au lien de retour. `scroll-margin-block` dégage les cibles de la barre Agent fixe.
+
+| Fichier | Où intervenir |
+| --- | --- |
+| `src/app/features/incidents/incident.ts`, `incidents-demo.ts` | Types, libellés et six exemples. Ajouter une référence matériel valide, sans recopier ses champs. |
+| `incident-filters.ts` | Paramètres autorisés et construction des URL liste/détail. |
+| `incidents.ts`, `.html`, `.css` | Champs recherchés, combinaison des filtres, compteur, réinitialisation et tableau/cartes. |
+| `incident-detail.ts`, `.html`, `.css` | Sélection par identifiant, description, lien matériel et état introuvable. |
+| `incident-presentation.css` | Mentions, références, badges et dégagement commun du focus. |
+| `app.routes.ts`, `app.spec.ts` | Chargement des deux espaces, navigation active et déclaration sans ajout à la liste. |
+| `incidents.spec.ts`, `incident-detail.spec.ts`, `e2e/responsive.pw.ts` | Relations, filtres/URL, retours, identifiants réutilisés, clavier et quatre formats. |
+
+Essai manuel : dans les deux espaces, ouvrir Incidents, chercher `  EQ-OUT  `, choisir Haute
+et En cours, puis ouvrir Vibration du plateau de coupe au clavier. Revenir, recharger et
+retrouver les trois critères. Ouvrir Voir le matériel et constater que son URL n'a pas les
+filtres de signalements. Essayer Clôturé pour obtenir le vide, puis Réinitialiser.
+Ouvrir directement `/responsable/incidents/INC-2026-047` (texte long), recharger, puis essayer
+`inconnu`. Refaire à 320, 390, 768 et 1440 px. Django n'est pas nécessaire pour ces exemples.
+
+Questions de compréhension :
+
+1. Pourquoi stocker `equipmentId` plutôt que recopier le nom et l'emplacement du matériel ?
+2. Comment les paramètres d'URL permettent-ils de retrouver recherche et filtres sans stockage ?
+3. Pourquoi les statuts Ouvert/En cours/Clôturé ne changent-ils pas celui du matériel ?
 
 ## Backend et script de contrôle
 
@@ -644,8 +743,9 @@ Chromium : 320 × 568 et 390 × 844 avec toucher mobile, 768 × 1024 avec touche
 Les tests `.pw.ts` restent séparés des `.spec.ts` de Vitest ; `tsconfig.e2e.json` vérifie
 leurs types avant leur exécution, et ESLint analyse aussi ces fichiers et la configuration.
 
-`frontend/e2e/responsive.pw.ts` parcourt 19 URL de référence : les 11 entrées initiales,
-quatre fiches valides/inconnues et quatre déclarations valides/inconnues dans les deux espaces.
+`frontend/e2e/responsive.pw.ts` parcourt 23 URL de référence : les 11 entrées initiales,
+quatre fiches Matériel, quatre déclarations et quatre détails de signalement valides/inconnus
+dans les deux espaces.
 Il attend le contenu réellement
 rendu puis mesure le débordement du document, avec un pixel de tolérance pour les arrondis.
 Le menu Agent vérifie séparément que les quatre libellés mobiles tiennent dans leurs boutons
@@ -689,7 +789,7 @@ Les captures `incident-erreurs`, `incident-formulaire`, `incident-recapitulatif`
 `incident-simulation-terminee`, `incident-recapitulatif-limites` et `incident-materiel-introuvable`
 sont jointes au rapport pour la relecture.
 
-L'issue #36 adapte les parcours et propose **144 scénarios** : dans les deux espaces et
+La PR #37 a intégré **144 scénarios** : dans les deux espaces et
 aux quatre formats, le parcours ajouté accepte une description vide puis blanche, vérifie
 Non renseignée dans le récapitulatif et retrouve la valeur exacte avec Modifier le signalement.
 Les boutons Vérifier/Envoyer/Modifier le signalement sont utilisés au clavier et restent
@@ -697,6 +797,16 @@ entièrement visibles ; la mention de démonstration près de l'action finale do
 dans la fenêtre. Les tests unitaires conservent les refus d'intitulé/priorité et des bornes
 120/121 et 2000/2001 pour les détails renseignés, avec des cas d'absence et de modification.
 La capture `signalement-sans-description` complète celles du parcours existant.
+
+L'issue #39 propose **176 scénarios**, soit 32 de plus : quatre URL de détail et deux
+parcours par espace aux quatre formats. Filtres combinés, historique sans étape par lettre,
+état conservé au retour/rechargement, réinitialisation, détail sans description, textes longs,
+risque, inconnu, lien Matériel sans pollution des paramètres, navigation active et clavier
+sont contrôlés. Le tableau est vérifié sur Responsable à 1440 px, les cartes dans les contenus
+plus étroits. Les captures `signalements-liste`, `signalements-filtres`, `signalement-detail`,
+`signalement-detail-long`, `signalements-aucun-resultat` et `signalement-introuvable` complètent
+le rapport. `signalement-intitule-long-focus` vérifie aussi un lien à intitulé long focalisé.
+Les tests ne prouvent ni permissions ni persistance : les données sont locales.
 
 La fixture `page` intercepte uniquement `/api/v1/health` et répond `{"status":"ok"}`.
 L'objectif est la mise en page et la navigation : aucun serveur Django ni authentification

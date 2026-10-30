@@ -7,6 +7,8 @@ const equipmentDetailPage = () =>
 const incidentsPage = () => import('./features/incidents/incidents').then((m) => m.Incidents);
 const incidentDeclarationPage = () =>
   import('./features/incidents/incident-declaration').then((m) => m.IncidentDeclaration);
+const incidentDetailPage = () =>
+  import('./features/incidents/incident-detail').then((m) => m.IncidentDetail);
 const interventionsPage = () =>
   import('./features/interventions/interventions').then((m) => m.Interventions);
 const upcomingPage = () =>
@@ -48,6 +50,13 @@ export const routes: Routes = [
       path: `${space}/incidents/nouveau/:equipmentId`,
       loadComponent: incidentDeclarationPage,
       title: 'Déclarer un incident — TerriMaint',
+      data: { label: 'Incidents' },
+    },
+    {
+      // La route spécifique nouveau/:equipmentId reste avant le détail par identifiant.
+      path: `${space}/incidents/:id`,
+      loadComponent: incidentDetailPage,
+      title: 'Détail du signalement — TerriMaint',
       data: { label: 'Incidents' },
     },
     {

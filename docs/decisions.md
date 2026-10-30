@@ -1,6 +1,50 @@
 # Décisions techniques et métier
 
-## 2026-10-30 — Saisie et actions de signalement (issue #36, en revue)
+## 2026-10-30 — Consultation des signalements et priorité frontend (issue #39, en revue)
+
+Arthur valide la priorité aux parcours frontend pour son **oral de décembre 2026** : liste
+et détail des signalements côté Responsable, réutilisés côté Agent. PostgreSQL
+([issue #38](https://github.com/arthurb1348/terrimaint/issues/38)) est différé sans modifier
+la cible de persistance. L'[issue #39](https://github.com/arthurb1348/terrimaint/issues/39)
+reste une consultation locale et publique, en revue jusqu'à fusion.
+
+Les prototypes [liste `188:10487`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-10487)
+et [détail `188:10497`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-10497)
+ont été consultés. La table mélange des références et états de matériel avec des incidents.
+L'adaptation distingue donc **référence de signalement `INC-…`** et **matériel `EQ-…`**.
+Les seuls statuts de signalement sont **Ouvert, En cours et Clôturé** ; Disponible,
+Immobilisé et Maintenance ne sont pas repris comme statuts d'incident. Les priorités restent
+Faible, Haute et Urgente. Ces états fictifs ne définissent pas encore un workflow serveur.
+
+Une unique source typée contient six exemples fixes, dont une description absente et des
+contenus longs. `equipmentId` référence la source Matériel existante ; noms et emplacements
+ne sont pas recopiés. La date affichée est la date fixe du signalement, sans activité relative
+inventée. Le compteur vient des résultats filtrés, jamais du nombre montré dans le prototype.
+La déclaration simulée ne modifie pas ce jeu d'exemples et garde son comportement intégré.
+
+La recherche porte sur intitulé, référence, nom et identifiant de matériel, sans casse ni
+espaces de bord. Elle se combine avec priorité et statut. Des sélections natives remplacent
+les onglets du prototype pour proposer aussi Toutes/Tous dans un espace réduit. L'URL porte
+`q`, `priority` et `status` ; seules les valeurs connues des filtres sont appliquées. Une
+valeur inconnue affiche Toutes/Tous ; une nouvelle interaction ou le lien de retour la retire
+de l'URL produite. La saisie exacte de `q` est conservée et `replaceUrl` évite un historique
+par lettre. Le lien Voir le matériel ne transmet aucun de ces paramètres : une recherche
+de signalements ne devient pas une recherche de matériel.
+
+Le shell reste inchangé. Le tableau reprend la surface verte et les lignes du prototype ;
+sous **960 px de largeur disponible du composant**, les mêmes lignes se présentent en cartes,
+sans second jeu de contenu. Cette requête de conteneur tient compte de la barre Responsable
+sur tablette ; le contenu Agent, plus étroit, garde les cartes même sur ordinateur. Les rôles
+explicites et en-têtes du tableau conservent sa structure accessible lors du changement CSS.
+Les liens, champs et réinitialisation gardent un focus visible, dégagé de la barre basse.
+
+Identités connectées, notifications, synchronisation, récurrence, entretien, médias et actions
+de gestion du prototype restent hors périmètre. Aucun changement de statut, intervention,
+API, stockage, dépendance ou refonte de déclaration ajouté. Un risque signalé ne change jamais
+le statut du matériel. Les routes ne confèrent pas de permission ; #33 reste distincte.
+La validation humaine et la fusion restent à Arthur.
+
+## 2026-10-30 — Saisie et actions de signalement (issue #36, fusionnée)
 
 Après validation manuelle du parcours de la PR #35, Arthur demande dans
 l'[issue #36](https://github.com/arthurb1348/terrimaint/issues/36) une **description facultative**
@@ -21,8 +65,9 @@ n'est réellement transmis ou enregistré. Le vocabulaire utilisateur ne crée a
 
 Le matériel choisi, les deux espaces, `q`, le clavier, la mémoire seule et la règle de risque
 sans changement de statut sont conservés. Aucun renommage général des composants/routes,
-API, stockage ou dépendance ajouté. Cet ajustement reste **en revue jusqu'à fusion** ;
-la validation humaine et la fusion restent à Arthur.
+API, stockage ou dépendance ajouté. Cet ajustement est intégré par la
+[PR #37](https://github.com/arthurb1348/terrimaint/pull/37), fusionnée le 30 octobre 2026
+(commit `09f6613e65626bb3158f05c37bac6931306a5a8f`), vérifié dans `origin/main` avant l'issue #39.
 
 ## 2026-10-30 — Déclaration d'incident de démonstration (issue #34, fusionnée)
 
