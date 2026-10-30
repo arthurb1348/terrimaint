@@ -310,6 +310,7 @@ for (const space of ['agent', 'responsable']) {
       await verify.focus();
       await page.keyboard.press('Enter');
       await expect(main.getByRole('heading', { level: 1 })).toHaveText('Vérifier le signalement');
+      await expect(main.getByRole('heading', { level: 1 })).toBeFocused();
       await expect(main.locator('dd').nth(1)).toHaveText('Non renseignée');
       await expectIncidentsActive(page, space);
       await expectNoHorizontalOverflow(page);
@@ -330,6 +331,8 @@ for (const space of ['agent', 'responsable']) {
     }
     await verify.focus();
     await page.keyboard.press('Enter');
+    // Attendre le focus posé après rendu avant de reprendre la tabulation.
+    await expect(main.getByRole('heading', { level: 1 })).toBeFocused();
     await page.keyboard.press('Tab');
     const send = main.getByRole('button', { name: 'Envoyer le signalement', exact: true });
     await expectFocusedControlVisible(page, send, space);
