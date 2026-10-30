@@ -1,0 +1,7 @@
+/* Garder le scan sur tablette, y compris à 1024 px en paysage.
+   Ce seuil de présentation reste aligné sur celui de main-navigation.css. */
+@media (min-width: 1200px) {
+  .scanner-shortcut {
+    display: none;
+  }
+}

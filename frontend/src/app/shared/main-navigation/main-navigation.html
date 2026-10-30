@@ -24,6 +24,7 @@
   >
     @for (destination of destinations(); track destination.path) {
       <a
+        [class.scanner-link]="destination.path === '/agent/scanner'"
         [routerLink]="destination.path"
         routerLinkActive="active"
         [routerLinkActiveOptions]="{ exact: true }"

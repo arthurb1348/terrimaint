@@ -1,5 +1,31 @@
 # Décisions techniques et métier
 
+## 2026-10-30 — Accès Scanner selon la présentation (issue #21, en revue)
+
+La décision UX d'Arthur dans l'[issue #21](https://github.com/arthurb1348/terrimaint/issues/21)
+conserve Scanner sur mobile et tablette et simplifie la présentation ordinateur. La PR
+associée masque **les deux accès**, raccourci de l'accueil Agent et entrée de navigation,
+à partir de **1200 px inclus de largeur de fenêtre CSS**. Ce seuil conserve Scanner à
+768 px et à 1024 px, notamment sur tablette en paysage ; il le masque à 1440 px.
+Une fenêtre d'ordinateur plus étroite conserve donc Scanner : la règle décrit la présentation,
+sans identifier l'appareil, sa caméra ou une permission.
+
+Le seuil existant de 760/761 px continue seulement de choisir entre Plus et les destinations
+directes. Jusqu'à 760 px : Accueil, Matériel, Scanner et Plus ; de 761 à moins de 1200 px :
+les cinq destinations directes ; à partir de 1200 px : Accueil, Matériel, Incidents et Profil.
+`display: none` retire les accès Scanner de la mise en page et du parcours clavier ; il retire
+aussi le `li` de l'accueil pour ne laisser aucune puce vide. Les liens flexibles de navigation
+se répartissent l'espace disponible. La route `/agent/scanner` reste accessible par URL
+directe à toute largeur et affiche toujours la page d'attente existante.
+
+Les deux media queries, dans `features/agent/agent.css` et
+`shared/main-navigation/main-navigation.css`, doivent garder le même seuil. Playwright couvre
+les deux emplacements à 320, 390, 768 et 1440 px, les limites 1199/1200/1201 px et des
+allers-retours par redimensionnement sans rechargement, ainsi que l'URL directe et le clavier.
+Matériel et sa recherche, les autres destinations et la navigation Responsable sont conservés.
+Scanner réel, saisie de code et dépendances restent hors périmètre. Cette adaptation reste
+**en cours jusqu'à fusion** ; les contrôles et captures ne remplacent pas la validation humaine.
+
 ## 2026-10-23 — Tests responsive reproductibles
 
 Versionner les contrôles Playwright du shell et des navigations avec Chromium, en complément
@@ -22,6 +48,8 @@ trop serrés. Jusqu'à 760 px, conserver **Accueil, Matériel, Scanner et Plus**
 avec icônes et textes. Plus donne accès à Incidents et Profil, indique leur état actif et
 se ferme au toucher extérieur, par Échap, par Fermer ou après navigation, avec gestion du focus.
 À partir de 761 px, les cinq destinations Agent restent directement visibles.
+La décision du 30 octobre ci-dessus propose ensuite de masquer Scanner à partir de 1200 px,
+sans changer le seuil ni le fonctionnement de Plus.
 
 Cette adaptation validée privilégie la lisibilité et les accès terrain fréquents par rapport
 au nombre d'entrées du prototype. La déclaration rapide depuis l'accueil ou une fiche reste

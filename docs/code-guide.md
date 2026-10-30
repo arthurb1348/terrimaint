@@ -123,7 +123,7 @@ conteneur de déclarations Angular) n'est nécessaire.
 | `src/app/features/equipements/equipements.css` | Palette existante, focus du champ, contrôles qui passent à la ligne et cartes : une colonne jusqu'à 760 px, deux au-delà. Les textes longs peuvent revenir à la ligne. |
 | `src/app/features/equipements/equipements.spec.ts` | Tests des comportements visibles via saisie et clic : données initiales, nom/identifiant, casse, espaces, aucun résultat et effacement/focus. |
 | `e2e/responsive.pw.ts` | Ajoute la recherche dans les deux espaces aux quatre formats, avec effacement au clavier, contexte et débordement contrôlés. |
-| `docs/project-status.md`, `docs/decisions.md` | Bilan de cet incrément en cours et correction du statut des tests responsive déjà intégrés par la PR #19. |
+| `docs/project-status.md`, `docs/decisions.md` | Bilan de la démonstration intégrée par la PR #20 et décisions de présentation. |
 
 ### De la saisie aux cartes
 
@@ -331,6 +331,55 @@ Le menu Responsable annonce son état avec `aria-expanded` et ferme après un cl
 rejoint le contenu lorsque le lien mobile disparaît. Le lien d'évitement mène au seul `main`.
 Le contrôle de santé et son service restent inchangés et accessibles depuis l'accueil général.
 
+## Accès Scanner et seuil de présentation (issue #21)
+
+L'accueil Agent propose un lien « Scanner un QR code » ; la navigation commune à l'espace
+Agent propose « Scanner ». Les deux restent visibles sous **1200 px de largeur de fenêtre**
+et disparaissent à partir de **1200 px inclus**. Ce choix conserve l'accès à 768 px et à
+1024 px en paysage, tout en simplifiant le grand écran à 1440 px. La largeur est exprimée
+en pixels CSS : elle décrit l'espace disponible, sans déduire le type d'appareil, la présence
+d'une caméra ou les droits de l'utilisateur.
+
+| Largeur CSS | Navigation Agent |
+| --- | --- |
+| Jusqu'à 760 px | Accueil, Matériel, Scanner et Plus ; Incidents et Profil dans Plus |
+| De 761 à moins de 1200 px | Accueil, Matériel, Scanner, Incidents et Profil directement |
+| À partir de 1200 px | Accueil, Matériel, Incidents et Profil directement |
+
+Une **media query** applique des règles CSS seulement lorsque sa condition est vraie.
+`@media (min-width: 1200px)` signifie « si la fenêtre mesure au moins 1200 px » ; le navigateur
+réévalue cette condition lors d'un redimensionnement, sans recharger la page ni exécuter de
+logique Angular supplémentaire. Le seuil de Plus (760/761 px) répond à un autre besoin :
+éviter des libellés trop serrés sur petit écran.
+
+Les règles ajoutées utilisent `display: none`. L'élément ne prend alors plus de place et
+son lien sort de la tabulation et de l'arbre d'accessibilité. Sur l'accueil, la classe est
+portée par le **`li` entier**, afin de retirer aussi la puce et l'espace de la ligne. Dans
+la navigation, les autres liens gardent `flex: 1 1 0` : ils partagent la largeur restante à
+parts égales, sans colonne réservée à Scanner. Un simple masquage visuel avec conservation
+de l'espace laisserait au contraire un trou.
+
+| Endroit à modifier | Rôle |
+| --- | --- |
+| `src/app/features/agent/agent.ts` | Le `li.scanner-shortcut` contient le raccourci ; `styleUrl` charge ses styles. |
+| `src/app/features/agent/agent.css` | Masque le `li` à partir de 1200 px. |
+| `src/app/shared/main-navigation/main-navigation.html` | `[class.scanner-link]` ajoute la classe uniquement à la destination `/agent/scanner`. |
+| `src/app/shared/main-navigation/main-navigation.css` | `nav a.scanner-link` masque ce lien au même seuil et garde la disposition flexible existante. |
+| `src/app/app.routes.ts` | Conserve la route Scanner ; aucun masquage CSS ne doit en conditionner l'accès. |
+| `e2e/responsive.pw.ts` | Vérifie visibilité, nombre et répartition des destinations, limites, redimensionnement, URL directe et clavier. |
+
+Pour changer le seuil, modifier **les deux fichiers CSS**, les attentes Playwright et la
+[décision UX](decisions.md). Il n'y a pas de nouvelle donnée ni de requête HTTP : Angular
+produit les liens, CSS choisit leur présentation, et le routeur garde l'URL accessible.
+Le scanner réel et la nouvelle saisie de code restent à développer dans un autre incrément.
+
+Essai manuel : ouvrir `/agent` à 320, 390, 768 et 1440 px ; vérifier les deux accès, puis
+redimensionner entre 1199, 1200 et 1201 px dans les deux sens, sans recharger. Parcourir au
+clavier les liens d'accueil et de navigation : Scanner doit être ignoré à partir de 1200 px,
+les quatre autres destinations doivent rester accessibles et réparties sans trou. Ouvrir
+`/agent/scanner` directement à chaque largeur, puis vérifier Matériel/recherche et changer
+vers l'espace Responsable pour contrôler sa navigation.
+
 ## Tests navigateur responsive
 
 `frontend/playwright.config.ts` démarre Angular sur le port 4173 et définit quatre projets
@@ -352,6 +401,14 @@ Deux scénarios Matériel, chacun exécuté aux quatre formats, vérifient aussi
 nom et identifiant, la casse et les espaces, le message vide, l'effacement par Tab/Entrée,
 le retour du focus et le maintien de l'URL et du lien actif dans chaque espace. Ils contrôlent
 le débordement après saisie, y compris une recherche très longue, et après effacement.
+
+Deux scénarios supplémentaires dans chacun des quatre projets contrôlent les accès Scanner
+et leur seuil de présentation : visibilité sur l'accueil et dans la navigation, activation
+des deux liens quand ils sont visibles, URL directe à toute largeur, tabulation, et accès
+à Matériel. Le redimensionnement couvre 1024, 1199, 1200, 1201 et 1440 px puis revient jusqu'à
+320 px sans rechargement. Les liens directs visibles doivent avoir des largeurs égales et
+occuper tout l'espace intérieur de navigation, sans intervalle vide. Le total proposé pour
+l'issue #21 est de **72 scénarios** (64 intégrés par la PR #20, plus huit).
 
 La fixture `page` intercepte uniquement `/api/v1/health` et répond `{"status":"ok"}`.
 L'objectif est la mise en page et la navigation : aucun serveur Django ni authentification

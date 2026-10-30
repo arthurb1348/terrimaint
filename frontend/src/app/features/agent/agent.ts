@@ -12,9 +12,10 @@ import { RouterLink } from '@angular/router';
       <ul>
         <li><a routerLink="/agent/equipements">Matériel</a></li>
         <li><a routerLink="/agent/incidents">Incidents</a></li>
-        <li><a routerLink="/agent/scanner">Scanner un QR code</a></li>
+        <li class="scanner-shortcut"><a routerLink="/agent/scanner">Scanner un QR code</a></li>
       </ul>
     </section>
   `,
+  styleUrl: './agent.css',
 })
 export class Agent {}
