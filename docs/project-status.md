@@ -2,9 +2,9 @@
 
 ## Référence et usage
 
-- Date de vérification : 2026-10-23 (Europe/Paris).
+- Date de vérification : 2026-10-30 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `8d715edfeaebe70d2d02a2cde6065874591f5e4f`.
+- Code de référence : `main`, commit `ecfb7ebeff9f978035fef93a36e03f13c6ce0ba1`, vérifié sur GitHub et par Git distant.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -27,8 +27,9 @@ Source : [contexte produit](project.md).
 La [PR #16 fusionnée](https://github.com/arthurb1348/terrimaint/pull/16) intègre les navigations
 des prototypes Agent et Responsable : barre basse Agent, barre latérale Responsable sur ordinateur et menu repliable
 sur mobile. Les deux espaces restent accessibles sur chaque format. Les liens actifs,
-repères de focus et lien d'évitement sont conservés. Les pages restent des espaces réservés,
-sans formulaire, authentification, modèle métier ou API supplémentaire. Le contrôle de santé
+repères de focus et lien d'évitement sont conservés. Hormis Matériel de démonstration intégré
+par la PR #20, les pages restent des espaces réservés, sans formulaire métier,
+authentification, modèle métier ou API supplémentaire. Le contrôle de santé
 reste sur l'accueil général ; aucun statut de synchronisation n'est simulé.
 
 Les nouvelles URL sous `/agent/…` et `/responsable/…` partagent les composants équipement et
@@ -37,15 +38,17 @@ explication de fonctionnalité à venir. Les décisions validées sur l'immobili
 au Responsable et le retrait du type d'incident sont dans [decisions.md](decisions.md).
 Sur mobile jusqu'à 760 px, la navigation Agent affiche **Accueil, Matériel, Scanner et Plus**.
 Plus ouvre Incidents et Profil, indique leur état actif et gère fermeture et focus. À partir
-de 761 px, les cinq destinations sont visibles directement. Cette adaptation validée après
-essai sur petit écran est consignée dans [decisions.md](decisions.md).
+de 761 px, les cinq destinations sont visibles directement sur le `main` de référence.
+L'adaptation Scanner de l'issue #21 décrite ci-dessous reste en revue. Les décisions sont
+consignées dans [decisions.md](decisions.md).
 
 ## Architecture Angular intégrée
 
 La [PR #15](https://github.com/arthurb1348/terrimaint/pull/15) a intégré sur `main` le shell
 responsive et cinq pages d'entrée différées : `/agent`, `/responsable`, `/equipements`,
 `/incidents`, `/interventions`. `core/` porte le service de santé, `shared/` la navigation,
-`features/` les pages métier. Sur ce `main`, elles restent sans données ni actions.
+`features/` les pages métier. Matériel affiche désormais une liste locale et une recherche ;
+les autres pages restent sans données métier ni actions opérationnelles.
 Ces liens ne confèrent aucun rôle.
 
 ## Architecture actuelle
@@ -70,9 +73,9 @@ Sources : [API](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc
 
 | Partie | Technologies présentes et versions de référence | Source |
 | --- | --- | --- |
-| Backend | Python 3.12 pour le socle/CI ; Django 5.2.18, DRF 3.18.3 ; SQLite local configuré, sans persistance métier | [.python-version](../.python-version), [pyproject.toml](../pyproject.toml), [uv.lock](../uv.lock) |
-| Qualité Python | uv, pytest 9.1.1, pytest-django 4.14.0, Ruff 0.17.1, pre-commit | [uv.lock](../uv.lock), [hooks](../.pre-commit-config.yaml) |
-| Frontend | Angular/CLI 22.2.1, TypeScript 6.0.3, RxJS, HTML/CSS | [package.json](../frontend/package.json), [package-lock.json](../frontend/package-lock.json) |
+| Backend | Python 3.12 pour le socle/CI ; Django 6.1.2, DRF 3.18.3 ; SQLite local configuré, sans persistance métier | [.python-version](../.python-version), [pyproject.toml](../pyproject.toml), [uv.lock](../uv.lock) |
+| Qualité Python | uv, pytest 9.1.1, pytest-django 4.14.0, Ruff 0.17.2, pre-commit | [uv.lock](../uv.lock), [hooks](../.pre-commit-config.yaml) |
+| Frontend | Angular 22.2.1, CLI 22.2.4, TypeScript 6.0.3, RxJS, HTML/CSS | [package.json](../frontend/package.json), [package-lock.json](../frontend/package-lock.json) |
 | Outillage frontend | Node 24.21.0 LTS, npm 11.19.0, ESLint/angular-eslint, Vitest et jsdom | [.nvmrc](../.nvmrc), [package.json](../frontend/package.json) |
 | Suivi et CI | Git/GitHub, GitHub Actions, Dependabot | [CI](../.github/workflows/ci.yml), [Dependabot](../.github/dependabot.yml) |
 
@@ -89,20 +92,39 @@ les bornes déclarées dans les manifestes ne doivent pas être prises pour des 
 | Accueil responsive | Signature du projet, statut de l'API et bouton de relance ; attente, disponible ou indisponible | [composant Home](../frontend/src/app/home/home.ts), [template](../frontend/src/app/home/home.html), [styles](../frontend/src/app/home/home.css) |
 | Gestion des échecs HTTP | Validation du JSON, erreurs réseau/HTTP et délai maximal de cinq secondes ; annulation en quittant la page | [service intégré](../frontend/src/app/core/api-health.ts), [composant](../frontend/src/app/home/home.ts) |
 | Routage | Accueil sur `/`, onze URL avec contexte Agent/Responsable, anciennes URL redirigées et retour des URL inconnues à l’accueil | [routes](../frontend/src/app/app.routes.ts) |
+| Matériel de démonstration | Six équipements fictifs, recherche locale par nom/identifiant et effacement avec retour du focus, dans les deux espaces ; aucune API métier | [PR #20 fusionnée](https://github.com/arthurb1348/terrimaint/pull/20), [composant](../frontend/src/app/features/equipements/equipements.ts) |
 
-## Travaux en cours
+## Matériel de démonstration intégré
 
-La présente PR propose une **interface de démonstration en cours** : la page Matériel
-commune à `/agent/equipements` et `/responsable/equipements` affiche six équipements fictifs,
+La [PR #20](https://github.com/arthurb1348/terrimaint/pull/20), **fusionnée le 23 octobre 2026**
+(commit `f36d19f31d29b11969405216eb43bb96b147f061`), intègre la page Matériel
+commune à `/agent/equipements` et `/responsable/equipements`, qui affiche six équipements fictifs,
 avec identifiant stable, nom et emplacement textuel. Une mention visible identifie les données
 de démonstration. La recherche locale porte sur le nom et l'identifiant, ignore la casse et
 les espaces de début/fin ; une recherche vide affiche tout. Le message vide et l'effacement
 avec retour du focus au champ sont inclus. La source typée est séparée du composant.
 
-Cet incrément reste en cours jusqu'à fusion. Il ne constitue pas un parcours connecté à une
+Cet incrément intégré ne constitue pas un parcours connecté à une
 API métier : aucune requête d'équipements, sauvegarde, fiche, CRUD, authentification, permission,
 scan QR ou synchronisation. Les navigations existantes sont conservées. Le [guide du code](code-guide.md#matériel--première-liste-de-démonstration)
 explique les fichiers, le filtrage et le futur point de raccordement API.
+
+## Travaux en cours
+
+L'[issue #21](https://github.com/arthurb1348/terrimaint/issues/21) fait l'objet de la présente
+adaptation responsive, sur `fix/21-scanner-desktop` : conserver les deux accès Scanner sous
+1200 px et les masquer à partir de 1200 px inclus. Le seuil conserve les présentations
+mobile et tablette, dont 768 et 1024 px, et simplifie le grand écran à 1440 px. Le raccourci
+de l'accueil disparaît avec sa ligne et la navigation redistribue l'espace entre les quatre
+destinations restantes. Matériel/recherche, Plus, les autres destinations et l'espace
+Responsable sont conservés ; `/agent/scanner` reste accessible par URL directe partout.
+
+Cette adaptation est **en revue, non intégrée à `main` jusqu'à fusion**. Elle ajoute des
+vérifications navigateur des deux emplacements, des limites 1199/1200/1201 px, du
+redimensionnement et du clavier. Le seuil est une règle de présentation, sans détection de
+caméra ni permission. Scanner réel, nouvelle saisie de code et dépendances restent hors
+périmètre. La [décision](decisions.md) et le
+[guide du code](code-guide.md#accès-scanner-et-seuil-de-présentation-issue-21) détaillent le choix.
 
 Les tests responsive sont déjà **intégrés** par la
 [PR #19](https://github.com/arthurb1348/terrimaint/pull/19), fusionnée le 23 octobre 2026
@@ -152,10 +174,11 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 - Backend : **12 cas pytest-django** dans [test_health.py](../backend/tests/test_health.py)
   et [test_settings.py](../backend/tests/test_settings.py) : contrat santé JSON, méthodes,
   routes absentes, hôtes et configuration de la clé secrète. Aucun accès DB métier.
-- Frontend intégré : **38 cas Vitest dans 3 fichiers** :
+- Frontend intégré : **50 cas Vitest dans 4 fichiers** :
   [routage et navigation](../frontend/src/app/app.spec.ts),
   [service HTTP](../frontend/src/app/core/api-health.spec.ts),
-  [accueil](../frontend/src/app/home/home.spec.ts).
+  [accueil](../frontend/src/app/home/home.spec.ts),
+  [Matériel](../frontend/src/app/features/equipements/equipements.spec.ts).
   Ils couvrent l'attente, le succès, les JSON invalides, les erreurs HTTP/réseau,
   la relance, l'annulation, le délai de cinq secondes et les routes inconnues.
   HTTP simulé ; aucun serveur réel requis.
@@ -171,12 +194,21 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   La CI du dernier commit de la PR #19 (`6bf22293cdff49970a2685c4cf3327dbc6847194`)
   a été consultée : [CI réussie](https://github.com/arthurb1348/terrimaint/actions/runs/39932815516)
   et [Responsive réussi](https://github.com/arthurb1348/terrimaint/actions/runs/39932815661).
-- La présente PR ajoute **12 cas Vitest** pour Matériel (soit **50 dans quatre fichiers**)
-  et deux parcours Playwright dans quatre formats (soit **64 scénarios**). Les scénarios
+- La [PR #20 fusionnée](https://github.com/arthurb1348/terrimaint/pull/20) ajoute
+  **12 cas Vitest** pour Matériel (inclus dans les 50 ci-dessus) et deux parcours Playwright
+  dans quatre formats (soit **64 scénarios intégrés**). Les scénarios
   Matériel contrôlent la recherche dans les deux espaces, le résultat vide, l'effacement au
   clavier, le focus, le contexte et le débordement après saisie/effacement.
-  Les résultats effectivement exécutés et les limites de l'environnement figurent dans
-  la description de PR ; ces ajouts restent en cours jusqu'à fusion.
+  Sa [CI réussie](https://github.com/arthurb1348/terrimaint/actions/runs/39973749045) et son
+  [Responsive réussi](https://github.com/arthurb1348/terrimaint/actions/runs/39973749049) concernent
+  le commit proposé `0c0fd95fec4273188992ab4d29ecd3efc23b9fe9` ; les artifacts étaient conservés
+  sept jours. Ces liens historiques ne prouvent pas les contrôles d'un nouveau commit.
+- La présente PR pour l'issue #21 propose **huit scénarios supplémentaires**, soit **72** :
+  accès Scanner dans les deux emplacements, URL directe et clavier, seuil et redimensionnement
+  dans chacun des quatre formats. Elle vérifie aussi la répartition des destinations visibles.
+  Les 50 cas Vitest restent inchangés. Les résultats réellement obtenus et les éventuelles
+  limites d'installation de Chromium sont consignés dans la description de PR ; ces ajouts
+  restent en cours jusqu'à fusion. La santé HTTP est simulée dans tous les tests responsive.
 - Aucun test de persistance ou de parcours métier complet présent.
 - Commandes : `uv run --locked python scripts/check.py` à la racine ;
   `npm run lint`, `npm test`, `npm run build`, `npm run test:responsive` dans `frontend/`.
@@ -231,7 +263,7 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire la PR de la liste Matériel de démonstration, ses tests et captures, puis décider sa fusion manuelle.
+1. Relire la PR d'adaptation Scanner de l'issue #21, ses tests et captures, puis décider sa fusion manuelle ; la PR #20 Matériel est déjà fusionnée.
 2. Définir les critères du premier parcours métier avant de développer ses écrans et son API.
 3. Préciser le modèle métier et la persistance PostgreSQL avec ORM/migrations Django,
    puis les parcours MVP en petits incréments, avec règles d'accès entre collectivités.

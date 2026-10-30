@@ -62,6 +62,30 @@ async function expectSingleLineLabel(control: Locator): Promise<void> {
   expect(fits, 'Le libellé tient sur une ligne dans son bouton').toBe(true);
 }
 
+async function expectEvenAgentNavigation(navigation: Locator): Promise<void> {
+  const links = await navigation.getByRole('link').evaluateAll((elements) =>
+    elements.map((element) => {
+      const { left, right, width } = element.getBoundingClientRect();
+      return { left, right, width };
+    }),
+  );
+  const content = await navigation.evaluate((element) => {
+    const bounds = element.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    return {
+      left: bounds.left + parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft),
+      right: bounds.right - parseFloat(style.borderRightWidth) - parseFloat(style.paddingRight),
+    };
+  });
+  expect(links.length).toBeGreaterThan(0);
+  expect(links[0].left).toBeCloseTo(content.left, 0);
+  expect(links[links.length - 1].right).toBeCloseTo(content.right, 0);
+  for (let index = 1; index < links.length; index++) {
+    expect(links[index].width).toBeCloseTo(links[0].width, 0);
+    expect(links[index].left).toBeCloseTo(links[index - 1].right, 0);
+  }
+}
+
 for (const path of routes) {
   test(`La page ${path} tient dans la fenêtre`, async ({ page }, info) => {
     await page.goto(path);
@@ -126,9 +150,12 @@ test('La navigation Agent conserve ses destinations selon la taille', async ({ p
 
   if ((page.viewportSize()?.width ?? 0) > 760) {
     await expect(plus).toBeHidden();
-    await expect(navigation.getByRole('link')).toHaveCount(5);
+    const names = ['Accueil', 'Matériel', 'Incidents', 'Profil'];
+    if ((page.viewportSize()?.width ?? 0) < 1200) names.splice(2, 0, 'Scanner');
+    await expect(navigation.getByRole('link')).toHaveText(names);
     await expect(incidents).toBeVisible();
     await expect(profile).toBeVisible();
+    await expectEvenAgentNavigation(navigation);
     await expectNoHorizontalOverflow(page);
     return;
   }
@@ -173,6 +200,94 @@ test('La navigation Agent conserve ses destinations selon la taille', async ({ p
   await page.getByRole('main').getByRole('heading', { level: 1 }).tap();
   await expect(plus).toHaveAttribute('aria-expanded', 'false');
   await expectNoHorizontalOverflow(page);
+});
+
+test('Les accès Scanner suivent la présentation et la route reste accessible', async ({
+  page,
+}, info) => {
+  await page.goto('/agent');
+  const main = page.getByRole('main');
+  const shortcut = main.getByRole('link', { name: 'Scanner un QR code', exact: true });
+  const navigation = page.getByRole('navigation', { name: 'Navigation Agent' });
+  const scanner = navigation.getByRole('link', { name: 'Scanner', exact: true });
+  const scannerVisible = (page.viewportSize()?.width ?? 0) < 1200;
+
+  await expect(shortcut).toBeVisible({ visible: scannerVisible });
+  await expect(scanner).toBeVisible({ visible: scannerVisible });
+  // Le masquage du li doit aussi retirer sa puce et son espace dans la liste.
+  await expect(main.getByRole('listitem')).toHaveCount(scannerVisible ? 3 : 2);
+  await capture(page, info, 'acces-scanner');
+
+  await main.focus();
+  await page.keyboard.press('Tab');
+  await expect(main.getByRole('link', { name: 'Matériel', exact: true })).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(main.getByRole('link', { name: 'Incidents', exact: true })).toBeFocused();
+  await page.keyboard.press('Tab');
+  if (scannerVisible) {
+    await expect(shortcut).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/\/agent\/scanner$/);
+    await page.goto('/agent');
+    await scanner.click();
+    await expect(page).toHaveURL(/\/agent\/scanner$/);
+  } else {
+    // Le lien masqué reste dans le DOM, mais getByRole ne l'expose plus.
+    await expect(main.locator('a[href="/agent/scanner"]')).not.toBeFocused();
+  }
+
+  await page.goto('/agent/scanner');
+  await expect(page).toHaveURL(/\/agent\/scanner$/);
+  await expect(main.getByRole('heading', { name: 'Scanner', exact: true })).toBeVisible();
+  await expect(main).toContainText('prochain incrément');
+  // Matériel reste le premier accès après Accueil ; Tab ignore Scanner sur grand écran.
+  await navigation.getByRole('link', { name: 'Accueil', exact: true }).focus();
+  await page.keyboard.press('Tab');
+  const equipment = navigation.getByRole('link', { name: 'Matériel', exact: true });
+  await expect(equipment).toBeFocused();
+  if ((page.viewportSize()?.width ?? 0) > 760) {
+    await page.keyboard.press('Tab');
+    await expect(
+      navigation.getByRole('link', { name: scannerVisible ? 'Scanner' : 'Incidents', exact: true }),
+    ).toBeFocused();
+    await equipment.focus();
+  }
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(/\/agent\/equipements$/);
+  await expect(
+    main.getByRole('searchbox', { name: 'Rechercher par nom ou identifiant' }),
+  ).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+});
+
+test('Redimensionner conserve les accès Scanner sous 1200 px et répartit la navigation', async ({
+  page,
+}, info) => {
+  await page.goto('/agent');
+  const main = page.getByRole('main');
+  const navigation = page.getByRole('navigation', { name: 'Navigation Agent' });
+  const shortcut = main.getByRole('link', { name: 'Scanner un QR code', exact: true });
+  const scanner = navigation.getByRole('link', { name: 'Scanner', exact: true });
+
+  // Les allers-retours sans rechargement couvrent les limites et la tablette en paysage.
+  for (const width of [1024, 1199, 1200, 1201, 1440, 1200, 1199, 768, 390, 320]) {
+    await page.setViewportSize({ width, height: 1024 });
+    const scannerVisible = width < 1200;
+    await expect(shortcut).toBeVisible({ visible: scannerVisible });
+    await expect(scanner).toBeVisible({ visible: scannerVisible });
+    await expect(main.getByRole('listitem')).toHaveCount(scannerVisible ? 3 : 2);
+    if (width > 760) {
+      const names = ['Accueil', 'Matériel', 'Incidents', 'Profil'];
+      if (scannerVisible) names.splice(2, 0, 'Scanner');
+      await expect(navigation.getByRole('link')).toHaveText(names);
+      await expectEvenAgentNavigation(navigation);
+    } else {
+      await expect(navigation.getByRole('link')).toHaveText(['Accueil', 'Matériel', 'Scanner']);
+      await expect(navigation.getByRole('button', { name: 'Plus', exact: true })).toBeVisible();
+    }
+    await expectNoHorizontalOverflow(page);
+    if ([1024, 1199, 1200, 1201].includes(width)) await capture(page, info, `seuil-${width}`);
+  }
 });
 
 test('La navigation Responsable garde le contexte après un changement de page', async ({
