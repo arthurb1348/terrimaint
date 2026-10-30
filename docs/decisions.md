@@ -1,6 +1,22 @@
 # Décisions techniques et métier
 
-## 2026-10-30 — Accès Scanner selon la présentation (issue #21, en revue)
+## 2026-10-30 — Outillage frontend et scripts npm examinés (en revue)
+
+La maintenance sur `fix/frontend-toolchain-security` fixe `@angular/build` à **22.2.5**
+pour suivre sa dépendance officielle Vite **8.3.5**, avec lockfile régénéré par npm.
+Les autres versions directes, dont Node 24.21.0 et npm 11.19.0, sont conservées.
+Les dépendances indirectes nécessaires à ce builder évoluent sans override Vite.
+
+Les décisions `allowScripts` sont limitées aux versions examinées : seul le `postinstall`
+d'`esbuild@0.28.2` est autorisé. Les scripts d'`@parcel/watcher@2.6.0`, `lmdb@3.5.6` et
+`msgpackr-extract@3.0.4` sont refusés : les binaires précompilés fonctionnent sans leur
+compilation de repli dans l'environnement Linux contrôlé. Le `.npmrc` du frontend active
+`strict-allow-scripts=true` pour refuser toute nouvelle version avec script non examinée.
+Le [guide du code](code-guide.md#dépendances-frontend-et-scripts-dinstallation-npm) détaille
+les fichiers relus, les raisons, les contrôles et la procédure de mise à jour. Windows et
+macOS restent à vérifier. Cette maintenance reste **en revue jusqu'à fusion**.
+
+## 2026-10-30 — Accès Scanner selon la présentation (issue #21, fusionnée)
 
 La décision UX d'Arthur dans l'[issue #21](https://github.com/arthurb1348/terrimaint/issues/21)
 conserve Scanner sur mobile et tablette et simplifie la présentation ordinateur. La PR
@@ -23,8 +39,9 @@ Les deux media queries, dans `features/agent/agent.css` et
 les deux emplacements à 320, 390, 768 et 1440 px, les limites 1199/1200/1201 px et des
 allers-retours par redimensionnement sans rechargement, ainsi que l'URL directe et le clavier.
 Matériel et sa recherche, les autres destinations et la navigation Responsable sont conservés.
-Scanner réel, saisie de code et dépendances restent hors périmètre. Cette adaptation reste
-**en cours jusqu'à fusion** ; les contrôles et captures ne remplacent pas la validation humaine.
+Scanner réel, saisie de code et dépendances restent hors périmètre. Cette adaptation est
+**intégrée par la [PR #29](https://github.com/arthurb1348/terrimaint/pull/29)**, fusionnée le
+30 octobre 2026 (commit `4f5e3fc7b331482c5a2a994309f6481ee3f2acb1`).
 
 ## 2026-10-23 — Tests responsive reproductibles
 

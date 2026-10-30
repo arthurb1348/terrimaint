@@ -4,7 +4,7 @@
 
 - Date de vérification : 2026-10-30 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `ecfb7ebeff9f978035fef93a36e03f13c6ce0ba1`, vérifié sur GitHub et par Git distant.
+- Code de référence : `main`, commit `4f5e3fc7b331482c5a2a994309f6481ee3f2acb1`, vérifié sur GitHub et par Git distant.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -37,10 +37,12 @@ incident. Les anciennes URL redirigent. Scanner, profil et agents affichent seul
 explication de fonctionnalité à venir. Les décisions validées sur l'immobilisation réservée
 au Responsable et le retrait du type d'incident sont dans [decisions.md](decisions.md).
 Sur mobile jusqu'à 760 px, la navigation Agent affiche **Accueil, Matériel, Scanner et Plus**.
-Plus ouvre Incidents et Profil, indique leur état actif et gère fermeture et focus. À partir
-de 761 px, les cinq destinations sont visibles directement sur le `main` de référence.
-L'adaptation Scanner de l'issue #21 décrite ci-dessous reste en revue. Les décisions sont
-consignées dans [decisions.md](decisions.md).
+Plus ouvre Incidents et Profil, indique leur état actif et gère fermeture et focus. De 761 à
+moins de 1200 px, les cinq destinations sont visibles directement. Depuis la
+[PR #29 fusionnée](https://github.com/arthurb1348/terrimaint/pull/29), les deux accès Scanner
+sont masqués à partir de 1200 px inclus, avec répartition de la navigation entre les quatre
+autres destinations. La route `/agent/scanner` reste accessible par URL directe à toute largeur.
+La [décision](decisions.md) décrit ce seuil de présentation, sans détection de caméra ni permission.
 
 ## Architecture Angular intégrée
 
@@ -109,22 +111,37 @@ API métier : aucune requête d'équipements, sauvegarde, fiche, CRUD, authentif
 scan QR ou synchronisation. Les navigations existantes sont conservées. Le [guide du code](code-guide.md#matériel--première-liste-de-démonstration)
 explique les fichiers, le filtrage et le futur point de raccordement API.
 
+## Adaptation Scanner intégrée
+
+L'[issue #21](https://github.com/arthurb1348/terrimaint/issues/21) est réalisée par la
+[PR #29](https://github.com/arthurb1348/terrimaint/pull/29), **fusionnée le 30 octobre 2026**
+(commit `4f5e3fc7b331482c5a2a994309f6481ee3f2acb1`). Les deux accès restent visibles sous
+1200 px, dont 768 et 1024 px sur tablette, et sont masqués sur grand écran à partir de
+1200 px inclus. Le raccourci disparaît avec sa ligne et la navigation se répartit sans trou.
+Matériel/recherche, Plus, la navigation Responsable et la route directe sont conservés.
+Le [guide du code](code-guide.md#accès-scanner-et-seuil-de-présentation-issue-21) détaille le choix.
+
 ## Travaux en cours
 
-L'[issue #21](https://github.com/arthurb1348/terrimaint/issues/21) fait l'objet de la présente
-adaptation responsive, sur `fix/21-scanner-desktop` : conserver les deux accès Scanner sous
-1200 px et les masquer à partir de 1200 px inclus. Le seuil conserve les présentations
-mobile et tablette, dont 768 et 1024 px, et simplifie le grand écran à 1440 px. Le raccourci
-de l'accueil disparaît avec sa ligne et la navigation redistribue l'espace entre les quatre
-destinations restantes. Matériel/recherche, Plus, les autres destinations et l'espace
-Responsable sont conservés ; `/agent/scanner` reste accessible par URL directe partout.
+La présente maintenance, sur `fix/frontend-toolchain-security`, est **en revue jusqu'à fusion**.
+Elle fixe `@angular/build` à 22.2.5, dont le manifeste officiel déclare Vite 8.3.5. Le lockfile
+régénéré par npm ne contient plus que Vite 8.3.5, au lieu de 8.3.3 à la racine et de 8.3.0
+sous le builder. L'audit de départ signale Vite et son parent, soit deux paquets affectés ;
+les contrôles après mise à jour puis après installation propre ne signalent aucune vulnérabilité.
+Ce constat est daté, limité aux alertes connues par npm, et ne vaut pas validation de sécurité
+de l'application. Les autres dépendances directes et Node/npm sont conservés ; les dépendances
+indirectes nécessaires au builder évoluent sans override Vite ni `npm audit fix --force`.
 
-Cette adaptation est **en revue, non intégrée à `main` jusqu'à fusion**. Elle ajoute des
-vérifications navigateur des deux emplacements, des limites 1199/1200/1201 px, du
-redimensionnement et du clavier. Le seuil est une règle de présentation, sans détection de
-caméra ni permission. Scanner réel, nouvelle saisie de code et dépendances restent hors
-périmètre. La [décision](decisions.md) et le
-[guide du code](code-guide.md#accès-scanner-et-seuil-de-présentation-issue-21) détaillent le choix.
+Après lecture des quatre scripts présents, seul `esbuild@0.28.2` est autorisé. Les scripts
+d'`@parcel/watcher@2.6.0`, `lmdb@3.5.6` et `msgpackr-extract@3.0.4` sont refusés pour ces versions ;
+leurs binaires précompilés restent installés. Le `.npmrc` du frontend active le contrôle strict
+pour refuser avant exécution les versions avec script non examinées. L'installation propre
+avec `npm ci --foreground-scripts` n'exécute que le `postinstall` d'esbuild ;
+`npm install-scripts ls` ne présente plus de script non couvert. Les modules natifs et le
+démarrage/rechargement Angular sont contrôlés sous Linux ; Windows et macOS restent à vérifier.
+Les résultats complets et la CI du commit proposé sont consignés dans la PR de maintenance.
+Le [guide](code-guide.md#dépendances-frontend-et-scripts-dinstallation-npm) et la
+[décision](decisions.md) expliquent les autorisations et les limites.
 
 Les tests responsive sont déjà **intégrés** par la
 [PR #19](https://github.com/arthurb1348/terrimaint/pull/19), fusionnée le 23 octobre 2026
@@ -203,12 +220,17 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   [Responsive réussi](https://github.com/arthurb1348/terrimaint/actions/runs/39973749049) concernent
   le commit proposé `0c0fd95fec4273188992ab4d29ecd3efc23b9fe9` ; les artifacts étaient conservés
   sept jours. Ces liens historiques ne prouvent pas les contrôles d'un nouveau commit.
-- La présente PR pour l'issue #21 propose **huit scénarios supplémentaires**, soit **72** :
+- La [PR #29 fusionnée](https://github.com/arthurb1348/terrimaint/pull/29) ajoute
+  **huit scénarios supplémentaires**, soit **72 intégrés** :
   accès Scanner dans les deux emplacements, URL directe et clavier, seuil et redimensionnement
   dans chacun des quatre formats. Elle vérifie aussi la répartition des destinations visibles.
-  Les 50 cas Vitest restent inchangés. Les résultats réellement obtenus et les éventuelles
-  limites d'installation de Chromium sont consignés dans la description de PR ; ces ajouts
-  restent en cours jusqu'à fusion. La santé HTTP est simulée dans tous les tests responsive.
+  Les 50 cas Vitest restent inchangés. La [CI](https://github.com/arthurb1348/terrimaint/actions/runs/41036057026)
+  et le [Responsive](https://github.com/arthurb1348/terrimaint/actions/runs/41036057013) réussis
+  concernent le commit proposé `6d129a072923a5de183cccb1782f9931a29d844b`, avant fusion.
+  La santé HTTP est simulée dans tous les tests responsive.
+- La maintenance de l'outillage ne change aucun scénario ni code applicatif. Elle vérifie
+  aussi l'installation propre, l'audit, les décisions de scripts et le démarrage/rechargement
+  Angular. La description de sa PR fournit les résultats du nouveau commit et leurs limites.
 - Aucun test de persistance ou de parcours métier complet présent.
 - Commandes : `uv run --locked python scripts/check.py` à la racine ;
   `npm run lint`, `npm test`, `npm run build`, `npm run test:responsive` dans `frontend/`.
@@ -263,7 +285,7 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire la PR d'adaptation Scanner de l'issue #21, ses tests et captures, puis décider sa fusion manuelle ; la PR #20 Matériel est déjà fusionnée.
+1. Relire la PR de maintenance de l'outillage frontend et les décisions de scripts npm, puis décider sa fusion manuelle ; les PR #20 et #29 sont déjà fusionnées.
 2. Définir les critères du premier parcours métier avant de développer ses écrans et son API.
 3. Préciser le modèle métier et la persistance PostgreSQL avec ORM/migrations Django,
    puis les parcours MVP en petits incréments, avec règles d'accès entre collectivités.
@@ -272,8 +294,8 @@ selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humain
 5. Définir l'hébergement et les contrôles d'intégration/navigateur au fil des parcours.
 
 Cet ordre indique des dépendances de travail, sans planning engagé. Aucune de ces protections
-métier n'est implémentée aujourd'hui. Le workflow responsive est déjà intégré ; cette PR
-complète ses scénarios sans modifier les jobs `Backend`/`Frontend` ni les protections distantes.
+métier n'est implémentée aujourd'hui. Le workflow responsive et ses 72 scénarios sont déjà
+intégrés ; cette maintenance ne modifie pas les jobs `Backend`/`Frontend` ni les protections distantes.
 
 ## Règles de mise à jour du bilan
 
