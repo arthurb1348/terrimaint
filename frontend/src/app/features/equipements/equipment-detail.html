@@ -1,0 +1,27 @@
+<section class="feature-page" aria-labelledby="equipment-title">
+  <a
+    class="back-link"
+    [routerLink]="['..']"
+    [queryParams]="{ q: search() || null }"
+    (click)="focusContent()"
+    >Retour au matériel</a
+  >
+  <p class="demo-label">Données de démonstration</p>
+
+  @if (equipment(); as item) {
+    <h1 id="equipment-title">{{ item.name }}</h1>
+    <dl>
+      <div>
+        <dt>Identifiant</dt>
+        <dd>{{ item.id }}</dd>
+      </div>
+      <div>
+        <dt>Emplacement</dt>
+        <dd>{{ item.location }}</dd>
+      </div>
+    </dl>
+  } @else {
+    <h1 id="equipment-title">Équipement introuvable</h1>
+    <p>Aucun équipement de démonstration ne correspond à cet identifiant.</p>
+  }
+</section>

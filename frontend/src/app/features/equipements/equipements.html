@@ -1,7 +1,7 @@
 <section class="feature-page" aria-labelledby="equipements-title">
   <h1 id="equipements-title">Matériel</h1>
   <p class="demo-label">Données de démonstration</p>
-  <p>Six équipements fictifs pour découvrir la liste. Aucune donnée n’est enregistrée.</p>
+  <p>Six équipements fictifs pour découvrir la liste et leurs fiches.</p>
 
   <label for="equipment-search">Rechercher par nom ou identifiant</label>
   <div class="search-controls">
@@ -10,9 +10,9 @@
       id="equipment-search"
       type="search"
       [value]="search()"
-      (input)="search.set(searchInput.value)"
+      (input)="updateSearch(searchInput.value)"
     />
-    <button type="button" (click)="search.set(''); searchInput.focus()">
+    <button type="button" (click)="updateSearch(''); searchInput.focus()">
       Effacer la recherche
     </button>
   </div>
@@ -30,7 +30,11 @@
     <ul class="equipment-list" aria-label="Équipements">
       @for (equipment of filteredEquipment(); track equipment.id) {
         <li>
-          <h2>{{ equipment.name }}</h2>
+          <h2>
+            <a [routerLink]="[equipment.id]" [queryParams]="{ q: search() || null }">{{
+              equipment.name
+            }}</a>
+          </h2>
           <p class="equipment-id">{{ equipment.id }}</p>
           <p>Emplacement : {{ equipment.location }}</p>
         </li>

@@ -129,6 +129,50 @@ describe('Shell et routage', () => {
     expect(element.querySelectorAll('nav a[aria-current="page"]')).toHaveLength(1);
   });
 
+  it.each([
+    ['agent', 'EQ-OUT-0001'],
+    ['agent', 'inconnu'],
+    ['responsable', 'EQ-OUT-0001'],
+    ['responsable', 'inconnu'],
+  ])('garde Matériel actif sur une fiche de %s, id %s et recherche q', async (space, id) => {
+    await navigate(`/${space}/equipements/${id}?q=tondeuse`);
+    expect(element.querySelector('app-equipment-detail')).not.toBeNull();
+    expect(element.querySelector('nav')?.getAttribute('aria-label')).toBe(
+      space === 'agent' ? 'Navigation Agent' : 'Navigation Responsable',
+    );
+    expect(element.querySelector('.screen-title')?.textContent).toBe('Matériel');
+    const active = element.querySelectorAll('nav a[aria-current="page"]');
+    expect(active).toHaveLength(1);
+    expect(active[0].getAttribute('href')).toBe(`/${space}/equipements`);
+    expect(active[0].textContent).toContain('Matériel');
+    http.expectNone('/api/v1/health');
+  });
+
+  it.each(['agent', 'responsable'])(
+    'ouvre une fiche depuis la recherche de %s puis retrouve la saisie et les résultats',
+    async (space) => {
+      document.body.appendChild(element);
+      await navigate(`/${space}/equipements?q=%20%20tONDeUSE%20%20`);
+      const input = element.querySelector<HTMLInputElement>('main input')!;
+      expect(input.value).toBe('  tONDeUSE  ');
+      expect(element.querySelectorAll('main li')).toHaveLength(1);
+      element.querySelector<HTMLAnchorElement>('main li a')!.click();
+      await fixture.whenStable();
+      expect(router.url).toMatch(new RegExp(`^/${space}/equipements/EQ-OUT-0001\\?q=`));
+      expect(element.querySelector('main h1')?.textContent).toBe('Tondeuse autoportée');
+      element.querySelector<HTMLAnchorElement>('main .back-link')!.click();
+      await fixture.whenStable();
+      expect(router.parseUrl(router.url).queryParams['q']).toBe('  tONDeUSE  ');
+      expect(element.querySelector<HTMLInputElement>('main input')?.value).toBe('  tONDeUSE  ');
+      expect(element.querySelectorAll('main li')).toHaveLength(1);
+      expect(element.querySelector('main li')?.textContent).toContain('Tondeuse autoportée');
+      expect(document.activeElement).toBe(element.querySelector('main'));
+      expect(element.querySelector('nav a[aria-current="page"]')?.getAttribute('href')).toBe(
+        `/${space}/equipements`,
+      );
+    },
+  );
+
   it('annonce et referme le menu Responsable après navigation', async () => {
     await navigate('/responsable');
     const toggle = element.querySelector<HTMLButtonElement>('.menu-toggle')!;

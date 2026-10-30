@@ -1,21 +1,25 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideRouter, Router } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { Equipements } from './equipements';
 
 describe('Liste de matériel de démonstration', () => {
-  let fixture: ComponentFixture<Equipements>;
+  let harness: RouterTestingHarness;
   let element: HTMLElement;
   let input: HTMLInputElement;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [Equipements] }).compileComponents();
-    fixture = TestBed.createComponent(Equipements);
-    fixture.detectChanges();
-    element = fixture.nativeElement as HTMLElement;
+    await TestBed.configureTestingModule({
+      imports: [Equipements],
+      providers: [provideRouter([{ path: 'agent/equipements', component: Equipements }])],
+    }).compileComponents();
+    harness = await RouterTestingHarness.create('/agent/equipements');
+    element = harness.routeNativeElement!;
     input = element.querySelector('input') as HTMLInputElement;
   });
 
-  afterEach(() => fixture.destroy());
+  afterEach(() => harness.fixture.destroy());
 
   function items(): HTMLLIElement[] {
     return Array.from(element.querySelectorAll('li'));
@@ -25,7 +29,7 @@ describe('Liste de matériel de démonstration', () => {
     // Passer par l'événement utilisateur vérifie aussi le lien entre HTML et signal.
     input.value = value;
     input.dispatchEvent(new Event('input'));
-    await fixture.whenStable();
+    await harness.fixture.whenStable();
   }
 
   it('affiche six équipements identifiés, leurs emplacements et la mention de démonstration', () => {
@@ -44,6 +48,9 @@ describe('Liste de matériel de démonstration', () => {
     for (const item of items()) {
       expect(item.querySelector('h2')?.textContent?.trim()).toBeTruthy();
       expect(item.textContent).toMatch(/Emplacement : \S/);
+      expect(item.querySelector('h2 a')?.getAttribute('href')).toBe(
+        `/agent/equipements/${item.querySelector('.equipment-id')?.textContent?.trim()}`,
+      );
     }
     expect(items()[2].textContent).toContain('Atelier municipal');
   });
@@ -87,11 +94,32 @@ describe('Liste de matériel de démonstration', () => {
     async (query) => {
       await search(query);
       element.querySelector('button')?.click();
-      await fixture.whenStable();
+      await harness.fixture.whenStable();
       expect(input.value).toBe('');
       expect(items()).toHaveLength(6);
       expect(element.querySelector('[role="status"]')?.textContent).toContain('6 équipement(s)');
       expect(document.activeElement).toBe(input);
     },
   );
+
+  it('retrouve la saisie et les résultats depuis le paramètre q de l’URL', async () => {
+    await harness.navigateByUrl('/agent/equipements?q=%20%20eq-veh-0042%20%20');
+    expect(input.value).toBe('  eq-veh-0042  ');
+    expect(items()).toHaveLength(1);
+    expect(items()[0].textContent).toContain('Fourgon de voirie');
+  });
+
+  it('écrit q dans l’URL, le transmet aux fiches et le retire lors de l’effacement', async () => {
+    const router = TestBed.inject(Router);
+    await search('  tONDeUSE  ');
+    expect(router.parseUrl(router.url).queryParams['q']).toBe('  tONDeUSE  ');
+    const detailUrl = items()[0].querySelector('a')!.getAttribute('href')!;
+    expect(detailUrl).toMatch(/^\/agent\/equipements\/EQ-OUT-0001\?q=/);
+    expect(router.parseUrl(detailUrl).queryParams['q']).toBe('  tONDeUSE  ');
+    element.querySelector('button')?.click();
+    await harness.fixture.whenStable();
+    expect(router.url).toBe('/agent/equipements');
+    expect(input.value).toBe('');
+    expect(items()).toHaveLength(6);
+  });
 });
