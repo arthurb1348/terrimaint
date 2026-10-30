@@ -4,7 +4,7 @@
 
 - Date de vérification : 2026-10-30 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `ab29cc512a384cbe5a583b3e42b7f24312932dc0`, vérifié sur GitHub et par Git distant.
+- Code de référence : `main`, commit `5e348c7f275a471e9369571a1181801c2291a1d4`, vérifié sur GitHub et par Git distant.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -27,9 +27,9 @@ Source : [contexte produit](project.md).
 La [PR #16 fusionnée](https://github.com/arthurb1348/terrimaint/pull/16) intègre les navigations
 des prototypes Agent et Responsable : barre basse Agent, barre latérale Responsable sur ordinateur et menu repliable
 sur mobile. Les deux espaces restent accessibles sur chaque format. Les liens actifs,
-repères de focus et lien d'évitement sont conservés. Hormis Matériel de démonstration et ses
-fiches intégrés par les PR #20 et #32, les pages restent des espaces réservés, sans formulaire métier,
-authentification, modèle métier ou API supplémentaire. Le contrôle de santé
+repères de focus et lien d'évitement sont conservés. La liste et les fiches Matériel des PR
+#20/#32, puis la simulation locale d'incident de la PR #35, complètent les pages d'attente.
+Aucune authentification, modèle métier ou API supplémentaire n'est ajouté. Le contrôle de santé
 reste sur l'accueil général ; aucun statut de synchronisation n'est simulé.
 
 Les nouvelles URL sous `/agent/…` et `/responsable/…` partagent les composants équipement et
@@ -49,8 +49,8 @@ La [décision](decisions.md) décrit ce seuil de présentation, sans détection 
 La [PR #15](https://github.com/arthurb1348/terrimaint/pull/15) a intégré sur `main` le shell
 responsive et cinq pages d'entrée différées : `/agent`, `/responsable`, `/equipements`,
 `/incidents`, `/interventions`. `core/` porte le service de santé, `shared/` la navigation,
-`features/` les pages métier. Matériel affiche désormais une liste locale et une recherche ;
-les autres pages restent sans données métier ni actions opérationnelles.
+`features/` les pages métier. Matériel affiche une liste locale, une recherche et ses fiches ;
+un formulaire permet une simulation d'incident en mémoire, sans action métier opérationnelle.
 Ces liens ne confèrent aucun rôle.
 
 ## Architecture actuelle
@@ -96,6 +96,7 @@ les bornes déclarées dans les manifestes ne doivent pas être prises pour des 
 | Routage | Accueil, listes et fiches publiques avec contexte Agent/Responsable, anciennes URL redirigées et retour des URL inconnues à l’accueil | [routes](../frontend/src/app/app.routes.ts) |
 | Matériel de démonstration | Six équipements fictifs, recherche locale par nom/identifiant et effacement avec retour du focus, dans les deux espaces ; aucune API métier | [PR #20 fusionnée](https://github.com/arthurb1348/terrimaint/pull/20), [composant](../frontend/src/app/features/equipements/equipements.ts) |
 | Fiche Matériel de démonstration | Liens clavier, composant partagé, état introuvable, accès direct/rechargement, retour conservant la recherche `q` et Matériel actif | [PR #32 fusionnée](https://github.com/arthurb1348/terrimaint/pull/32), [fiche](../frontend/src/app/features/equipements/equipment-detail.ts) |
+| Simulation locale d'incident | Formulaire partagé, validation, récapitulatif modifiable, confirmation sans enregistrement ni envoi, retours avec `q` ; état en mémoire seul | [PR #35 fusionnée](https://github.com/arthurb1348/terrimaint/pull/35), [composant](../frontend/src/app/features/incidents/incident-declaration.ts) |
 
 ## Matériel de démonstration intégré
 
@@ -170,13 +171,15 @@ formulaire d'incident, statut métier, historique ou scanner ajouté. Le
 explique les routes, les paramètres et les endroits à modifier. Les résultats réels des
 contrôles et les captures sont consignés dans la PR ; ils ne valent pas validation humaine.
 
-## Travaux en cours
+## Simulation locale d'incident intégrée
 
-L'[issue #34](https://github.com/arthurb1348/terrimaint/issues/34), sur
-`feat/34-incident-declaration-demo`, propose une **déclaration locale d'incident en revue
-jusqu'à fusion**. Un lien de fiche valide ouvre le même formulaire dans les deux espaces,
-avec le matériel identifié depuis la source existante. Intitulé et description obligatoires
-(120/2000 caractères maximum), priorité explicite Faible/Haute/Urgente et risque facultatif
+L'[issue #34](https://github.com/arthurb1348/terrimaint/issues/34) est intégrée par la
+[PR #35](https://github.com/arthurb1348/terrimaint/pull/35), **fusionnée le 30 octobre 2026**
+(commit `5e348c7f275a471e9369571a1181801c2291a1d4`, vérifié dans le dernier `origin/main`).
+Un lien de fiche valide ouvre le même formulaire dans les deux espaces,
+avec le matériel identifié depuis la source existante. Dans cet incrément initial,
+intitulé et description obligatoires (120/2000 caractères maximum), priorité explicite
+Faible/Haute/Urgente et risque facultatif
 conduisent à un récapitulatif modifiable, puis à une confirmation sans enregistrement.
 Incidents reste actif, y compris Plus sur mobile Agent. Annuler ou revenir après la simulation
 retrouve la fiche du même espace et sa recherche `q`.
@@ -187,9 +190,24 @@ modifié, photo/audio/GPS, stockage persistant ou appel métier n'est ajouté. L
 publiques et la validation locale n'impose aucune permission. Dépendances et politique npm
 sont inchangées. L'issue #33 reste un diagnostic séparé, sans contournement ajouté ici.
 La [décision](decisions.md) explique le formulaire regroupé à partir des deux prototypes ;
-le [guide](code-guide.md#déclaration-locale-dincident-issue-34-en-revue) détaille le flux,
+le [guide](code-guide.md#déclaration-locale-dincident-issue-34-fusionnée) détaille le flux,
 les fichiers et le test manuel. Les preuves des contrôles du commit proposé figurent dans
-la PR ; la validation humaine et la fusion restent à Arthur.
+la PR. L'assouplissement de la description est l'ajustement distinct décrit ci-dessous.
+
+## Travaux en cours
+
+L'[issue #36](https://github.com/arthurb1348/terrimaint/issues/36), sur `feat/36-signalement-ux`,
+propose une **description facultative et des actions de signalement en revue jusqu'à fusion**.
+L'intitulé et la priorité restent obligatoires. Une description vide ou blanche est acceptée
+comme absente ; des détails renseignés restent limités à 2000 caractères. Le récapitulatif
+affiche Non renseignée pour l'absence, sans modifier la valeur retrouvée avec Modifier.
+Les trois boutons deviennent Vérifier le signalement, Envoyer le signalement et Modifier
+le signalement. Une mention de démonstration accompagne l'action finale et la confirmation
+Signalement simulé précise qu'aucun signalement n'est réellement transmis ou enregistré.
+Le matériel, les deux espaces, `q`, le clavier, l'état en mémoire et le risque sans changement
+de statut sont conservés, sans API, stockage ni dépendance ajoutés. La
+[décision](decisions.md) demande de conserver cette règle dans le futur contrat serveur ;
+la validation humaine et la fusion restent à Arthur.
 
 Les tests responsive sont déjà **intégrés** par la
 [PR #19](https://github.com/arthurb1348/terrimaint/pull/19), fusionnée le 23 octobre 2026
@@ -239,12 +257,13 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 - Backend : **12 cas pytest-django** dans [test_health.py](../backend/tests/test_health.py)
   et [test_settings.py](../backend/tests/test_settings.py) : contrat santé JSON, méthodes,
   routes absentes, hôtes et configuration de la clé secrète. Aucun accès DB métier.
-- Frontend intégré : **66 cas Vitest dans 5 fichiers** :
+- Frontend intégré : **93 cas Vitest dans 6 fichiers** :
   [routage et navigation](../frontend/src/app/app.spec.ts),
   [service HTTP](../frontend/src/app/core/api-health.spec.ts),
   [accueil](../frontend/src/app/home/home.spec.ts),
   [Matériel](../frontend/src/app/features/equipements/equipements.spec.ts),
-  [fiches](../frontend/src/app/features/equipements/equipment-detail.spec.ts).
+  [fiches](../frontend/src/app/features/equipements/equipment-detail.spec.ts),
+  [déclaration locale](../frontend/src/app/features/incidents/incident-declaration.spec.ts).
   Ils couvrent l'attente, le succès, les JSON invalides, les erreurs HTTP/réseau,
   la relance, l'annulation, le délai de cinq secondes et les routes inconnues.
   HTTP simulé ; aucun serveur réel requis.
@@ -261,7 +280,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   a été consultée : [CI réussie](https://github.com/arthurb1348/terrimaint/actions/runs/39932815516)
   et [Responsive réussi](https://github.com/arthurb1348/terrimaint/actions/runs/39932815661).
 - La [PR #20 fusionnée](https://github.com/arthurb1348/terrimaint/pull/20) ajoute
-  **12 cas Vitest** pour Matériel (inclus dans les 66 ci-dessus) et deux parcours Playwright
+  **12 cas Vitest** pour Matériel (inclus dans les 93 ci-dessus) et deux parcours Playwright
   dans quatre formats (soit **64 scénarios intégrés**). Les scénarios
   Matériel contrôlent la recherche dans les deux espaces, le résultat vide, l'effacement au
   clavier, le focus, le contexte et le débordement après saisie/effacement.
@@ -291,15 +310,23 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   concernent le commit proposé `8631d118031cfcc64e61e831cd1da517883d8689`, avant fusion.
   La santé HTTP est simulée, sans intégration réelle
   Django/proxy ni validation de permissions.
-- L'issue #34 propose **93 cas Vitest dans six fichiers** (27 de plus) et **136 scénarios
-  Playwright** (32 de plus), encore en revue : formulaire partagé, identifiant inconnu,
+- La PR #35 fusionnée intègre **93 cas Vitest dans six fichiers** (27 de plus) et **136 scénarios
+  Playwright** (32 de plus) : formulaire partagé, identifiant inconnu,
   champs vides/blancs et bornes, trois priorités, risque sans mutation, récapitulatif/modification,
   simulation, annulation et `q`, accès direct/rechargement, réinitialisation à chaque changement
   de matériel. Les parcours des deux espaces contrôlent clavier, erreurs, focus dégagé de la
   barre Agent, navigation active et débordement aux quatre formats. Les tests navigateur
   vérifient aussi l'absence de requête métier et de stockage local/session pendant le parcours.
+  Sa [CI](https://github.com/arthurb1348/terrimaint/actions/runs/41070394284) et son
+  [Responsive](https://github.com/arthurb1348/terrimaint/actions/runs/41070394410) réussis
+  concernent le commit proposé `84a8922bc752f9f83697ba60f59e7f92f953669e`, avant fusion.
   Les résultats et limites d'exécution locale/CI sont consignés dans sa PR ; aucun appareil
   physique, backend métier, Windows ou Safari n'est validé par ces scénarios.
+- L'issue #36 propose **99 cas Vitest dans six fichiers** et **144 scénarios Playwright**, en
+  revue : description vide/blanche, récapitulatif d'absence sans mutation du champ, modification
+  conservant la saisie et nouveaux boutons au clavier aux quatre formats. Les tests des champs
+  réellement obligatoires, des détails renseignés et des dépassements restent présents.
+  Les résultats réels du commit proposé et leurs limites sont consignés dans sa PR.
 - Aucun test de persistance ou de parcours métier complet présent.
 - Commandes : `uv run --locked python scripts/check.py` à la racine ;
   `npm run lint`, `npm test`, `npm run build`, `npm run test:responsive` dans `frontend/`.
@@ -354,7 +381,7 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire la PR de simulation d'incident de l'issue #34, ses tests et captures, puis décider sa fusion manuelle ; les PR #20, #29, #30 et #32 sont fusionnées.
+1. Relire l'ajustement de signalement de l'issue #36, ses tests et captures, puis décider sa fusion manuelle ; les PR #20, #29, #30, #32 et #35 sont fusionnées.
 2. Définir les prochains incréments métier (médias, localisation, validation serveur et envoi) avant de développer leur API.
 3. Préciser le modèle métier et la persistance PostgreSQL avec ORM/migrations Django,
    puis les parcours MVP en petits incréments, avec règles d'accès entre collectivités.
@@ -363,8 +390,8 @@ selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humain
 5. Définir l'hébergement et les contrôles d'intégration/navigateur au fil des parcours.
 
 Cet ordre indique des dépendances de travail, sans planning engagé. Aucune de ces protections
-métier n'est implémentée aujourd'hui. Le workflow responsive et ses 104 scénarios sont déjà
-intégrés ; la simulation proposée complète les parcours sans modifier les jobs `Backend`/`Frontend`
+métier n'est implémentée aujourd'hui. Le workflow responsive et ses 136 scénarios sont déjà
+intégrés ; l'ajustement proposé complète les parcours sans modifier les jobs `Backend`/`Frontend`
 ni les protections distantes.
 
 ## Règles de mise à jour du bilan

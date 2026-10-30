@@ -22,10 +22,10 @@
           Déclarer un incident
         }
         @case ('review') {
-          Vérifier la déclaration
+          Vérifier le signalement
         }
         @case ('complete') {
-          Simulation terminée
+          Signalement simulé
         }
       }
     </h1>
@@ -37,7 +37,7 @@
     @switch (step()) {
       @case ('form') {
         <form [formGroup]="form" (ngSubmit)="review()" novalidate>
-          <p>Intitulé, description et priorité sont obligatoires.</p>
+          <p>L'intitulé et la priorité sont obligatoires. La description est facultative.</p>
           <div class="field">
             <label for="incident-title">Intitulé</label>
             <input
@@ -63,7 +63,7 @@
             }
           </div>
           <div class="field">
-            <label for="incident-description">Description</label>
+            <label for="incident-description">Description (facultative)</label>
             <textarea
               #descriptionInput
               id="incident-description"
@@ -75,19 +75,14 @@
               [attr.aria-describedby]="
                 invalid('description') ? 'description-help description-error' : 'description-help'
               "
-              required
             ></textarea>
             <p id="description-help" class="help">
-              Décrivez ce que vous observez sur le terrain. {{ descriptionLimit }} caractères
-              maximum.
+              Vous pouvez préciser ce que vous observez sur le terrain. {{ descriptionLimit }}
+              caractères maximum si renseignée.
             </p>
             @if (invalid('description')) {
               <p id="description-error" class="error">
-                @if (form.controls.description.hasError('maxlength')) {
-                  La description ne doit pas dépasser {{ descriptionLimit }} caractères.
-                } @else {
-                  Renseignez une description, avec au moins un caractère autre qu'un espace.
-                }
+                La description ne doit pas dépasser {{ descriptionLimit }} caractères.
               </p>
             }
           </div>
@@ -130,7 +125,7 @@
             </p>
           </div>
           <div class="actions">
-            <button type="submit">Vérifier la déclaration</button>
+            <button type="submit">Vérifier le signalement</button>
             <a
               [routerLink]="['../../../equipements', item.id]"
               [queryParams]="{ q: search() || null }"
@@ -147,7 +142,7 @@
           </div>
           <div>
             <dt>Description</dt>
-            <dd>{{ form.controls.description.value }}</dd>
+            <dd>{{ descriptionLabel() }}</dd>
           </div>
           <div>
             <dt>Priorité</dt>
@@ -158,10 +153,15 @@
             <dd>{{ form.controls.risk.value ? 'Oui' : 'Non' }}</dd>
           </div>
         </dl>
-        <p>Le statut du matériel reste inchangé. Aucun incident ne sera enregistré ni envoyé.</p>
+        <p>Le statut du matériel reste inchangé.</p>
+        <p id="simulation-notice" class="demo-notice">
+          Démonstration : aucun signalement n'est réellement transmis ou enregistré.
+        </p>
         <div class="actions">
-          <button type="button" (click)="complete()">Terminer la simulation</button>
-          <button type="button" class="secondary" (click)="edit()">Modifier</button>
+          <button type="button" aria-describedby="simulation-notice" (click)="complete()">
+            Envoyer le signalement
+          </button>
+          <button type="button" class="secondary" (click)="edit()">Modifier le signalement</button>
           <a
             [routerLink]="['../../../equipements', item.id]"
             [queryParams]="{ q: search() || null }"
@@ -170,7 +170,10 @@
         </div>
       }
       @case ('complete') {
-        <p>Aucun incident n'a été enregistré ni envoyé. Le statut du matériel reste inchangé.</p>
+        <p>
+          Démonstration : aucun signalement n'est réellement transmis ou enregistré. Le statut du
+          matériel reste inchangé.
+        </p>
         <a
           class="return-link"
           [routerLink]="['../../../equipements', item.id]"

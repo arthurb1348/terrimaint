@@ -101,7 +101,7 @@ describe('Déclaration locale d’incident', () => {
       await harness.navigateByUrl(`${base}/EQ-OUT-0003?q=OUT`, IncidentDeclaration);
       await fillValid();
       await submit();
-      expect(heading()).toBe('Vérifier la déclaration');
+      expect(heading()).toBe('Vérifier le signalement');
       expect(Array.from(content().querySelectorAll('dd'), (item) => item.textContent)).toEqual([
         'Le moteur cale',
         'Le moteur cale lors de l’accélération.\nRedémarrage difficile.',
@@ -109,7 +109,7 @@ describe('Déclaration locale d’incident', () => {
         'Oui',
       ]);
       expect(document.activeElement).toBe(content().querySelector('h1'));
-      await click('Modifier');
+      await click('Modifier le signalement');
       expect(field('title').value).toBe('Le moteur cale');
       expect(field('description').value).toContain('\nRedémarrage difficile.');
       expect(content().querySelector<HTMLInputElement>('#priority-high')!.checked).toBe(true);
@@ -120,9 +120,11 @@ describe('Déclaration locale d’incident', () => {
       await submit();
       expect(content().querySelector('dd')?.textContent).toBe('Le moteur cale à chaud');
       expect(content().textContent).toContain('Urgente — danger immédiat');
-      await click('Terminer la simulation');
-      expect(heading()).toBe('Simulation terminée');
-      expect(content().textContent).toContain("Aucun incident n'a été enregistré ni envoyé");
+      await click('Envoyer le signalement');
+      expect(heading()).toBe('Signalement simulé');
+      expect(content().textContent).toContain(
+        "aucun signalement n'est réellement transmis ou enregistré",
+      );
       expect(content().querySelector('form')).toBeNull();
       expect(JSON.stringify(DEMO_EQUIPMENT)).toBe(sourceBefore);
       expect(TestBed.inject(Router).url).toBe(`${base}/EQ-OUT-0003?q=OUT`);
@@ -130,13 +132,43 @@ describe('Déclaration locale d’incident', () => {
       expect(TestBed.inject(Router).url).toBe(`/${space}/equipements/EQ-OUT-0003?q=OUT`);
     });
 
+    it.each([
+      ['vide', ''],
+      ['blanche', '   \n  '],
+      ['blanche au-delà de la borne des détails', ' '.repeat(2001)],
+    ])(
+      `accepte une description %s dans ${space} sans remplacer la saisie par le texte d'absence`,
+      async (_label, description) => {
+        await harness.navigateByUrl(`${base}/EQ-OUT-0003`, IncidentDeclaration);
+        await enter('title', 'Bruit inhabituel');
+        if (description) await enter('description', description);
+        await choose('low');
+        expect((field('description') as HTMLTextAreaElement).required).toBe(false);
+        await submit();
+        expect(heading()).toBe('Vérifier le signalement');
+        expect(content().querySelectorAll('dd')[1].textContent).toBe('Non renseignée');
+        expect(content().querySelector('.error')).toBeNull();
+        await click('Modifier le signalement');
+        expect(field('description').value).toBe(description);
+        expect(field('title').value).toBe('Bruit inhabituel');
+        expect(content().querySelector<HTMLInputElement>('#priority-low')!.checked).toBe(true);
+        await enter('description', '  Un bruit est apparu.\nAu démarrage.  ');
+        await submit();
+        expect(content().querySelectorAll('dd')[1].textContent).toBe(
+          '  Un bruit est apparu.\nAu démarrage.  ',
+        );
+        await click('Modifier le signalement');
+        expect(field('description').value).toBe('  Un bruit est apparu.\nAu démarrage.  ');
+      },
+    );
+
     it.each(['form', 'review', 'complete'])(
       `efface saisie et étape en changeant de matériel dans la même instance de ${space} depuis %s`,
       async (step) => {
         const first = await harness.navigateByUrl(`${base}/EQ-OUT-0003`, IncidentDeclaration);
         await fillValid();
         if (step !== 'form') await submit();
-        if (step === 'complete') await click('Terminer la simulation');
+        if (step === 'complete') await click('Envoyer le signalement');
         const second = await harness.navigateByUrl(`${base}/EQ-VEH-0042`, IncidentDeclaration);
         expect(second).toBe(first);
         expect(heading()).toBe('Déclarer un incident');
@@ -173,19 +205,20 @@ describe('Déclaration locale d’incident', () => {
   }
 
   it.each(['', '   \n  '])(
-    'rejette les champs vides ou blancs (%j), associe les erreurs et focalise le premier champ invalide',
+    'rejette un intitulé vide ou blanc (%j) et la priorité absente, tout en acceptant la description absente',
     async (value) => {
       await harness.navigateByUrl('/agent/incidents/nouveau/EQ-OUT-0003', IncidentDeclaration);
       await enter('title', value);
       await enter('description', value);
       await submit();
       expect(heading()).toBe('Déclarer un incident');
-      expect(content().querySelectorAll('.error')).toHaveLength(3);
-      for (const name of ['title', 'description']) {
-        expect(field(name).getAttribute('aria-invalid')).toBe('true');
-        expect(field(name).getAttribute('aria-describedby')).toContain(`${name}-error`);
-        expect(content().querySelector(`#${name}-error`)?.textContent).toContain('caractère autre');
-      }
+      expect(content().querySelectorAll('.error')).toHaveLength(2);
+      expect(field('title').getAttribute('aria-invalid')).toBe('true');
+      expect(field('title').getAttribute('aria-describedby')).toContain('title-error');
+      expect(content().querySelector('#title-error')?.textContent).toContain('caractère autre');
+      expect(content().querySelector('#priority-error')?.textContent).toContain('Choisissez');
+      expect(field('description').getAttribute('aria-invalid')).toBe('false');
+      expect(content().querySelector('#description-error')).toBeNull();
       expect(document.activeElement).toBe(field('title'));
     },
   );
@@ -214,7 +247,7 @@ describe('Déclaration locale d’incident', () => {
       await fillValid();
       await enter(name, 'x'.repeat(length));
       await submit();
-      expect(heading()).toBe(valid ? 'Vérifier la déclaration' : 'Déclarer un incident');
+      expect(heading()).toBe(valid ? 'Vérifier le signalement' : 'Déclarer un incident');
       if (!valid) {
         expect(field(name).value).toHaveLength(length);
         expect(content().querySelector(`#${name}-error`)?.textContent).toContain(
@@ -234,7 +267,7 @@ describe('Déclaration locale d’incident', () => {
     await enter('description', 'Bruit inhabituel observé.');
     await choose(value);
     await submit();
-    expect(heading()).toBe('Vérifier la déclaration');
+    expect(heading()).toBe('Vérifier le signalement');
     expect(content().textContent).toContain(label);
     expect(Array.from(content().querySelectorAll('dd')).at(-1)?.textContent).toBe('Non');
   });

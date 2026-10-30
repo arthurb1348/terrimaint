@@ -175,11 +175,11 @@ describe('Shell et routage', () => {
         .querySelector('form')!
         .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
       await fixture.whenStable();
-      expect(element.querySelector('main h1')?.textContent).toContain('Vérifier la déclaration');
+      expect(element.querySelector('main h1')?.textContent).toContain('Vérifier le signalement');
       assertNavigation();
       element.querySelector<HTMLButtonElement>('main button')!.click();
       await fixture.whenStable();
-      expect(element.querySelector('main h1')?.textContent).toContain('Simulation terminée');
+      expect(element.querySelector('main h1')?.textContent).toContain('Signalement simulé');
       assertNavigation();
       http.expectNone(() => true);
     },
