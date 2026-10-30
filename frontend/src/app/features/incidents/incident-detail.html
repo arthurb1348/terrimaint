@@ -1,0 +1,57 @@
+<section class="feature-page" aria-labelledby="incident-detail-title">
+  <a class="back-link" [routerLink]="['..']" [queryParams]="query()" (click)="focusContent()"
+    >Retour aux signalements</a
+  >
+  <p class="demo-label">Données de démonstration</p>
+  @if (incident(); as item) {
+    <p class="reference">{{ item.id }}</p>
+    <h1 id="incident-detail-title">{{ item.title }}</h1>
+    <dl class="metadata">
+      <div>
+        <dt>Priorité</dt>
+        <dd>
+          <span class="badge" [attr.data-priority]="item.priority">{{
+            priorities[item.priority]
+          }}</span>
+        </dd>
+      </div>
+      <div>
+        <dt>Statut du signalement</dt>
+        <dd>
+          <span class="badge">{{ statuses[item.status] }}</span>
+        </dd>
+      </div>
+      <div>
+        <dt>Signalé le</dt>
+        <dd>
+          <time [attr.datetime]="item.reportedOn">{{ item.reportedOn | date: 'dd/MM/yyyy' }}</time>
+        </dd>
+      </div>
+    </dl>
+    <h2>Description</h2>
+    <p class="description">{{ description() }}</p>
+    <section class="equipment-summary" aria-labelledby="related-equipment-title">
+      <h2 id="related-equipment-title">Matériel concerné</h2>
+      @if (equipment(); as material) {
+        <p>
+          {{ material.name
+          }}<span class="reference">{{ material.id }} · {{ material.location }}</span>
+        </p>
+        <!-- La recherche de signalements ne doit pas devenir une recherche Matériel. -->
+        <a [routerLink]="['../../equipements', material.id]">Voir le matériel</a>
+      } @else {
+        <p>Matériel introuvable</p>
+      }
+    </section>
+    @if (item.risk) {
+      <p class="risk-note">
+        <strong>Risque ou impossibilité d'utilisation signalé.</strong> Ce signalement ne change pas
+        le statut du matériel.
+      </p>
+    }
+    <p class="help">Ces signalements fictifs servent uniquement à la démonstration.</p>
+  } @else {
+    <h1 id="incident-detail-title">Signalement introuvable</h1>
+    <p>Aucun signalement de démonstration ne correspond à cet identifiant.</p>
+  }
+</section>

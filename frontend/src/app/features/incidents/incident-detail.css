@@ -1,0 +1,52 @@
+.back-link {
+  min-height: 44px;
+  margin-bottom: 16px;
+}
+h1 {
+  margin: 16px 0 24px;
+}
+h2 {
+  margin: 24px 0 8px;
+  font-size: 1rem;
+}
+.metadata {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 32px;
+  margin: 0;
+}
+dt {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+dd {
+  margin: 4px 0 0;
+}
+.description {
+  margin: 0;
+  white-space: pre-wrap;
+}
+.equipment-summary {
+  margin-top: 24px;
+  padding: 16px;
+  background: var(--surface);
+  border-left: 4px solid var(--green);
+  border-radius: 12px;
+}
+.equipment-summary h2 {
+  margin-top: 0;
+}
+.equipment-summary p {
+  margin: 0;
+}
+.risk-note {
+  margin-top: 24px;
+  padding: 16px;
+  border-left: 4px solid var(--accent);
+  background: #fff1dc;
+  border-radius: 8px;
+}
+.help {
+  color: var(--muted);
+  font-size: 0.875rem;
+}

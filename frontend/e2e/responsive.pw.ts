@@ -18,6 +18,8 @@ const routes = [
   '/agent/equipements/EQ-OUT-0003',
   '/agent/equipements/inconnu',
   '/agent/incidents',
+  '/agent/incidents/INC-2026-047',
+  '/agent/incidents/inconnu',
   '/agent/incidents/nouveau/EQ-OUT-0003',
   '/agent/incidents/nouveau/inconnu',
   '/agent/scanner',
@@ -27,6 +29,8 @@ const routes = [
   '/responsable/equipements/EQ-OUT-0003',
   '/responsable/equipements/inconnu',
   '/responsable/incidents',
+  '/responsable/incidents/INC-2026-047',
+  '/responsable/incidents/inconnu',
   '/responsable/incidents/nouveau/EQ-OUT-0003',
   '/responsable/incidents/nouveau/inconnu',
   '/responsable/interventions',
@@ -138,6 +142,190 @@ for (const path of routes) {
 }
 
 for (const space of ['agent', 'responsable']) {
+  test.describe(`Consultation des signalements — ${space}`, () => {
+    test.use({ timezoneId: 'Europe/Paris' });
+    test(`La consultation des signalements de ${space} conserve recherche et filtres au clavier`, async ({
+      page,
+    }, info) => {
+      const base = `/${space}/incidents`;
+      const query = '  EQ-OUT  ';
+      const main = page.getByRole('main');
+      const rows = main.locator('tbody tr');
+      const search = main.getByRole('searchbox', {
+        name: 'Rechercher un signalement',
+        exact: true,
+      });
+      const priority = main.getByRole('combobox', { name: 'Priorité', exact: true });
+      const status = main.getByRole('combobox', { name: 'Statut du signalement', exact: true });
+      const reset = main.getByRole('button', { name: 'Réinitialiser les filtres', exact: true });
+      await page.goto(base);
+      await expect(rows).toHaveCount(6);
+      await expect(rows.first().locator('time')).toHaveText('28/10/2026');
+      await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+      await expect(main.getByRole('status')).toHaveText('6 signalements trouvés.');
+      await expect(main.getByRole('table').getByRole('columnheader')).toHaveCount(5);
+      const expectedDisplay =
+        space === 'responsable' && page.viewportSize()!.width === 1440 ? 'table' : 'block';
+      expect(
+        await main.locator('table').evaluate((element) => getComputedStyle(element).display),
+      ).toBe(expectedDisplay);
+      await expectIncidentsActive(page, space);
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'signalements-liste');
+      const longTitle = rows.getByRole('link', { name: /INC-2026-047/ });
+      await longTitle.focus();
+      await expectFocusedControlVisible(page, longTitle, space);
+      await capture(page, info, 'signalement-intitule-long-focus');
+      await main.focus();
+      const historyLength = await page.evaluate(() => history.length);
+      await expect(main).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, search, space);
+      await page.keyboard.type(query);
+      await expect(rows).toHaveCount(4);
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, priority, space);
+      await priority.selectOption('high');
+      await expect(rows).toHaveCount(1);
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, status, space);
+      await status.selectOption('in-progress');
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === base &&
+          url.searchParams.get('q') === query &&
+          url.searchParams.get('priority') === 'high' &&
+          url.searchParams.get('status') === 'in-progress',
+      );
+      expect(
+        await page.evaluate(() => history.length),
+        'La saisie et les filtres ne créent pas une entrée par changement',
+      ).toBe(historyLength);
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, reset, space);
+      await page.keyboard.press('Tab');
+      const open = rows.getByRole('link', { name: /INC-2026-048.*Vibration du plateau de coupe/ });
+      await expectFocusedControlVisible(page, open, space);
+      await capture(page, info, 'signalements-filtres');
+      await page.keyboard.press('Enter');
+      await expect(main.getByRole('heading', { level: 1 })).toHaveText(
+        'Vibration du plateau de coupe',
+      );
+      await expect(main.locator('.description')).toHaveText('Non renseignée');
+      await expect(main.locator('.equipment-summary')).toContainText('Tondeuse autoportée');
+      await expectIncidentsActive(page, space);
+      await expect(main).toBeFocused();
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'signalement-detail');
+      await page.keyboard.press('Tab');
+      const back = main.getByRole('link', { name: 'Retour aux signalements', exact: true });
+      await expectFocusedControlVisible(page, back, space);
+      await page.keyboard.press('Enter');
+      await expect(search).toHaveValue(query);
+      await expect(priority).toHaveValue('high');
+      await expect(status).toHaveValue('in-progress');
+      await expect(rows).toHaveCount(1);
+      await page.reload();
+      await expect(search).toHaveValue(query);
+      await expect(priority).toHaveValue('high');
+      await expect(status).toHaveValue('in-progress');
+      await expect(rows).toHaveCount(1);
+      await open.click();
+      await expect(main.getByRole('heading', { level: 1 })).toHaveText(
+        'Vibration du plateau de coupe',
+      );
+      await expect(main).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(back).toBeFocused();
+      await page.keyboard.press('Tab');
+      const material = main.getByRole('link', { name: 'Voir le matériel', exact: true });
+      await expectFocusedControlVisible(page, material, space);
+      await expect(material).toHaveAttribute('href', `/${space}/equipements/EQ-OUT-0001`);
+      await page.keyboard.press('Enter');
+      await expect(main.getByRole('heading', { level: 1 })).toHaveText('Tondeuse autoportée');
+      await expect(page).toHaveURL(
+        (url) => url.pathname === `/${space}/equipements/EQ-OUT-0001` && url.search === '',
+      );
+      await expect(page.locator('nav a[aria-current="page"]')).toHaveAttribute(
+        'href',
+        `/${space}/equipements`,
+      );
+      await page.goBack();
+      await expect(main.getByRole('heading', { level: 1 })).toHaveText(
+        'Vibration du plateau de coupe',
+      );
+      await back.click();
+      await expect(search).toHaveValue(query);
+      await status.selectOption('closed');
+      await expect(rows).toHaveCount(0);
+      await expect(main.getByRole('status')).toHaveText('0 signalement trouvé.');
+      await expect(main).toContainText('Aucun signalement ne correspond');
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'signalements-aucun-resultat');
+      await reset.focus();
+      await page.keyboard.press('Enter');
+      await expectFocusedControlVisible(page, search, space);
+      await expect(rows).toHaveCount(6);
+      await expect(page).toHaveURL((url) => url.pathname === base && url.search === '');
+      await search.fill('x'.repeat(350));
+      await expect(rows).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
+      await reset.click();
+      await expect(rows).toHaveCount(6);
+      await expect(search).toBeFocused();
+    });
+
+    test(`Le détail des signalements de ${space} gère accès direct, rechargement, risque et inconnu`, async ({
+      page,
+    }, info) => {
+      const base = `/${space}/incidents`;
+      const main = page.getByRole('main');
+      await page.goto(`${base}/INC-2026-047?q=chauffage&priority=high&status=in-progress`);
+      await expect(main.getByRole('heading', { level: 1 })).toContainText(
+        'Température irrégulière',
+      );
+      await expect(main.locator('.description')).toContainText('Le panneau de commande');
+      await expect(main.locator('.equipment-summary')).toContainText('École des Marronniers');
+      await expectIncidentsActive(page, space);
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'signalement-detail-long');
+      await page.reload();
+      await expect(main.getByRole('heading', { level: 1 })).toContainText(
+        'Température irrégulière',
+      );
+      await expect(main.locator('time')).toHaveText('27/10/2026');
+      await expect(
+        main.getByRole('link', { name: 'Retour aux signalements', exact: true }),
+      ).toHaveAttribute('href', `${base}?q=chauffage&priority=high&status=in-progress`);
+      await page.goto(`${base}/INC-2026-046`);
+      await expect(main.getByRole('heading', { level: 1 })).toHaveText(
+        'Bruit au freinage du fourgon de voirie',
+      );
+      await expect(main.locator('.risk-note')).toContainText('ne change pas le statut du matériel');
+      await expectNoHorizontalOverflow(page);
+      const query = '  tONDEUSE  ';
+      await page.goto(
+        `${base}/inconnu?${new URLSearchParams({ q: query, priority: 'incorrect', status: 'incorrect' })}`,
+      );
+      await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement introuvable');
+      await expect(main.getByRole('link', { name: 'Voir le matériel', exact: true })).toHaveCount(
+        0,
+      );
+      await expectIncidentsActive(page, space);
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'signalement-introuvable');
+      await main.getByRole('link', { name: 'Retour aux signalements', exact: true }).click();
+      await expect(main.getByRole('searchbox')).toHaveValue(query);
+      await expect(main.getByRole('combobox', { name: 'Priorité', exact: true })).toHaveValue('');
+      await expect(
+        main.getByRole('combobox', { name: 'Statut du signalement', exact: true }),
+      ).toHaveValue('');
+      await expect(main.locator('tbody tr')).toHaveCount(1);
+      await expect(main.locator('tbody')).toContainText('INC-2026-048');
+      await expectNoHorizontalOverflow(page);
+    });
+  });
+
   test(`La déclaration de ${space} valide au clavier, permet de modifier et termine sans enregistrement`, async ({
     page,
   }, info) => {

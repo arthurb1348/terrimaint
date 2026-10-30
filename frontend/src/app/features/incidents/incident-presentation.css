@@ -1,0 +1,46 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.feature-page {
+  overflow-wrap: anywhere;
+}
+.demo-label {
+  width: fit-content;
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--green);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.reference {
+  display: block;
+  color: var(--muted);
+  font-size: 0.875rem;
+  font-weight: 400;
+}
+.badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.badge[data-priority='high'] {
+  background: #fff1dc;
+  color: #704512;
+}
+.badge[data-priority='urgent'] {
+  background: #fce8e5;
+  color: #8c2921;
+}
+a,
+button,
+input,
+select,
+[tabindex] {
+  scroll-margin-block: 24px calc(112px + env(safe-area-inset-bottom));
+}

@@ -1,0 +1,114 @@
+<section class="feature-page" aria-labelledby="incidents-title">
+  <h1 id="incidents-title">Incidents</h1>
+  <p class="demo-label">Données de démonstration</p>
+  <p>Consultez les signalements fictifs. La déclaration simulée n'ajoute rien à cette liste.</p>
+  <div class="filters" role="search" aria-label="Rechercher et filtrer les signalements">
+    <div class="search-field">
+      <label for="incident-search">Rechercher un signalement</label>
+      <input
+        #searchInput
+        id="incident-search"
+        type="search"
+        [value]="filters().q"
+        (input)="updateFilter('q', searchInput.value)"
+        aria-describedby="incident-search-help"
+      />
+      <p id="incident-search-help" class="help">
+        Intitulé, référence, nom ou identifiant du matériel.
+      </p>
+    </div>
+    <div>
+      <label for="incident-priority-filter">Priorité</label>
+      <select
+        #priorityInput
+        id="incident-priority-filter"
+        (change)="updateFilter('priority', priorityInput.value)"
+      >
+        <!-- L'option porte la sélection : au retour direct, @for crée les options après le select. -->
+        <option value="" [selected]="!filters().priority">Toutes les priorités</option>
+        @for (option of priorityOptions; track option[0]) {
+          <option [value]="option[0]" [selected]="filters().priority === option[0]">
+            {{ option[1] }}
+          </option>
+        }
+      </select>
+    </div>
+    <div>
+      <label for="incident-status-filter">Statut du signalement</label>
+      <select
+        #statusInput
+        id="incident-status-filter"
+        (change)="updateFilter('status', statusInput.value)"
+      >
+        <option value="" [selected]="!filters().status">Tous les statuts</option>
+        @for (option of statusOptions; track option[0]) {
+          <option [value]="option[0]" [selected]="filters().status === option[0]">
+            {{ option[1] }}
+          </option>
+        }
+      </select>
+    </div>
+    <button type="button" (click)="resetFilters(searchInput)">Réinitialiser les filtres</button>
+  </div>
+  <p role="status">
+    {{ filteredIncidents().length }} signalement{{
+      filteredIncidents().length > 1 ? 's' : ''
+    }}
+    trouvé{{ filteredIncidents().length > 1 ? 's' : '' }}.
+  </p>
+  @if (filteredIncidents().length) {
+    <!-- Les rôles conservent la structure de tableau lorsque le CSS présente les lignes en cartes. -->
+    <table role="table">
+      <caption class="visually-hidden">
+        Signalements de démonstration correspondant aux filtres
+      </caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader">Signalement</th>
+          <th scope="col" role="columnheader">Matériel</th>
+          <th scope="col" role="columnheader">Priorité</th>
+          <th scope="col" role="columnheader">Statut du signalement</th>
+          <th scope="col" role="columnheader">Signalé le</th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        @for (row of filteredIncidents(); track row.incident.id) {
+          <tr role="row">
+            <th scope="row" role="rowheader">
+              <a [routerLink]="[row.incident.id]" [queryParams]="query()">
+                <span class="reference">{{ row.incident.id }}</span>
+                {{ row.incident.title }}
+              </a>
+            </th>
+            <td role="cell">
+              <span class="cell-label" aria-hidden="true">Matériel</span
+              >{{ row.equipment?.name ?? 'Matériel introuvable'
+              }}<span class="reference">{{ row.incident.equipmentId }}</span>
+            </td>
+            <td role="cell">
+              <span class="cell-label" aria-hidden="true">Priorité</span
+              ><span class="badge" [attr.data-priority]="row.incident.priority">{{
+                priorities[row.incident.priority]
+              }}</span>
+            </td>
+            <td role="cell">
+              <span class="cell-label" aria-hidden="true">Statut du signalement</span
+              ><span class="badge">{{ statuses[row.incident.status] }}</span>
+            </td>
+            <td role="cell">
+              <span class="cell-label" aria-hidden="true">Signalé le</span
+              ><time [attr.datetime]="row.incident.reportedOn">{{
+                row.incident.reportedOn | date: 'dd/MM/yyyy'
+              }}</time>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <p>
+      Aucun signalement ne correspond à ces critères. Modifiez la recherche ou réinitialisez les
+      filtres.
+    </p>
+  }
+</section>

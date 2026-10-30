@@ -7,6 +7,7 @@ import { provideRouter, Router } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from './app';
 import { routes } from './app.routes';
+import { DEMO_INCIDENTS } from './features/incidents/incidents-demo';
 
 describe('Shell et routage', () => {
   let fixture: ComponentFixture<App>;
@@ -151,6 +152,7 @@ describe('Shell et routage', () => {
   it.each(['agent', 'responsable'])(
     'garde Incidents actif pendant formulaire, récapitulatif et fin dans %s, y compris Plus',
     async (space) => {
+      const source = JSON.stringify(DEMO_INCIDENTS);
       await navigate(`/${space}/incidents/nouveau/EQ-OUT-0003?q=OUT`);
       const assertNavigation = () => {
         expect(element.querySelector('.screen-title')?.textContent).toBe('Incidents');
@@ -181,9 +183,31 @@ describe('Shell et routage', () => {
       await fixture.whenStable();
       expect(element.querySelector('main h1')?.textContent).toContain('Signalement simulé');
       assertNavigation();
+      await navigate(`/${space}/incidents`);
+      expect(element.querySelectorAll('main tbody tr')).toHaveLength(6);
+      expect(JSON.stringify(DEMO_INCIDENTS)).toBe(source);
       http.expectNone(() => true);
     },
   );
+
+  it.each([
+    ['agent', 'INC-2026-045'],
+    ['agent', 'absent'],
+    ['responsable', 'INC-2026-045'],
+    ['responsable', 'absent'],
+  ])('garde le contexte et Incidents actif sur le détail de %s, id %s', async (space, id) => {
+    await navigate(`/${space}/incidents/${id}?q=OUT&priority=low&status=open`);
+    expect(element.querySelector('app-incident-detail')).not.toBeNull();
+    expect(element.querySelector('.screen-title')?.textContent).toBe('Incidents');
+    const active = element.querySelectorAll('nav a[aria-current="page"]');
+    expect(active).toHaveLength(1);
+    expect(active[0].getAttribute('href')).toBe(`/${space}/incidents`);
+    if (space === 'agent')
+      expect(element.querySelector('.more-toggle')?.getAttribute('aria-label')).toBe(
+        'Plus — Incidents actif',
+      );
+    http.expectNone(() => true);
+  });
 
   it.each(['agent', 'responsable'])(
     'ouvre une fiche depuis la recherche de %s puis retrouve la saisie et les résultats',
