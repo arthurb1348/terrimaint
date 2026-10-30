@@ -249,10 +249,12 @@ reste correcte. Remplacer l'identifiant par `inconnu` : message explicite et ret
 2. Pourquoi faut-il observer `paramMap` plutôt que lire seulement l'identifiant au démarrage ?
 3. Comment le lien de retour peut-il retrouver la recherche sans stockage ni visite précédente de la liste ?
 
-## Déclaration locale d'incident (issue #34, en revue)
+## Déclaration locale d'incident (issue #34, fusionnée)
 
-Ce parcours est proposé après la [PR #32 fusionnée](https://github.com/arthurb1348/terrimaint/pull/32).
-Il reste une démonstration sans enregistrement, en revue jusqu'à sa propre fusion.
+Ce parcours est intégré par la [PR #35 fusionnée](https://github.com/arthurb1348/terrimaint/pull/35),
+après la fiche de la PR #32. Il reste une démonstration sans enregistrement.
+L'ajustement de saisie et des boutons de l'**issue #36 reste en revue jusqu'à fusion** ;
+les règles ci-dessous décrivent cet ajustement proposé.
 Les routes `/agent/incidents/nouveau/:equipmentId` et
 `/responsable/incidents/nouveau/:equipmentId` chargent **le même `IncidentDeclaration`**.
 Le paramètre `equipmentId` sélectionne un objet dans `DEMO_EQUIPMENT`, la seule source de
@@ -267,10 +269,13 @@ sa valeur et son état de validation ; `formControlName` relie le champ HTML au 
 `nonNullable` permet de revenir à une chaîne vide ou à `false` lors d'un `reset`, plutôt
 qu'à `null`. Aucun service de brouillon ou stockage n'est ajouté.
 
-Intitulé et description doivent contenir un caractère autre qu'un espace : le validateur
-`nonBlank` teste `trim()` sans modifier la valeur saisie. `Validators.maxLength` vérifie les
-limites de démonstration **120 et 2000**, également annoncées dans l'aide et appliquées par
-`maxlength` dans le navigateur. Le test Angular reste utile si cette limite HTML est contournée.
+L'intitulé doit contenir un caractère autre qu'un espace : `nonBlank` teste `trim()` sans
+modifier la valeur saisie. La **description est facultative**, dans Angular, le HTML et les
+aides. Son validateur accepte la chaîne vide ou blanche ; sinon il applique
+`Validators.maxLength`. Les limites de démonstration **120 et 2000** sont aussi annoncées
+dans l'aide et appliquées par `maxlength` dans le navigateur. Pour des détails non blancs,
+la longueur brute est contrôlée : les espaces de bord ne sont pas retirés.
+Le test Angular reste utile si cette limite HTML est contournée.
 Ce sont des longueurs JavaScript/HTML en unités UTF-16, à confirmer avec le futur serveur.
 La priorité doit appartenir aux trois valeurs examinées ; aucun choix n'est présélectionné.
 Les valeurs internes `low`, `high`, `urgent` correspondent aux textes **Faible, Haute, Urgente**.
@@ -283,8 +288,16 @@ Les contrôles gardent leurs valeurs. La case de risque est facultative et ne ch
 le matériel : ni type d'incident ni immobilisation ne sont implémentés par ce formulaire.
 
 Le signal `step` choisit entre `form`, `review` et `complete`. La validation locale ouvre le
-récapitulatif, qui lit les contrôles existants ; **Modifier** réaffiche les mêmes valeurs.
-**Terminer la simulation** change seulement l'étape : aucun numéro, appel HTTP ni sauvegarde.
+récapitulatif avec **Vérifier le signalement**. Il lit les contrôles existants ;
+**Modifier le signalement** réaffiche les mêmes valeurs.
+`descriptionLabel()` retourne **Non renseignée** si `trim()` ne trouve aucun détail,
+ou la valeur exacte dans le cas contraire. Cette méthode ne modifie pas le `FormControl` :
+le texte d'absence n'est jamais une donnée saisie et une description blanche est retrouvée
+telle quelle avec Modifier. Les retours à la ligne des descriptions renseignées sont conservés.
+**Envoyer le signalement** change seulement l'étape : aucun numéro, appel HTTP ni sauvegarde.
+La mention de démonstration placée près du bouton lui est reliée par `aria-describedby`.
+La confirmation **Signalement simulé** rappelle qu'aucun signalement n'est réellement
+transmis ou enregistré. Seuls les libellés changent, sans renommer les routes ou composants.
 Une mention visible explique dès le départ que la saisie est perdue en quittant ou rechargeant.
 Le composant est détruit à la sortie. S'il est réutilisé pour un autre `equipmentId`, un
 `effect` remet valeurs, erreurs et étape à zéro ; observer seulement l'initialisation serait
@@ -334,7 +347,8 @@ reconnaît aussi ce sous-chemin pour annoncer **Plus — Incidents actif** sur p
 | `e2e/responsive.pw.ts` | Clavier, états du parcours, rechargement, quatre formats et captures. |
 
 Une future API devra définir validation serveur, authentification, permissions et conservation
-des données avant tout envoi. Photos/audio/GPS et brouillons persistants restent des tâches
+des données avant tout envoi, en conservant la description facultative prévue par l'issue #36.
+Photos/audio/GPS et brouillons persistants restent des tâches
 suivantes ; le code présent ne prétend pas les fournir. Dépendances et politique npm ne changent pas.
 
 ### Essai manuel et compréhension
@@ -343,10 +357,12 @@ Avec les versions Node/npm du dépôt, exécuter `npm ci` puis `npm start` dans 
 Dans chacun des deux espaces :
 
 1. Chercher `  tONDeUSE  ` dans Matériel, ouvrir sa fiche au clavier, puis Déclarer un incident.
-2. Tenter de continuer avec des champs vides ou blancs : vérifier erreurs et focus, puis
-   renseigner intitulé, description, une priorité et éventuellement le risque.
-3. Vérifier le récapitulatif, utiliser Modifier et retrouver toutes les valeurs ; terminer
-   la simulation, lire l'absence d'enregistrement, puis revenir à la fiche et à la recherche.
+2. Tenter de continuer sans intitulé ni priorité : vérifier erreurs et focus. Renseigner
+   ces deux champs, laisser la description vide ou blanche, puis Vérifier le signalement :
+   le récapitulatif affiche Non renseignée. Essayer aussi une description renseignée.
+3. Utiliser Modifier le signalement et retrouver toutes les valeurs. Envoyer le signalement,
+   lire la confirmation de démonstration sans transmission/enregistrement, puis revenir à
+   la fiche et à la recherche. Le risque facultatif ne modifie jamais le statut du matériel.
 4. Essayer Annuler, une URL directe, un rechargement après saisie et un identifiant inconnu.
    Refaire à 320, 390, 768 et 1440 px avec Tab, Maj+Tab, flèches et Espace ; vérifier le focus
    visible et l'absence de débordement. Django n'est pas nécessaire pour cette démonstration.
@@ -354,7 +370,7 @@ Dans chacun des deux espaces :
 Questions pour l'oral :
 
 1. Comment `formControlName` relie-t-il le champ saisi au validateur puis au récapitulatif ?
-2. Pourquoi Modifier conserve-t-il les valeurs, alors que recharger ou changer de matériel les efface ?
+2. Pourquoi Non renseignée doit-il rester un texte d'affichage plutôt qu'une valeur du formulaire ?
 3. Pourquoi transmettre `q` dans les liens, tout en gardant les données d'incident hors de l'URL ?
 
 ## Backend et script de contrôle
@@ -661,7 +677,7 @@ Agent fixe. Les captures `lien-fiche-focus`, `fiche-materiel`, `retour-recherche
 `equipement-introuvable` servent à la relecture. La réutilisation d'une même instance lors
 du changement d'`id` est vérifiée séparément avec le routeur Angular dans Vitest.
 
-L'issue #34 propose **136 scénarios**, soit 32 de plus : quatre URL de déclaration aux quatre
+La PR #35 a intégré **136 scénarios**, soit 32 de plus : quatre URL de déclaration aux quatre
 formats et deux parcours supplémentaires par espace. Ils couvrent formulaire/erreurs,
 validation de priorité au clavier, risque, récapitulatif/Modifier/fin, annulation, `q`, accès
 direct, perte de saisie au rechargement et matériel inconnu. Les champs focalisés doivent
@@ -672,6 +688,15 @@ d'identifiant dans une même instance, les bornes dépassées et l'absence de mu
 Les captures `incident-erreurs`, `incident-formulaire`, `incident-recapitulatif`,
 `incident-simulation-terminee`, `incident-recapitulatif-limites` et `incident-materiel-introuvable`
 sont jointes au rapport pour la relecture.
+
+L'issue #36 adapte les parcours et propose **144 scénarios** : dans les deux espaces et
+aux quatre formats, le parcours ajouté accepte une description vide puis blanche, vérifie
+Non renseignée dans le récapitulatif et retrouve la valeur exacte avec Modifier le signalement.
+Les boutons Vérifier/Envoyer/Modifier le signalement sont utilisés au clavier et restent
+entièrement visibles ; la mention de démonstration près de l'action finale doit aussi tenir
+dans la fenêtre. Les tests unitaires conservent les refus d'intitulé/priorité et des bornes
+120/121 et 2000/2001 pour les détails renseignés, avec des cas d'absence et de modification.
+La capture `signalement-sans-description` complète celles du parcours existant.
 
 La fixture `page` intercepte uniquement `/api/v1/health` et répond `{"status":"ok"}`.
 L'objectif est la mise en page et la navigation : aucun serveur Django ni authentification

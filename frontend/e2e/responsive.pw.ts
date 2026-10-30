@@ -147,8 +147,11 @@ for (const space of ['agent', 'responsable']) {
     const declaration = `/${space}/incidents/nouveau/EQ-OUT-0001`;
     const main = page.getByRole('main');
     const title = main.getByRole('textbox', { name: 'Intitulé', exact: true });
-    const description = main.getByRole('textbox', { name: 'Description', exact: true });
-    const verify = main.getByRole('button', { name: 'Vérifier la déclaration', exact: true });
+    const description = main.getByRole('textbox', {
+      name: 'Description (facultative)',
+      exact: true,
+    });
+    const verify = main.getByRole('button', { name: 'Vérifier le signalement', exact: true });
     const risk = main.getByRole('checkbox', {
       name: "Je signale un risque ou une impossibilité d'utilisation",
       exact: true,
@@ -183,25 +186,24 @@ for (const space of ['agent', 'responsable']) {
     ).toBeFocused();
     await page.keyboard.press('Tab');
     await expectFocusedControlVisible(page, title, space);
-    await page.keyboard.type('Le moteur cale');
+    await page.keyboard.type('   ');
     await page.keyboard.press('Tab');
     await expectFocusedControlVisible(page, description, space);
-    await page.keyboard.type('   ');
+    await page.keyboard.type('Le moteur cale lors de l’accélération.\nRedémarrage difficile.');
     await verify.focus();
     await page.keyboard.press('Enter');
-    await expectFocusedControlVisible(page, description, space);
-    await expect(description).toHaveAttribute('aria-invalid', 'true');
-    await expect(description).toHaveAttribute(
-      'aria-describedby',
-      'description-help description-error',
+    await expectFocusedControlVisible(page, title, space);
+    await expect(title).toHaveAttribute('aria-invalid', 'true');
+    await expect(title).toHaveAttribute('aria-describedby', 'title-help title-error');
+    await expect(main.locator('#title-error')).toContainText('caractère autre');
+    await expect(title).toHaveValue('   ');
+    await expect(description).toHaveValue(
+      'Le moteur cale lors de l’accélération.\nRedémarrage difficile.',
     );
-    await expect(main.locator('#description-error')).toContainText('caractère autre');
-    await expect(title).toHaveValue('Le moteur cale');
-    await expect(description).toHaveValue('   ');
     await expectNoHorizontalOverflow(page);
     await capture(page, info, 'incident-erreurs');
     await page.keyboard.press('ControlOrMeta+A');
-    await page.keyboard.type('Le moteur cale lors de l’accélération.\nRedémarrage difficile.');
+    await page.keyboard.type('Le moteur cale');
     await verify.focus();
     await page.keyboard.press('Enter');
     const low = main.getByRole('radio', { name: 'Faible — intervention à planifier', exact: true });
@@ -220,7 +222,7 @@ for (const space of ['agent', 'responsable']) {
     await expectFocusedControlVisible(page, verify, space);
     await capture(page, info, 'incident-formulaire');
     await page.keyboard.press('Enter');
-    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Vérifier la déclaration');
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Vérifier le signalement');
     await expect(main.getByRole('heading', { level: 1 })).toBeFocused();
     await expect(main.locator('dd')).toHaveText([
       'Le moteur cale',
@@ -233,10 +235,10 @@ for (const space of ['agent', 'responsable']) {
     await capture(page, info, 'incident-recapitulatif');
     await page.keyboard.press('Tab');
     await expect(
-      main.getByRole('button', { name: 'Terminer la simulation', exact: true }),
+      main.getByRole('button', { name: 'Envoyer le signalement', exact: true }),
     ).toBeFocused();
     await page.keyboard.press('Tab');
-    const edit = main.getByRole('button', { name: 'Modifier', exact: true });
+    const edit = main.getByRole('button', { name: 'Modifier le signalement', exact: true });
     await expectFocusedControlVisible(page, edit, space);
     await page.keyboard.press('Enter');
     await expectFocusedControlVisible(page, title, space);
@@ -251,11 +253,13 @@ for (const space of ['agent', 'responsable']) {
     await page.keyboard.press('Enter');
     await expect(main.locator('dd').first()).toHaveText('Le moteur cale à chaud');
     await page.keyboard.press('Tab');
-    const finish = main.getByRole('button', { name: 'Terminer la simulation', exact: true });
+    const finish = main.getByRole('button', { name: 'Envoyer le signalement', exact: true });
     await expectFocusedControlVisible(page, finish, space);
+    await expect(main.locator('#simulation-notice')).toBeInViewport({ ratio: 1 });
+    await expect(finish).toHaveAccessibleDescription(/Démonstration : aucun signalement/);
     await page.keyboard.press('Enter');
-    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Simulation terminée');
-    await expect(main).toContainText("Aucun incident n'a été enregistré ni envoyé");
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement simulé');
+    await expect(main).toContainText("aucun signalement n'est réellement transmis ou enregistré");
     await expectIncidentsActive(page, space);
     await expectNoHorizontalOverflow(page);
     await capture(page, info, 'incident-simulation-terminee');
@@ -283,6 +287,69 @@ for (const space of ['agent', 'responsable']) {
     await expectNoHorizontalOverflow(page);
   });
 
+  test(`Le signalement de ${space} accepte une description vide ou blanche et conserve la saisie après modification`, async ({
+    page,
+  }, info) => {
+    const query = '  OUT  ';
+    const main = page.getByRole('main');
+    await page.goto(`/${space}/incidents/nouveau/EQ-OUT-0003?${new URLSearchParams({ q: query })}`);
+    const title = main.getByRole('textbox', { name: 'Intitulé', exact: true });
+    const description = main.getByRole('textbox', {
+      name: 'Description (facultative)',
+      exact: true,
+    });
+    const verify = main.getByRole('button', { name: 'Vérifier le signalement', exact: true });
+    const edit = main.getByRole('button', { name: 'Modifier le signalement', exact: true });
+    await expect(description).not.toHaveAttribute('required');
+    await title.fill('Bruit au démarrage');
+    await main
+      .getByRole('radio', { name: 'Faible — intervention à planifier', exact: true })
+      .check();
+    for (const value of ['', '   ']) {
+      await description.fill(value);
+      await verify.focus();
+      await page.keyboard.press('Enter');
+      await expect(main.getByRole('heading', { level: 1 })).toHaveText('Vérifier le signalement');
+      await expect(main.getByRole('heading', { level: 1 })).toBeFocused();
+      await expect(main.locator('dd').nth(1)).toHaveText('Non renseignée');
+      await expectIncidentsActive(page, space);
+      await expectNoHorizontalOverflow(page);
+      await page.keyboard.press('Tab');
+      await expect(
+        main.getByRole('button', { name: 'Envoyer le signalement', exact: true }),
+      ).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, edit, space);
+      await page.keyboard.press('Enter');
+      await expectFocusedControlVisible(page, title, space);
+      await expect(title).toHaveValue('Bruit au démarrage');
+      await expect(description).toHaveValue(value);
+      await expect(
+        main.getByRole('radio', { name: 'Faible — intervention à planifier', exact: true }),
+      ).toBeChecked();
+      await expect(main.locator('.error')).toHaveCount(0);
+    }
+    await verify.focus();
+    await page.keyboard.press('Enter');
+    // Attendre le focus posé après rendu avant de reprendre la tabulation.
+    await expect(main.getByRole('heading', { level: 1 })).toBeFocused();
+    await page.keyboard.press('Tab');
+    const send = main.getByRole('button', { name: 'Envoyer le signalement', exact: true });
+    await expectFocusedControlVisible(page, send, space);
+    await expect(main.locator('#simulation-notice')).toBeInViewport({ ratio: 1 });
+    await capture(page, info, 'signalement-sans-description');
+    await page.keyboard.press('Enter');
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement simulé');
+    await expect(main).toContainText(
+      "Démonstration : aucun signalement n'est réellement transmis ou enregistré.",
+    );
+    await main.getByRole('link', { name: 'Retour à la fiche', exact: true }).click();
+    await expect(page).toHaveURL(
+      (url) =>
+        url.pathname === `/${space}/equipements/EQ-OUT-0003` && url.searchParams.get('q') === query,
+    );
+  });
+
   test(`La déclaration de ${space} fonctionne en accès direct, s'annule et perd sa saisie au rechargement`, async ({
     page,
   }, info) => {
@@ -293,16 +360,19 @@ for (const space of ['agent', 'responsable']) {
     await expect(main.getByRole('heading', { level: 1 })).toHaveText('Déclarer un incident');
     await expectIncidentsActive(page, space);
     const title = main.getByRole('textbox', { name: 'Intitulé', exact: true });
-    const description = main.getByRole('textbox', { name: 'Description', exact: true });
-    await main.getByRole('button', { name: 'Vérifier la déclaration', exact: true }).click();
+    const description = main.getByRole('textbox', {
+      name: 'Description (facultative)',
+      exact: true,
+    });
+    await main.getByRole('button', { name: 'Vérifier le signalement', exact: true }).click();
     await expectFocusedControlVisible(page, title, space);
-    await expect(main.locator('.error')).toHaveCount(3);
+    await expect(main.locator('.error')).toHaveCount(2);
     await title.fill('B'.repeat(120));
     await description.fill('D'.repeat(2000));
     await main.getByRole('radio', { name: 'Urgente — danger immédiat', exact: true }).check();
     await main.getByRole('checkbox').check();
-    await main.getByRole('button', { name: 'Vérifier la déclaration', exact: true }).click();
-    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Vérifier la déclaration');
+    await main.getByRole('button', { name: 'Vérifier le signalement', exact: true }).click();
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Vérifier le signalement');
     await expectNoHorizontalOverflow(page);
     await capture(page, info, 'incident-recapitulatif-limites');
     await page.reload();

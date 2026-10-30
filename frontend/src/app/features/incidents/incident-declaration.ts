@@ -63,7 +63,11 @@ export class IncidentDeclaration {
     }),
     description: new FormControl('', {
       nonNullable: true,
-      validators: [nonBlank, Validators.maxLength(this.descriptionLimit)],
+      // Des espaces seuls représentent une absence ; la borne porte sur les détails fournis.
+      validators: [
+        (control) =>
+          control.value.trim() ? Validators.maxLength(this.descriptionLimit)(control) : null,
+      ],
     }),
     priority: new FormControl('', {
       nonNullable: true,
@@ -128,6 +132,12 @@ export class IncidentDeclaration {
       (item) => item.value === this.form.controls.priority.value,
     );
     return priority ? `${priority.label} — ${priority.explanation}` : '';
+  }
+
+  protected descriptionLabel(): string {
+    const description = this.form.controls.description.value;
+    // Le texte d'absence reste une présentation : Modifier retrouve la saisie intacte.
+    return description.trim() ? description : 'Non renseignée';
   }
 
   protected revealDescription(control: HTMLTextAreaElement): void {

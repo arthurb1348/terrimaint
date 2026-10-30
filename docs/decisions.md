@@ -1,6 +1,30 @@
 # Décisions techniques et métier
 
-## 2026-10-30 — Déclaration d'incident de démonstration (issue #34, en revue)
+## 2026-10-30 — Saisie et actions de signalement (issue #36, en revue)
+
+Après validation manuelle du parcours de la PR #35, Arthur demande dans
+l'[issue #36](https://github.com/arthurb1348/terrimaint/issues/36) une **description facultative**
+et des boutons formulés autour de l'action utilisateur. L'intitulé et la priorité restent
+obligatoires. Les bornes restent 120 caractères pour l'intitulé et 2000 pour une description
+renseignée, en unités UTF-16 comme auparavant. Une valeur vide ou composée uniquement
+d'espaces représente une absence, sans erreur de validation. Les détails non blancs sont
+contrôlés sur leur longueur brute, sans supprimer les espaces ni les retours à la ligne saisis.
+Cette règle devra être conservée dans le futur contrat serveur.
+
+Le champ porte le libellé **Description (facultative)**. Le récapitulatif affiche
+**Non renseignée** en cas d'absence, uniquement pour la présentation : le formulaire garde
+sa valeur exacte, retrouvée avec **Modifier le signalement**. **Vérifier le signalement**
+ouvre le récapitulatif ; **Envoyer le signalement** termine encore une simulation locale.
+Une mention de démonstration se trouve près de cette action et lui est associée
+par `aria-describedby`. La confirmation **Signalement simulé** précise qu'aucun signalement
+n'est réellement transmis ou enregistré. Le vocabulaire utilisateur ne crée aucun envoi métier.
+
+Le matériel choisi, les deux espaces, `q`, le clavier, la mémoire seule et la règle de risque
+sans changement de statut sont conservés. Aucun renommage général des composants/routes,
+API, stockage ou dépendance ajouté. Cet ajustement reste **en revue jusqu'à fusion** ;
+la validation humaine et la fusion restent à Arthur.
+
+## 2026-10-30 — Déclaration d'incident de démonstration (issue #34, fusionnée)
 
 L'[issue #34](https://github.com/arthurb1348/terrimaint/issues/34) propose une consultation
 locale du parcours **fiche → formulaire → récapitulatif modifiable → simulation terminée**.
@@ -26,7 +50,8 @@ priment : **aucun type d'incident et aucun changement de statut d'équipement**.
 risque n'immobilise pas le matériel, y compris dans l'espace Responsable ; l'immobilisation
 officielle reste un futur parcours réservé au Responsable.
 
-Intitulé et description doivent contenir autre chose que des espaces. Leurs limites sont
+Dans cet incrément initial, intitulé et description doivent contenir autre chose que des espaces.
+La description facultative fait l'objet de l'ajustement #36 décrit ci-dessus. Les limites sont
 **120 et 2000 caractères** (longueur JavaScript/HTML, en unités UTF-16) : bornes frontend de
 démonstration, visibles dans l'aide et à confirmer avec le futur contrat serveur. Les erreurs
 conservent la saisie et déplacent le focus au premier champ invalide. Modifier depuis le
@@ -40,7 +65,9 @@ audio, GPS, brouillons persistants et API restent futurs. Les routes publiques e
 locale ne constituent pas des permissions ou une validation serveur. Dépendances et politique
 npm de la PR #30 sont conservées. L'[issue #33](https://github.com/arthurb1348/terrimaint/issues/33)
 reste un diagnostic distinct : aucun contournement de l'autocomplétion n'est ajouté.
-Cette adaptation reste **en revue jusqu'à fusion**, avec validation humaine ouverte.
+Cet incrément est intégré par la [PR #35](https://github.com/arthurb1348/terrimaint/pull/35),
+fusionnée le 30 octobre 2026 (commit `5e348c7f275a471e9369571a1181801c2291a1d4`),
+vérifié dans le dernier `origin/main` avant création de la branche de l'issue #36.
 
 ## 2026-10-30 — Fiche Matériel locale et recherche dans l'URL (issue #31, fusionnée)
 
