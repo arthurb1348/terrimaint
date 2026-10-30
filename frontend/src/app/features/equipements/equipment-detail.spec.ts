@@ -37,7 +37,10 @@ describe('Fiche de matériel de démonstration', () => {
       expect(content().textContent).toContain('Données de démonstration');
       expect(returnUrl()).toBe(`/${space}/equipements`);
       expect(content().querySelector('a')?.textContent).toBe('Retour au matériel');
-      expect(content().textContent).not.toMatch(/Synchronisé|Disponible|Déclarer un incident/);
+      const declaration = content().querySelector<HTMLAnchorElement>('.declaration-link')!;
+      expect(declaration.textContent?.trim()).toBe('Déclarer un incident');
+      expect(declaration.getAttribute('href')).toBe(`/${space}/incidents/nouveau/EQ-OUT-0003`);
+      expect(content().textContent).not.toMatch(/Synchronisé|Disponible/);
     },
   );
 
@@ -47,6 +50,7 @@ describe('Fiche de matériel de démonstration', () => {
       await harness.navigateByUrl(`/${space}/equipements/inconnu?q=Souffleur`, EquipmentDetail);
       expect(content().querySelector('h1')?.textContent).toBe('Équipement introuvable');
       expect(content().querySelector('dl')).toBeNull();
+      expect(content().querySelector('.declaration-link')).toBeNull();
       expect(content().textContent).toContain('Données de démonstration');
       expect(returnUrl()).toBe(`/${space}/equipements?q=Souffleur`);
     },
@@ -93,6 +97,10 @@ describe('Fiche de matériel de démonstration', () => {
       );
       const router = TestBed.inject(Router);
       expect(router.parseUrl(returnUrl()).queryParams['q']).toBe('  tONDeUSE  ');
+      expect(
+        router.parseUrl(content().querySelector('.declaration-link')!.getAttribute('href')!)
+          .queryParams['q'],
+      ).toBe('  tONDeUSE  ');
       expect(
         await harness.navigateByUrl(`/${space}/equipements/EQ-OUT-0001?q=EQ-OUT`, EquipmentDetail),
       ).toBe(component);

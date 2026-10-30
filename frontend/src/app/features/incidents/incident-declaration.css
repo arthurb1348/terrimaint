@@ -1,0 +1,148 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+.feature-page {
+  max-width: 768px;
+  overflow-wrap: anywhere;
+}
+.demo-label {
+  width: fit-content;
+  padding: 4px 12px;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--green);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.demo-notice,
+.help {
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+h1 {
+  margin: 24px 0;
+}
+.equipment-summary {
+  margin: 24px 0;
+  padding: 16px;
+  background: var(--surface);
+  border-left: 4px solid var(--green);
+  border-radius: 12px;
+}
+.equipment-summary h2 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+.equipment-summary p {
+  margin: 4px 0 0;
+}
+form,
+.review-values {
+  display: grid;
+  gap: 24px;
+}
+form > p,
+.help,
+.error {
+  margin: 0;
+}
+.field {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+label,
+legend,
+dt {
+  font-weight: 600;
+}
+input[type='text'],
+textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font: inherit;
+  color: var(--text);
+  background: white;
+}
+textarea {
+  resize: vertical;
+}
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+}
+/* La barre Agent est fixe : le contrôle focalisé doit rester entièrement visible. */
+input,
+textarea,
+button,
+a,
+[tabindex] {
+  scroll-margin-block: 24px calc(112px + env(safe-area-inset-bottom));
+}
+fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+legend {
+  margin-bottom: 8px;
+}
+.choice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px;
+  font-weight: 400;
+  cursor: pointer;
+}
+.choice input {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  margin: 2px 0 0;
+  accent-color: var(--green);
+}
+.error {
+  color: #9a2a22;
+  font-weight: 600;
+}
+[aria-invalid='true'] {
+  border-color: #9a2a22;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+button,
+.feature-page .return-link {
+  min-height: 48px;
+  max-width: 100%;
+  padding: 10px 16px;
+  border: 1px solid var(--green);
+  border-radius: 8px;
+  background: var(--green);
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+button.secondary {
+  color: var(--green);
+  background: white;
+}
+dd {
+  margin: 4px 0 0;
+  white-space: pre-wrap;
+}

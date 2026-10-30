@@ -23,12 +23,15 @@
     [class.expanded]="expanded()"
   >
     @for (destination of destinations(); track destination.path) {
-      <!-- Matériel reste actif sur ses fiches et lorsque la recherche q est présente. -->
+      <!-- Les fiches Matériel et la déclaration gardent leur domaine actif, même avec q. -->
       <a
         [class.scanner-link]="destination.path === '/agent/scanner'"
         [routerLink]="destination.path"
         routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: !destination.path.endsWith('/equipements') }"
+        [routerLinkActiveOptions]="{
+          exact:
+            !destination.path.endsWith('/equipements') && !destination.path.endsWith('/incidents'),
+        }"
         ariaCurrentWhenActive="page"
         (click)="closeNavigation()"
       >
@@ -59,7 +62,7 @@
             <a
               [routerLink]="destination.path"
               routerLinkActive="active"
-              [routerLinkActiveOptions]="{ exact: true }"
+              [routerLinkActiveOptions]="{ exact: !destination.path.endsWith('/incidents') }"
               ariaCurrentWhenActive="page"
               (click)="closeNavigation()"
             >

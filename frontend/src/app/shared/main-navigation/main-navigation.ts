@@ -32,9 +32,13 @@ export class MainNavigation {
     { path: '/agent/profil', label: 'Profil', icon: 'profile' },
   ];
   protected readonly activeSecondary = computed(() =>
-    this.secondaryDestinations.find(
-      (destination) => this.currentUrl().split(/[?#]/)[0] === destination.path,
-    ),
+    this.secondaryDestinations.find((destination) => {
+      const path = this.currentUrl().split(/[?#]/)[0];
+      return (
+        path === destination.path ||
+        (destination.path.endsWith('/incidents') && path.startsWith(`${destination.path}/`))
+      );
+    }),
   );
 
   constructor() {

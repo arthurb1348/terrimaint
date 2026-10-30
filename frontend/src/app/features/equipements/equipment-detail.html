@@ -20,6 +20,12 @@
         <dd>{{ item.location }}</dd>
       </div>
     </dl>
+    <a
+      class="declaration-link"
+      [routerLink]="['../../incidents/nouveau', item.id]"
+      [queryParams]="{ q: search() || null }"
+      >Déclarer un incident</a
+    >
   } @else {
     <h1 id="equipment-title">Équipement introuvable</h1>
     <p>Aucun équipement de démonstration ne correspond à cet identifiant.</p>

@@ -1,6 +1,48 @@
 # Décisions techniques et métier
 
-## 2026-10-30 — Fiche Matériel locale et recherche dans l'URL (issue #31, en revue)
+## 2026-10-30 — Déclaration d'incident de démonstration (issue #34, en revue)
+
+L'[issue #34](https://github.com/arthurb1348/terrimaint/issues/34) propose une consultation
+locale du parcours **fiche → formulaire → récapitulatif modifiable → simulation terminée**.
+Un même composant sert `/agent/incidents/nouveau/:equipmentId` et son équivalent Responsable.
+Il retrouve le matériel dans l'unique source typée déjà utilisée par la liste et la fiche.
+Incidents reste actif pendant tout le parcours, y compris dans Plus sur petit écran Agent.
+Les retours visent explicitement la fiche du même espace et transmettent seulement `q`,
+la recherche de la liste. Un identifiant inconnu ne permet aucune déclaration.
+
+Les prototypes Figma [description `188:36`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-36)
+et [priorité `188:45`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-45)
+ont été consultés. Pour ce premier incrément, leurs deux étapes sont **regroupées dans un
+formulaire** : intitulé, description, priorité et signalement facultatif d'un risque ou d'une
+impossibilité d'utilisation. Cela permet de relire et corriger l'ensemble sans introduire
+les étapes médias/localisation prévues plus tard. Le récapitulatif reste une étape distincte.
+La charte, la carte matériel, les champs étiquetés et les choix radio suivent les références ;
+les indications de synchronisation et de disponibilité du prototype ne sont pas simulées.
+
+La priorité exige un choix explicite, sans sélection initiale : **Faible — intervention à
+planifier**, **Haute — intervention rapide**, **Urgente — danger immédiat**. Le libellé visible
+Faible prévaut sur le nom interne d'une couche Figma. Les décisions métier du 16 octobre
+priment : **aucun type d'incident et aucun changement de statut d'équipement**. Signaler un
+risque n'immobilise pas le matériel, y compris dans l'espace Responsable ; l'immobilisation
+officielle reste un futur parcours réservé au Responsable.
+
+Intitulé et description doivent contenir autre chose que des espaces. Leurs limites sont
+**120 et 2000 caractères** (longueur JavaScript/HTML, en unités UTF-16) : bornes frontend de
+démonstration, visibles dans l'aide et à confirmer avec le futur contrat serveur. Les erreurs
+conservent la saisie et déplacent le focus au premier champ invalide. Modifier depuis le
+récapitulatif retrouve toutes les valeurs ; terminer annonce explicitement qu'aucun incident
+n'a été enregistré ni envoyé et ne produit pas de numéro fictif.
+
+Les valeurs restent dans le composant en mémoire, jamais dans l'URL ni dans un stockage
+persistant. Quitter, recharger ou changer de matériel efface le formulaire et son étape ;
+une modification de `q` seule ne les efface pas. Aucune requête métier n'est faite. Photos,
+audio, GPS, brouillons persistants et API restent futurs. Les routes publiques et la validation
+locale ne constituent pas des permissions ou une validation serveur. Dépendances et politique
+npm de la PR #30 sont conservées. L'[issue #33](https://github.com/arthurb1348/terrimaint/issues/33)
+reste un diagnostic distinct : aucun contournement de l'autocomplétion n'est ajouté.
+Cette adaptation reste **en revue jusqu'à fusion**, avec validation humaine ouverte.
+
+## 2026-10-30 — Fiche Matériel locale et recherche dans l'URL (issue #31, fusionnée)
 
 La consultation de l'[issue #31](https://github.com/arthurb1348/terrimaint/issues/31) partage
 un seul composant entre `/agent/equipements/:id` et `/responsable/equipements/:id` et lit
@@ -17,7 +59,9 @@ reste actif sur sa liste et ses fiches ; les routes demeurent publiques, sans pe
 La fiche affiche uniquement nom, identifiant, emplacement et mention de démonstration.
 Statuts, historiques, formulaires, modification, scanner et API métier restent hors périmètre.
 La charte et les parties pertinentes des prototypes sont reprises sans simuler leurs
-fonctions futures. Cet incrément reste **en revue jusqu'à fusion**.
+fonctions futures. Cet incrément est intégré par la
+[PR #32](https://github.com/arthurb1348/terrimaint/pull/32), fusionnée le 30 octobre 2026
+(commit `ab29cc512a384cbe5a583b3e42b7f24312932dc0`), vérifié dans `origin/main` avant l'issue #34.
 
 ## 2026-10-30 — Outillage frontend et scripts npm examinés (fusionnée)
 

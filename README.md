@@ -105,7 +105,8 @@ npm run test:responsive:report
 
 Sous Linux, `npx playwright install --with-deps chromium` installe aussi les bibliothèques
 système requises. Playwright démarre Angular automatiquement ; Django n'est pas nécessaire
-car la santé HTTP est simulée. Les tests couvrent les pages, les fiches Matériel et les menus en Chromium à
+car la santé HTTP est simulée. Les tests couvrent les pages, les fiches Matériel, la simulation
+locale d'incident et les menus en Chromium à
 320, 390, 768 et 1440 px. Le [guide du code](docs/code-guide.md#tests-navigateur-responsive)
 explique les vérifications et leurs limites.
 

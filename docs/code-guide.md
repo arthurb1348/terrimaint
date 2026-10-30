@@ -173,7 +173,7 @@ nom/référence/emplacement et la charte existante ; il ne s'agit pas d'une fid�
 à un prototype complet de cette liste. Les statuts, historiques, actions d'incident et
 synchronisation restent hors de la consultation de démonstration.
 
-### Fiche partagée et circulation des données (issue #31, en revue)
+### Fiche partagée et circulation des données (issue #31, fusionnée)
 
 Les routes `/agent/equipements/:id` et `/responsable/equipements/:id` utilisent le même
 `EquipmentDetail`, chargé par `loadComponent`. `:id` est une partie variable du chemin :
@@ -198,9 +198,10 @@ lien « Retour au matériel » ; l'ancienne fiche n'est plus affichée.
 même si aucune liste n'a été visitée auparavant. Il ne dépend pas de l'historique du
 navigateur. La liste et la fiche restent publiques ; un préfixe `/responsable` ne donne aucun droit.
 
-La navigation utilise une correspondance de chemin partielle **uniquement pour Matériel** :
-son lien racine reste actif sur `/equipements/:id` et quand `q` est présent. Les autres
-destinations gardent leur correspondance exacte. Pour le clavier, la fiche place le focus sur
+La navigation utilise une correspondance de chemin partielle pour Matériel :
+son lien racine reste actif sur `/equipements/:id` et quand `q` est présent. L'issue #34 étend
+cette règle à Incidents pour son formulaire ; les autres destinations gardent leur
+correspondance exacte. Pour le clavier, la fiche place le focus sur
 le `main` permanent du shell après rendu : Tab atteint le retour. Au retour, ce repère garde
 le focus, puis Tab retrouve le champ de recherche. Le CSS utilise les couleurs existantes,
 des espacements de 16/24 px et le retour à la ligne pour les contenus longs, sans largeur minimale rigide.
@@ -247,6 +248,114 @@ reste correcte. Remplacer l'identifiant par `inconnu` : message explicite et ret
 1. Quelle différence y a-t-il entre `id` dans le chemin et `q` dans la recherche de l'URL ?
 2. Pourquoi faut-il observer `paramMap` plutôt que lire seulement l'identifiant au démarrage ?
 3. Comment le lien de retour peut-il retrouver la recherche sans stockage ni visite précédente de la liste ?
+
+## Déclaration locale d'incident (issue #34, en revue)
+
+Ce parcours est proposé après la [PR #32 fusionnée](https://github.com/arthurb1348/terrimaint/pull/32).
+Il reste une démonstration sans enregistrement, en revue jusqu'à sa propre fusion.
+Les routes `/agent/incidents/nouveau/:equipmentId` et
+`/responsable/incidents/nouveau/:equipmentId` chargent **le même `IncidentDeclaration`**.
+Le paramètre `equipmentId` sélectionne un objet dans `DEMO_EQUIPMENT`, la seule source de
+matériel. Un accès direct valide fonctionne ; un inconnu affiche un retour sans formulaire.
+Ces routes sont publiques : le contexte d'affichage n'est pas une permission.
+
+### Formulaire, validation et mémoire
+
+`ReactiveFormsModule` appartient à `@angular/forms`, déjà installé. Un `FormGroup` rassemble
+quatre `FormControl` : `title`, `description`, `priority` et `risk`. Chaque contrôle contient
+sa valeur et son état de validation ; `formControlName` relie le champ HTML au contrôle.
+`nonNullable` permet de revenir à une chaîne vide ou à `false` lors d'un `reset`, plutôt
+qu'à `null`. Aucun service de brouillon ou stockage n'est ajouté.
+
+Intitulé et description doivent contenir un caractère autre qu'un espace : le validateur
+`nonBlank` teste `trim()` sans modifier la valeur saisie. `Validators.maxLength` vérifie les
+limites de démonstration **120 et 2000**, également annoncées dans l'aide et appliquées par
+`maxlength` dans le navigateur. Le test Angular reste utile si cette limite HTML est contournée.
+Ce sont des longueurs JavaScript/HTML en unités UTF-16, à confirmer avec le futur serveur.
+La priorité doit appartenir aux trois valeurs examinées ; aucun choix n'est présélectionné.
+Les valeurs internes `low`, `high`, `urgent` correspondent aux textes **Faible, Haute, Urgente**.
+Les radios partagent aussi le nom HTML `priority` pour former un vrai groupe au clavier.
+
+Le formulaire utilise `novalidate` pour afficher ses propres messages associés par
+`aria-describedby` et `aria-invalid`. À une tentative invalide, `markAllAsTouched` rend
+les erreurs visibles et le focus rejoint le premier champ invalide après le rendu.
+Les contrôles gardent leurs valeurs. La case de risque est facultative et ne change jamais
+le matériel : ni type d'incident ni immobilisation ne sont implémentés par ce formulaire.
+
+Le signal `step` choisit entre `form`, `review` et `complete`. La validation locale ouvre le
+récapitulatif, qui lit les contrôles existants ; **Modifier** réaffiche les mêmes valeurs.
+**Terminer la simulation** change seulement l'étape : aucun numéro, appel HTTP ni sauvegarde.
+Une mention visible explique dès le départ que la saisie est perdue en quittant ou rechargeant.
+Le composant est détruit à la sortie. S'il est réutilisé pour un autre `equipmentId`, un
+`effect` remet valeurs, erreurs et étape à zéro ; observer seulement l'initialisation serait
+insuffisant. Le `computed` d'identifiant évite d'effacer le formulaire quand seul `q` change.
+
+### Circulation des données et retours
+
+**Liste et recherche `q` → fiche avec `id` et `q` → déclaration avec `equipmentId` et `q`
+→ contrôles en mémoire → récapitulatif → confirmation locale → fiche avec `id` et `q`
+→ liste filtrée**. L'intitulé, la description, la priorité et le risque ne passent jamais
+dans l'URL, `localStorage`, `sessionStorage` ou IndexedDB. `q` reste uniquement la recherche
+de matériel ; ce paramètre ne transporte pas le formulaire.
+
+Depuis une fiche, `['../../incidents/nouveau', item.id]` rejoint le domaine Incidents dans
+le même espace. Depuis la déclaration, `['../../../equipements', item.id]` vise explicitement
+la fiche ; sans matériel connu, le retour vise la liste. `[queryParams]` transmet `q` avec
+son encodage Angular. Ces vrais liens fonctionnent aussi après ouverture directe, sans
+faire l'hypothèse d'une page précédente dans l'historique.
+
+### Présentation, clavier et endroits à modifier
+
+Le formulaire regroupe les deux écrans Figma description/priorité pour ce premier incrément ;
+la [décision](decisions.md) explique ce choix et les règles métier qui priment sur les maquettes.
+La carte reprend la surface verte et le liseré du prototype, sans statut de disponibilité.
+Le CSS réutilise les couleurs du projet, des champs de largeur `100%` et `min-width: 0`,
+des actions flexibles avec retour à la ligne et `overflow-wrap: anywhere` pour les valeurs
+longues. `white-space: pre-wrap` conserve les retours à la ligne du récapitulatif.
+
+Le focus rejoint le contenu à l'entrée, le titre au récapitulatif et à la fin, et l'intitulé
+après Modifier. `scroll-margin-block` réserve un dégagement pour la barre Agent fixe.
+Pour la description multiligne, `revealDescription` centre le champ au focus : le défilement
+natif peut autrement ne dégager que le curseur et laisser le bas du champ derrière la barre.
+Ce comportement est contrôlé par la géométrie Playwright ; aucune modification de
+l'autocomplétion ni correction du diagnostic distinct #33 n'est ajoutée.
+Incidents reste actif sur son sous-chemin dans les deux navigations. `activeSecondary`
+reconnaît aussi ce sous-chemin pour annoncer **Plus — Incidents actif** sur petit écran Agent.
+
+| Fichier | Où intervenir |
+| --- | --- |
+| `src/app/features/incidents/incident-declaration.ts` | Contrôles, bornes, priorités, validation, étapes en mémoire et remise à zéro par identifiant. |
+| `incident-declaration.html` dans le même dossier | Libellés, aides/erreurs accessibles, carte, récapitulatif, simulation et liens de retour. |
+| `incident-declaration.css` dans le même dossier | Charte, champs, choix, actions, contenus longs et dégagement du focus. |
+| `src/app/features/equipements/equipment-detail.html` et `.css` | Lien Déclarer un incident, uniquement pour une fiche valide. |
+| `src/app/app.routes.ts` | Deux chemins publics vers le même composant. |
+| `src/app/shared/main-navigation/main-navigation.ts` et `.html` | Domaine Incidents actif et indication dans Plus. |
+| `incident-declaration.spec.ts`, `equipment-detail.spec.ts`, `src/app/app.spec.ts` | Validation/bornes, source inchangée, réinitialisation, contexte, liens et retours. |
+| `e2e/responsive.pw.ts` | Clavier, états du parcours, rechargement, quatre formats et captures. |
+
+Une future API devra définir validation serveur, authentification, permissions et conservation
+des données avant tout envoi. Photos/audio/GPS et brouillons persistants restent des tâches
+suivantes ; le code présent ne prétend pas les fournir. Dépendances et politique npm ne changent pas.
+
+### Essai manuel et compréhension
+
+Avec les versions Node/npm du dépôt, exécuter `npm ci` puis `npm start` dans `frontend/`.
+Dans chacun des deux espaces :
+
+1. Chercher `  tONDeUSE  ` dans Matériel, ouvrir sa fiche au clavier, puis Déclarer un incident.
+2. Tenter de continuer avec des champs vides ou blancs : vérifier erreurs et focus, puis
+   renseigner intitulé, description, une priorité et éventuellement le risque.
+3. Vérifier le récapitulatif, utiliser Modifier et retrouver toutes les valeurs ; terminer
+   la simulation, lire l'absence d'enregistrement, puis revenir à la fiche et à la recherche.
+4. Essayer Annuler, une URL directe, un rechargement après saisie et un identifiant inconnu.
+   Refaire à 320, 390, 768 et 1440 px avec Tab, Maj+Tab, flèches et Espace ; vérifier le focus
+   visible et l'absence de débordement. Django n'est pas nécessaire pour cette démonstration.
+
+Questions pour l'oral :
+
+1. Comment `formControlName` relie-t-il le champ saisi au validateur puis au récapitulatif ?
+2. Pourquoi Modifier conserve-t-il les valeurs, alors que recharger ou changer de matériel les efface ?
+3. Pourquoi transmettre `q` dans les liens, tout en gardant les données d'incident hors de l'URL ?
 
 ## Backend et script de contrôle
 
@@ -519,8 +628,9 @@ Chromium : 320 × 568 et 390 × 844 avec toucher mobile, 768 × 1024 avec touche
 Les tests `.pw.ts` restent séparés des `.spec.ts` de Vitest ; `tsconfig.e2e.json` vérifie
 leurs types avant leur exécution, et ESLint analyse aussi ces fichiers et la configuration.
 
-`frontend/e2e/responsive.pw.ts` parcourt 15 URL de référence : les 11 entrées initiales,
-deux fiches valides et deux identifiants inconnus, dans les deux espaces. Il attend le contenu réellement
+`frontend/e2e/responsive.pw.ts` parcourt 19 URL de référence : les 11 entrées initiales,
+quatre fiches valides/inconnues et quatre déclarations valides/inconnues dans les deux espaces.
+Il attend le contenu réellement
 rendu puis mesure le débordement du document, avec un pixel de tolérance pour les arrondis.
 Le menu Agent vérifie séparément que les quatre libellés mobiles tiennent dans leurs boutons
 sur une ligne : une simple largeur de document correcte ne suffirait pas à détecter leur
@@ -542,7 +652,7 @@ des deux liens quand ils sont visibles, URL directe à toute largeur, tabulation
 occuper tout l'espace intérieur de navigation, sans intervalle vide. La PR #29 a intégré
 **72 scénarios** (64 intégrés par la PR #20, plus huit).
 
-L'issue #31 propose **104 scénarios**, soit 32 de plus : quatre URL de fiche aux quatre
+La PR #32 a intégré **104 scénarios**, soit 32 de plus : quatre URL de fiche aux quatre
 formats et deux parcours supplémentaires par espace dans chaque format. Ils vérifient les
 liens Tab/Entrée, la conservation exacte de `q`, le retour du focus, les champs de la fiche,
 Matériel actif, l'accès direct, le rechargement des fiches et de la liste filtrée, puis l'état
@@ -550,6 +660,18 @@ introuvable avec retour. Le lien de carte focalisé doit rester visible au-dessu
 Agent fixe. Les captures `lien-fiche-focus`, `fiche-materiel`, `retour-recherche` et
 `equipement-introuvable` servent à la relecture. La réutilisation d'une même instance lors
 du changement d'`id` est vérifiée séparément avec le routeur Angular dans Vitest.
+
+L'issue #34 propose **136 scénarios**, soit 32 de plus : quatre URL de déclaration aux quatre
+formats et deux parcours supplémentaires par espace. Ils couvrent formulaire/erreurs,
+validation de priorité au clavier, risque, récapitulatif/Modifier/fin, annulation, `q`, accès
+direct, perte de saisie au rechargement et matériel inconnu. Les champs focalisés doivent
+être entièrement visibles, y compris au-dessus de la barre Agent. Un récapitulatif aux bornes
+120/2000 vérifie les contenus longs. L'URL ne reçoit que `q` ; aucune requête métier ni valeur
+locale/session n'est produite pendant le parcours complet. Vitest vérifie les changements
+d'identifiant dans une même instance, les bornes dépassées et l'absence de mutation de la source.
+Les captures `incident-erreurs`, `incident-formulaire`, `incident-recapitulatif`,
+`incident-simulation-terminee`, `incident-recapitulatif-limites` et `incident-materiel-introuvable`
+sont jointes au rapport pour la relecture.
 
 La fixture `page` intercepte uniquement `/api/v1/health` et répond `{"status":"ok"}`.
 L'objectif est la mise en page et la navigation : aucun serveur Django ni authentification

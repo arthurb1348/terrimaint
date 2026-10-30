@@ -149,6 +149,43 @@ describe('Shell et routage', () => {
   });
 
   it.each(['agent', 'responsable'])(
+    'garde Incidents actif pendant formulaire, récapitulatif et fin dans %s, y compris Plus',
+    async (space) => {
+      await navigate(`/${space}/incidents/nouveau/EQ-OUT-0003?q=OUT`);
+      const assertNavigation = () => {
+        expect(element.querySelector('.screen-title')?.textContent).toBe('Incidents');
+        const active = element.querySelectorAll('nav a[aria-current="page"]');
+        expect(active).toHaveLength(1);
+        expect(active[0].getAttribute('href')).toBe(`/${space}/incidents`);
+        if (space === 'agent') {
+          expect(element.querySelector('.more-toggle')?.classList.contains('active')).toBe(true);
+          expect(element.querySelector('.more-toggle')?.getAttribute('aria-label')).toBe(
+            'Plus — Incidents actif',
+          );
+        }
+      };
+      assertNavigation();
+      for (const name of ['title', 'description']) {
+        const input = element.querySelector<HTMLInputElement>(`#incident-${name}`)!;
+        input.value = 'Une observation';
+        input.dispatchEvent(new Event('input'));
+      }
+      element.querySelector<HTMLInputElement>('#priority-low')!.click();
+      element
+        .querySelector('form')!
+        .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+      await fixture.whenStable();
+      expect(element.querySelector('main h1')?.textContent).toContain('Vérifier la déclaration');
+      assertNavigation();
+      element.querySelector<HTMLButtonElement>('main button')!.click();
+      await fixture.whenStable();
+      expect(element.querySelector('main h1')?.textContent).toContain('Simulation terminée');
+      assertNavigation();
+      http.expectNone(() => true);
+    },
+  );
+
+  it.each(['agent', 'responsable'])(
     'ouvre une fiche depuis la recherche de %s puis retrouve la saisie et les résultats',
     async (space) => {
       document.body.appendChild(element);

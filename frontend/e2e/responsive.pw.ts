@@ -18,6 +18,8 @@ const routes = [
   '/agent/equipements/EQ-OUT-0003',
   '/agent/equipements/inconnu',
   '/agent/incidents',
+  '/agent/incidents/nouveau/EQ-OUT-0003',
+  '/agent/incidents/nouveau/inconnu',
   '/agent/scanner',
   '/agent/profil',
   '/responsable',
@@ -25,6 +27,8 @@ const routes = [
   '/responsable/equipements/EQ-OUT-0003',
   '/responsable/equipements/inconnu',
   '/responsable/incidents',
+  '/responsable/incidents/nouveau/EQ-OUT-0003',
+  '/responsable/incidents/nouveau/inconnu',
   '/responsable/interventions',
   '/responsable/agents',
 ];
@@ -66,6 +70,39 @@ async function expectSingleLineLabel(control: Locator): Promise<void> {
   expect(fits, 'Le libellé tient sur une ligne dans son bouton').toBe(true);
 }
 
+async function expectFocusedControlVisible(
+  page: Page,
+  control: Locator,
+  space: string,
+): Promise<void> {
+  await expect(control).toBeFocused();
+  await expect(control).toBeInViewport({ ratio: 1 });
+  if (space === 'agent') {
+    await expect
+      .poll(
+        async () => {
+          const bounds = (await control.boundingBox())!;
+          const navigation = (await page.locator('nav').boundingBox())!;
+          return bounds.y + bounds.height <= navigation.y;
+        },
+        { message: 'Le contrôle focalisé reste au-dessus de la navigation fixe' },
+      )
+      .toBe(true);
+  }
+}
+
+async function expectIncidentsActive(page: Page, space: string): Promise<void> {
+  await expect(page.locator('nav a[aria-current="page"]')).toHaveAttribute(
+    'href',
+    `/${space}/incidents`,
+  );
+  if (space === 'agent' && page.viewportSize()!.width <= 760) {
+    const plus = page.getByRole('button', { name: 'Plus — Incidents actif', exact: true });
+    await expect(plus).toBeVisible();
+    await expect(plus).toHaveClass(/active/);
+  }
+}
+
 async function expectEvenAgentNavigation(navigation: Locator): Promise<void> {
   const links = await navigation.getByRole('link').evaluateAll((elements) =>
     elements.map((element) => {
@@ -101,6 +138,204 @@ for (const path of routes) {
 }
 
 for (const space of ['agent', 'responsable']) {
+  test(`La déclaration de ${space} valide au clavier, permet de modifier et termine sans enregistrement`, async ({
+    page,
+  }, info) => {
+    const query = '  tONDeUSE  ';
+    const material = `/${space}/equipements`;
+    const detail = `${material}/EQ-OUT-0001`;
+    const declaration = `/${space}/incidents/nouveau/EQ-OUT-0001`;
+    const main = page.getByRole('main');
+    const title = main.getByRole('textbox', { name: 'Intitulé', exact: true });
+    const description = main.getByRole('textbox', { name: 'Description', exact: true });
+    const verify = main.getByRole('button', { name: 'Vérifier la déclaration', exact: true });
+    const risk = main.getByRole('checkbox', {
+      name: "Je signale un risque ou une impossibilité d'utilisation",
+      exact: true,
+    });
+    const businessRequests: string[] = [];
+    page.on('request', (request) => {
+      if (new URL(request.url()).pathname.startsWith('/api/')) businessRequests.push(request.url());
+    });
+    await page.goto(`${detail}?${new URLSearchParams({ q: query })}`);
+    await expect(main).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(main.getByRole('link', { name: 'Retour au matériel', exact: true })).toBeFocused();
+    await page.keyboard.press('Tab');
+    const open = main.getByRole('link', { name: 'Déclarer un incident', exact: true });
+    await expectFocusedControlVisible(page, open, space);
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(
+      (url) => url.pathname === declaration && url.searchParams.get('q') === query,
+    );
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Déclarer un incident');
+    await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+    await expect(main.locator('.demo-notice')).toContainText("n'enregistre et n'envoie rien");
+    await expect(main.locator('.equipment-summary')).toContainText('Tondeuse autoportée');
+    await expect(main.locator('.equipment-summary')).toContainText(
+      'EQ-OUT-0001 · Centre technique municipal',
+    );
+    await expectIncidentsActive(page, space);
+    await expect(main).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(
+      main.getByRole('link', { name: 'Retour à la fiche matériel', exact: true }),
+    ).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expectFocusedControlVisible(page, title, space);
+    await page.keyboard.type('Le moteur cale');
+    await page.keyboard.press('Tab');
+    await expectFocusedControlVisible(page, description, space);
+    await page.keyboard.type('   ');
+    await verify.focus();
+    await page.keyboard.press('Enter');
+    await expectFocusedControlVisible(page, description, space);
+    await expect(description).toHaveAttribute('aria-invalid', 'true');
+    await expect(description).toHaveAttribute(
+      'aria-describedby',
+      'description-help description-error',
+    );
+    await expect(main.locator('#description-error')).toContainText('caractère autre');
+    await expect(title).toHaveValue('Le moteur cale');
+    await expect(description).toHaveValue('   ');
+    await expectNoHorizontalOverflow(page);
+    await capture(page, info, 'incident-erreurs');
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('Le moteur cale lors de l’accélération.\nRedémarrage difficile.');
+    await verify.focus();
+    await page.keyboard.press('Enter');
+    const low = main.getByRole('radio', { name: 'Faible — intervention à planifier', exact: true });
+    await expectFocusedControlVisible(page, low, space);
+    await expect(main.locator('#priority-error')).toContainText('Choisissez une priorité');
+    await expect(main.getByRole('radio', { checked: true })).toHaveCount(0);
+    await page.keyboard.press('ArrowDown');
+    const high = main.getByRole('radio', { name: 'Haute — intervention rapide', exact: true });
+    await expect(high).toBeChecked();
+    await expectFocusedControlVisible(page, high, space);
+    await page.keyboard.press('Tab');
+    await expectFocusedControlVisible(page, risk, space);
+    await page.keyboard.press('Space');
+    await expect(risk).toBeChecked();
+    await page.keyboard.press('Tab');
+    await expectFocusedControlVisible(page, verify, space);
+    await capture(page, info, 'incident-formulaire');
+    await page.keyboard.press('Enter');
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Vérifier la déclaration');
+    await expect(main.getByRole('heading', { level: 1 })).toBeFocused();
+    await expect(main.locator('dd')).toHaveText([
+      'Le moteur cale',
+      'Le moteur cale lors de l’accélération.\nRedémarrage difficile.',
+      'Haute — intervention rapide',
+      'Oui',
+    ]);
+    await expectIncidentsActive(page, space);
+    await expectNoHorizontalOverflow(page);
+    await capture(page, info, 'incident-recapitulatif');
+    await page.keyboard.press('Tab');
+    await expect(
+      main.getByRole('button', { name: 'Terminer la simulation', exact: true }),
+    ).toBeFocused();
+    await page.keyboard.press('Tab');
+    const edit = main.getByRole('button', { name: 'Modifier', exact: true });
+    await expectFocusedControlVisible(page, edit, space);
+    await page.keyboard.press('Enter');
+    await expectFocusedControlVisible(page, title, space);
+    await expect(description).toHaveValue(
+      'Le moteur cale lors de l’accélération.\nRedémarrage difficile.',
+    );
+    await expect(high).toBeChecked();
+    await expect(risk).toBeChecked();
+    await page.keyboard.press('ControlOrMeta+A');
+    await page.keyboard.type('Le moteur cale à chaud');
+    await verify.focus();
+    await page.keyboard.press('Enter');
+    await expect(main.locator('dd').first()).toHaveText('Le moteur cale à chaud');
+    await page.keyboard.press('Tab');
+    const finish = main.getByRole('button', { name: 'Terminer la simulation', exact: true });
+    await expectFocusedControlVisible(page, finish, space);
+    await page.keyboard.press('Enter');
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Simulation terminée');
+    await expect(main).toContainText("Aucun incident n'a été enregistré ni envoyé");
+    await expectIncidentsActive(page, space);
+    await expectNoHorizontalOverflow(page);
+    await capture(page, info, 'incident-simulation-terminee');
+    await expect(page).toHaveURL(
+      (url) =>
+        url.pathname === declaration &&
+        url.searchParams.get('q') === query &&
+        [...url.searchParams.keys()].join() === 'q',
+    );
+    expect(businessRequests, 'Aucune requête métier pour cette simulation').toEqual([]);
+    expect(
+      await page.evaluate(() => ({ local: { ...localStorage }, session: { ...sessionStorage } })),
+    ).toEqual({ local: {}, session: {} });
+    await page.keyboard.press('Tab');
+    const back = main.getByRole('link', { name: 'Retour à la fiche', exact: true });
+    await expectFocusedControlVisible(page, back, space);
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(
+      (url) => url.pathname === detail && url.searchParams.get('q') === query,
+    );
+    await expect(page.locator('nav a[aria-current="page"]')).toHaveAttribute('href', material);
+    await main.getByRole('link', { name: 'Retour au matériel', exact: true }).click();
+    await expect(main.getByRole('searchbox')).toHaveValue(query);
+    await expect(main.getByRole('listitem')).toHaveCount(1);
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test(`La déclaration de ${space} fonctionne en accès direct, s'annule et perd sa saisie au rechargement`, async ({
+    page,
+  }, info) => {
+    const path = `/${space}/incidents/nouveau/EQ-OUT-0003`;
+    const query = '  OUT  ';
+    const main = page.getByRole('main');
+    await page.goto(`${path}?${new URLSearchParams({ q: query })}`);
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Déclarer un incident');
+    await expectIncidentsActive(page, space);
+    const title = main.getByRole('textbox', { name: 'Intitulé', exact: true });
+    const description = main.getByRole('textbox', { name: 'Description', exact: true });
+    await main.getByRole('button', { name: 'Vérifier la déclaration', exact: true }).click();
+    await expectFocusedControlVisible(page, title, space);
+    await expect(main.locator('.error')).toHaveCount(3);
+    await title.fill('B'.repeat(120));
+    await description.fill('D'.repeat(2000));
+    await main.getByRole('radio', { name: 'Urgente — danger immédiat', exact: true }).check();
+    await main.getByRole('checkbox').check();
+    await main.getByRole('button', { name: 'Vérifier la déclaration', exact: true }).click();
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Vérifier la déclaration');
+    await expectNoHorizontalOverflow(page);
+    await capture(page, info, 'incident-recapitulatif-limites');
+    await page.reload();
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Déclarer un incident');
+    await expect(title).toHaveValue('');
+    await expect(description).toHaveValue('');
+    await expect(main.getByRole('radio', { checked: true })).toHaveCount(0);
+    await expect(main.getByRole('checkbox')).not.toBeChecked();
+    await expect(main.locator('.error')).toHaveCount(0);
+    await main.getByRole('link', { name: 'Annuler', exact: true }).click();
+    await expect(page).toHaveURL(
+      (url) =>
+        url.pathname === `/${space}/equipements/EQ-OUT-0003` && url.searchParams.get('q') === query,
+    );
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Débroussailleuse n°3');
+    await main.getByRole('link', { name: 'Déclarer un incident', exact: true }).click();
+    await expect(title).toHaveValue('');
+    await main.getByRole('link', { name: 'Retour à la fiche matériel', exact: true }).click();
+    await expect(page).toHaveURL(
+      (url) =>
+        url.pathname === `/${space}/equipements/EQ-OUT-0003` && url.searchParams.get('q') === query,
+    );
+    await page.goto(`/${space}/incidents/nouveau/inconnu?${new URLSearchParams({ q: query })}`);
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Équipement introuvable');
+    await expect(main.locator('form')).toHaveCount(0);
+    await expectIncidentsActive(page, space);
+    await expectNoHorizontalOverflow(page);
+    await capture(page, info, 'incident-materiel-introuvable');
+    await main.getByRole('link', { name: 'Retour au matériel', exact: true }).click();
+    await expect(main.getByRole('searchbox')).toHaveValue(query);
+    await expect(main.getByRole('listitem')).toHaveCount(4);
+  });
+
   test(`La recherche Matériel fonctionne au clavier dans l’espace ${space}`, async ({
     page,
   }, info) => {
