@@ -373,10 +373,10 @@ Questions pour l'oral :
 2. Pourquoi Non renseignée doit-il rester un texte d'affichage plutôt qu'une valeur du formulaire ?
 3. Pourquoi transmettre `q` dans les liens, tout en gardant les données d'incident hors de l'URL ?
 
-## Liste et détail des signalements (issue #39, en revue)
+## Liste et détail des signalements (issue #39, fusionnée)
 
 La priorité validée est de préparer les parcours frontend pour l'oral de décembre 2026 ;
-PostgreSQL #38 est différé. Ce parcours de consultation reste en revue jusqu'à fusion.
+PostgreSQL #38 est différé. Ce parcours de consultation est intégré par la PR #40 fusionnée.
 La [décision](decisions.md) explique l'adaptation des deux prototypes Responsable : la table
 de matériel devient une liste de signalements, avec des statuts d'incident distincts.
 Le shell, les rôles de présentation et la déclaration existante sont conservés.
@@ -473,6 +473,142 @@ Questions de compréhension :
 1. Pourquoi stocker `equipmentId` plutôt que recopier le nom et l'emplacement du matériel ?
 2. Comment les paramètres d'URL permettent-ils de retrouver recherche et filtres sans stockage ?
 3. Pourquoi les statuts Ouvert/En cours/Clôturé ne changent-ils pas celui du matériel ?
+
+## Programmation locale d'une intervention (issue #41, en revue)
+
+Le parcours proposé reste en revue jusqu'à fusion. La PR #40 a intégré la consultation
+des signalements ; ce nouvel écran utilise les mêmes objets, sans transformer la simulation
+de déclaration en création réelle. La [décision](decisions.md) explique l'adaptation des
+références Figma : un formulaire regroupé, un récapitulatif modifiable, puis la confirmation.
+PostgreSQL #38 reste différé ; la liste et le détail des interventions ne sont pas réalisés ici.
+
+### Route, contexte et circulation des données
+
+Le flux est **lien du détail Responsable → `incidentId` dans la route → recherche du
+signalement → `equipmentId` → matériel existant → formulaire → récapitulatif → confirmation**.
+`/responsable/interventions/nouvelle/:incidentId` charge un composant standalone différé,
+`InterventionPlanning`. `incidentId` est une chaîne d'identification, pas le signalement
+lui-même. `toSignal` suit le paramètre et `computed` retrouve les objets dans `DEMO_INCIDENTS`
+et `DEMO_EQUIPMENT`. Le HTML lit leur contexte sans dupliquer leurs données dans une autre
+source : référence/intitulé/priorité du signalement et nom/id/emplacement du matériel.
+
+`IncidentDetail` propose un vrai lien pour le contexte Responsable et les statuts Ouvert
+ou En cours ; Agent conserve ses liens existants. Le cas Clôturé affiche une explication,
+sans bouton désactivé artificiel. Le composant de programmation contrôle aussi les accès
+directs : origine inconnue, matériel absent ou clôture empêchent tout formulaire actif.
+Ces conditions de présentation ne sont pas des permissions : les routes restent publiques.
+
+Le lien transmet `q`, `priority`, `status` avec `incident-filters.ts`, réutilisé au retour.
+Les commandes relatives remontent explicitement vers `/responsable/incidents/:id`, puis
+le détail permet de rejoindre la liste filtrée ; elles ne demandent pas au navigateur de
+revenir dans son historique. `q` garde sa casse et ses espaces. Les filtres inconnus sont
+retirés des liens selon la règle existante. Aucune valeur du formulaire ne passe dans l'URL.
+`routerLinkActive` accepte aussi le sous-chemin Interventions, pour les trois étapes et
+le menu mobile Responsable, tout en conservant les autres rubriques actives.
+
+### Formulaire et validation
+
+`FormGroup` rassemble quatre `FormControl` non nullables. Angular relie chaque contrôle
+au champ natif par `formControlName` et calcule ses erreurs :
+
+| Valeur | Règle de démonstration |
+| --- | --- |
+| `title` | Prérempli depuis l'intitulé du signalement, modifiable, non blanc et au plus 120 unités UTF-16. |
+| `instructions` | Vide au départ ; vide/blancs acceptés. Sinon au plus 2000 unités UTF-16 sur la valeur brute, avec espaces et retours à la ligne. |
+| `agentId` | Choix explicite requis parmi les trois identifiants de `DEMO_AGENTS`, sans présélection. |
+| `plannedOn` | Date calendaire valide, aujourd'hui ou après selon le jour local du navigateur. |
+
+UTF-16 est la façon dont JavaScript mesure ici la longueur d'une chaîne : `'🌿'.length` vaut
+deux, comme dans la déclaration intégrée. L'aide précise que certains symboles comptent
+pour deux. Les champs n'empêchent pas de coller un texte trop long : le validateur l'explique
+sans supprimer la saisie. Pour des consignes absentes, `instructionsLabel()` retourne
+**Non renseignées** seulement à l'affichage ; il ne remplace pas la valeur du contrôle.
+
+`agents-demo.ts` contient une interface et trois objets entièrement fictifs, avec identifiants
+stables et uniques. Ce ne sont ni des comptes ni des disponibilités. Le validateur contrôle
+l'appartenance à cette source, même si une valeur étrangère est injectée dans le sélecteur.
+
+`planning-date.ts` sépare le jour du calendrier d'un instant horodaté. `localToday()` assemble
+année/mois/jour avec les accesseurs locaux de `Date`. Utiliser `toISOString().slice(0, 10)`
+donnerait le jour UTC, parfois différent du jour de l'utilisateur. Le validateur vérifie le
+format `YYYY-MM-DD`, les mois, les jours et les années bissextiles. Après validation, l'ordre
+alphabétique de ce format fixe suffit pour comparer les jours, sans conversion de fuseau.
+L'attribut HTML `min` aide le contrôle natif mais ne remplace pas cette validation TypeScript.
+Le récapitulatif rend la même date par `DatePipe`, sans forcer UTC.
+
+`review()` valide, marque les contrôles touchés et montre les erreurs textuelles liées par
+`aria-describedby` et `aria-invalid`. `afterNextRender` attend leur présence dans le DOM avant
+de focaliser le premier champ invalide. Toutes les valeurs restent en place. L'action finale
+revérifie aussi la date : si minuit est passé depuis le récapitulatif, retour au champ date
+avec erreur et saisies conservées.
+
+### Étapes en mémoire et présentation responsive
+
+Le signal `step` vaut `form`, `review` ou `complete`. Vérifier change l'étape, Modifier revient
+aux mêmes contrôles, Programmer affiche **Programmation simulée**. Aucun service d'envoi ou
+de stockage n'est appelé. `form.controls.*.value` n'est pas un signal : les méthodes de libellé
+lisent ces valeurs lors du rendu, sans `computed` qui pourrait garder une ancienne saisie.
+L'effet de réinitialisation dépend de l'identifiant, indépendamment des filtres de retour :
+nouvel identifiant, nouvelles valeurs initiales et nouvelle étape ; seuls les filtres modifiés,
+saisie intacte. Départ et rechargement détruisent aussi cet état en mémoire.
+
+La mention de démonstration est constante ; celle près de **Programmer l'intervention**
+est associée à ce bouton. La confirmation explique l'absence d'enregistrement/transmission
+et de notification, sans inventer de numéro. Les sources et statuts ne changent jamais.
+Ces règles locales devront être validées et reprises dans le contrat serveur futur.
+
+`intervention-planning.css` garde le contenu à 768 px maximum et reprend les variables de la
+charte. `container-type: inline-size` sur le composant permet de mesurer sa largeur disponible,
+sidebar comprise. Avec `@container (min-width: 560px)`, agent et date occupent deux colonnes
+égales ; en dessous, ils restent empilés. Ainsi, à 768 px de fenêtre Responsable, le formulaire
+garde une colonne. `min-width: 0`, `overflow-wrap: anywhere` et `flex-wrap` permettent aux
+textes longs et aux actions de se replier sans déborder. Les champs/boutons ont au moins 48 px
+de haut ; les focus visibles reprennent l'accent de la charte. Le textarea est centré au focus
+pour dégager tout le contrôle, pas seulement son curseur. Le titre de chaque nouvelle étape
+reçoit le focus ; Modifier revient au titre saisi. Le shell n'est pas refondu et #33 reste distincte.
+
+### Fichiers à modifier et vérifications
+
+| Fichier sous `frontend/` | Rôle / endroit à modifier |
+| --- | --- |
+| `src/app/features/interventions/agents-demo.ts` | Type et choix fictifs, sans recopier le matériel ou les signalements. |
+| `src/app/features/interventions/planning-date.ts` | Jour local et validation calendaire. |
+| `src/app/features/interventions/intervention-planning.ts` | Contrôles, bornes, lecture des sources, étapes, réinitialisation, retours et focus. |
+| `src/app/features/interventions/intervention-planning.html`, `.css` | Libellés, erreurs liées, contexte, récapitulatif, démonstration et disposition responsive. |
+| `src/app/features/incidents/incident-detail.ts`, `.html` | Entrée Responsable et explication de clôture. |
+| `src/app/app.routes.ts`, `src/app/shared/main-navigation/main-navigation.html` | Route publique et Interventions actif. |
+| `src/app/features/interventions/*.spec.ts`, `src/app/app.spec.ts`, `src/app/features/incidents/incident-detail.spec.ts` | Cas limites, réutilisation de composant, sources inchangées et contexte. |
+| `e2e/responsive.pw.ts` | Parcours complets, clavier, quatre formats et deux fuseaux. |
+
+Les tests unitaires figent seulement `Date`, pour laisser les rendus Angular fonctionner
+normalement. Ils couvrent notamment les bornes avec un symbole de deux unités, les blancs,
+les années bissextiles, le passé, aujourd'hui, le changement de jour, l'agent inconnu et le
+matériel manquant. Le changement d'identifiant est vérifié dans **la même instance** depuis
+les trois étapes ; les seuls filtres ne doivent effacer ni valeurs ni étape.
+
+Les parcours Playwright figent l'instant `2026-10-30T23:30:00Z` : Paris est le 31, New York
+encore le 30. Chaque date locale est acceptée et affichée à l'identique. Ils contrôlent
+Tab/Maj+Tab/Entrée, formulaire/erreurs/modification/confirmation, retours, rechargement,
+clôture/inconnu, navigation active et absence de programmation Agent. Pendant le parcours
+complet, aucune requête `/api/`, entrée localStorage/sessionStorage ou base IndexedDB n'est
+produite. Les captures `intervention-formulaire`, `intervention-erreurs`,
+`intervention-recapitulatif`, `intervention-confirmation`, `intervention-signalement-cloture`
+et `intervention-signalement-introuvable` sont jointes au rapport.
+
+Essai local : utiliser Node/npm déclarés et les commandes du README (`npm ci`,
+`npm start`). Ouvrir `/responsable/incidents?q=%20%20EQ-BAT%20%20&priority=high&status=in-progress`,
+puis le signalement et Programmer une intervention. Essayer titre blanc, agent absent et
+date passée ; corriger avec la date locale du jour et un agent. Vérifier les consignes
+absentes, Modifier, ajouter des consignes et programmer : constater la confirmation simulée.
+Revenir au signalement puis à la liste et retrouver les filtres. Recharger directement le
+formulaire pour vérifier la perte de saisie ; essayer `INC-2026-049` et un identifiant inconnu.
+Refaire au clavier et aux quatre formats ; Agent n'a pas cette entrée.
+
+Questions de compréhension :
+
+1. Comment `incidentId` puis `equipmentId` permettent-ils d'afficher le contexte sans recopier les sources ?
+2. Pourquoi conserver les filtres dans l'URL mais les champs et l'étape du formulaire en mémoire ?
+3. Pourquoi la date locale, la validation TypeScript et l'attribut HTML `min` ont-ils chacun un rôle ?
 
 ## Backend et script de contrôle
 
@@ -800,7 +936,7 @@ dans la fenêtre. Les tests unitaires conservent les refus d'intitulé/priorité
 120/121 et 2000/2001 pour les détails renseignés, avec des cas d'absence et de modification.
 La capture `signalement-sans-description` complète celles du parcours existant.
 
-L'issue #39 propose **176 scénarios**, soit 32 de plus : quatre URL de détail et deux
+La PR #40 a intégré **176 scénarios**, soit 32 de plus : quatre URL de détail et deux
 parcours par espace aux quatre formats. Filtres combinés, historique sans étape par lettre,
 état conservé au retour/rechargement, réinitialisation, détail sans description, textes longs,
 risque, inconnu, lien Matériel sans pollution des paramètres, navigation active et clavier
@@ -809,6 +945,13 @@ plus étroits. Les captures `signalements-liste`, `signalements-filtres`, `signa
 `signalement-detail-long`, `signalements-aucun-resultat` et `signalement-introuvable` complètent
 le rapport. `signalement-intitule-long-focus` vérifie aussi un lien à intitulé long focalisé.
 Les tests ne prouvent ni permissions ni persistance : les données sont locales.
+
+L'issue #41 en revue porte le total à **204 scénarios**, soit 28 de plus : trois URL de
+programmation (valide, clôturée, inconnue), le parcours complet Paris/New York, accès direct
+avec rechargement/annulation et consultation Agent sans programmation, aux quatre formats.
+Les **176 tests Vitest dans dix fichiers** vérifient en complément les validations et les
+réutilisations de composant. Les résultats et limites réels, dont navigateur système local
+distinct du navigateur Playwright standard de CI, figurent dans le bilan et la PR.
 
 La fixture `page` intercepte uniquement `/api/v1/health` et répond `{"status":"ok"}`.
 L'objectif est la mise en page et la navigation : aucun serveur Django ni authentification

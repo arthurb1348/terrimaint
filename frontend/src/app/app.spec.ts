@@ -39,19 +39,22 @@ describe('Shell et routage', () => {
     await fixture.whenStable();
   }
 
-  it.each(['/', '/inconnue', '/agent/inconnue'])('affiche l’accueil depuis %s', async (url) => {
-    await navigate(url);
-    http.expectOne('/api/v1/health').flush({ status: 'ok' });
-    await fixture.whenStable();
-    expect(element.querySelector('h1')?.textContent).toContain('Du terrain');
-    expect(element.textContent).toContain('API disponible');
-    expect(element.textContent).not.toContain('Synchronisé');
-    expect(router.url).toBe('/');
-    expect(element.querySelectorAll('main')).toHaveLength(1);
-    expect(element.querySelector('a[href="#main-content"]')).not.toBeNull();
-    expect(element.querySelector('main')?.id).toBe('main-content');
-    expect(element.querySelector('nav a[aria-current="page"]')?.textContent).toContain('Accueil');
-  });
+  it.each(['/', '/inconnue', '/agent/inconnue', '/agent/interventions/nouvelle/INC-2026-045'])(
+    'affiche l’accueil depuis %s',
+    async (url) => {
+      await navigate(url);
+      http.expectOne('/api/v1/health').flush({ status: 'ok' });
+      await fixture.whenStable();
+      expect(element.querySelector('h1')?.textContent).toContain('Du terrain');
+      expect(element.textContent).toContain('API disponible');
+      expect(element.textContent).not.toContain('Synchronisé');
+      expect(router.url).toBe('/');
+      expect(element.querySelectorAll('main')).toHaveLength(1);
+      expect(element.querySelector('a[href="#main-content"]')).not.toBeNull();
+      expect(element.querySelector('main')?.id).toBe('main-content');
+      expect(element.querySelector('nav a[aria-current="page"]')?.textContent).toContain('Accueil');
+    },
+  );
 
   it.each([
     ['/agent', 'Accueil', 'Accueil Agent'],
@@ -233,6 +236,37 @@ describe('Shell et routage', () => {
       );
     },
   );
+
+  it('garde Interventions actif pendant les trois étapes de programmation sans requête métier', async () => {
+    await navigate('/responsable/interventions/nouvelle/INC-2026-045?q=OUT');
+    const assertNavigation = () => {
+      expect(element.querySelector('.screen-title')?.textContent).toBe('Interventions');
+      const active = element.querySelectorAll('nav a[aria-current="page"]');
+      expect(active).toHaveLength(1);
+      expect(active[0].getAttribute('href')).toBe('/responsable/interventions');
+    };
+    assertNavigation();
+    const date = element.querySelector<HTMLInputElement>('#planning-date')!;
+    date.value = date.min;
+    date.dispatchEvent(new Event('input'));
+    const agent = element.querySelector<HTMLSelectElement>('#planning-agent')!;
+    agent.value = 'AG-DEMO-001';
+    agent.dispatchEvent(new Event('change'));
+    element
+      .querySelector('form')!
+      .dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    await fixture.whenStable();
+    expect(element.querySelector('main h1')?.textContent).toContain('Vérifier l’intervention');
+    assertNavigation();
+    element.querySelector<HTMLButtonElement>('main button')!.click();
+    await fixture.whenStable();
+    expect(element.querySelector('main h1')?.textContent).toContain('Programmation simulée');
+    assertNavigation();
+    await navigate('/responsable/interventions');
+    expect(element.querySelector('main')?.textContent).toContain('prochain incrément');
+    expect(element.querySelector('main li')).toBeNull();
+    http.expectNone(() => true);
+  });
 
   it('annonce et referme le menu Responsable après navigation', async () => {
     await navigate('/responsable');

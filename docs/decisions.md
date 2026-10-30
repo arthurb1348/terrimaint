@@ -1,12 +1,85 @@
 # Décisions techniques et métier
 
-## 2026-10-30 — Consultation des signalements et priorité frontend (issue #39, en revue)
+## 2026-10-30 — Programmation d'une intervention de démonstration (issue #41, en revue)
+
+La [PR #40](https://github.com/arthurb1348/terrimaint/pull/40) est fusionnée dans le dernier
+`origin/main` vérifié, au commit `4eefc19a510a44e140d41425504fb02895ed2268`.
+L'[issue #41](https://github.com/arthurb1348/terrimaint/issues/41) poursuit la priorité frontend
+pour décembre 2026. Son parcours reste **en revue jusqu'à fusion** ; PostgreSQL #38 est
+différé. La liste et le détail des interventions appartiennent au prochain incrément.
+
+Les références Figma ont été consultées en lecture seule :
+[détail du signalement `188:10497`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-10497),
+[création `188:11246`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-11246),
+[affectation `188:11263`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-11263),
+[planification `188:11278`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-11278)
+et [confirmation `188:11296`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-11296).
+L'adaptation validée dans l'issue regroupe titre, consignes, agent et date dans **un formulaire**,
+puis présente un récapitulatif modifiable et une confirmation. Les surfaces vertes, bordures,
+contrôles arrondis et boutons reprennent la charte du shell intégré. Celui-ci reste conservé.
+Les contrôles sont natifs ; aucun calendrier personnalisé, type d'intervention, immobilisation,
+prestataire, disponibilité, heure, durée, brouillon, média ou notification du prototype n'est ajouté.
+
+Seul le détail **Responsable** d'un signalement Ouvert ou En cours propose le lien
+**Programmer une intervention**. Un signalement clôturé reste consultable avec une explication,
+sans action factice. La route `/responsable/interventions/nouvelle/:incidentId` vérifie aussi
+ces conditions, ainsi que l'existence du signalement et du matériel lié. Elle ne présente pas
+de formulaire utilisable en cas d'échec. Aucune route de programmation Agent n'est créée.
+Il s'agit de présentation frontend : les routes sont publiques, sans permission métier.
+Authentification, autorisations serveur et isolation entre collectivités restent à construire.
+
+Le signalement et son matériel sont lus dans les sources existantes, sans copie des objets.
+Le contexte non modifiable présente leur référence, intitulé/nom, priorité et emplacement.
+Une petite source typée séparée fournit trois agents fictifs aux identifiants stables ; aucun
+agent n'est présélectionné et aucune disponibilité ou identité connectée n'est annoncée.
+
+Le titre est prérempli, obligatoire, modifiable et limité à **120 unités UTF-16** ; les blancs
+seuls sont refusés. Les **consignes sont facultatives**, vides au départ : les blancs seuls
+représentent une absence ; sinon la longueur brute est limitée à **2000 unités UTF-16**.
+Comme dans la déclaration existante, certains symboles occupent deux unités. L'aide l'explique.
+Le récapitulatif affiche **Non renseignées** sans écrire ce texte dans le formulaire ;
+**Modifier l'intervention** retrouve espaces et retours à la ligne exactement.
+
+La date prévue est une **date calendaire**, obligatoire, valide et au moins égale au jour
+local du navigateur. Le validateur TypeScript contrôle aussi mois, jours et années bissextiles,
+indépendamment de l'attribut HTML `min`. Le jour courant est construit avec les composantes
+locales, sans troncature d'un instant UTC. Le récapitulatif utilise `DatePipe` sans imposer
+UTC. La date est revérifiée à l'action finale si minuit est passé pendant la lecture.
+Les tests figent l'horloge ; les parcours Paris et New York vérifient des jours locaux
+différents au même instant, ainsi que l'absence de décalage à l'affichage.
+
+**Vérifier l'intervention**, **Modifier l'intervention**, puis **Programmer l'intervention**
+déplacent seulement l'étape en mémoire. La mention de démonstration reste visible et celle
+près du dernier bouton lui est associée par `aria-describedby`. **Programmation simulée**
+précise qu'aucune intervention n'est enregistrée/transmise et qu'aucun agent n'est notifié.
+Aucun numéro d'intervention, statut modifié, ajout à une liste, appel métier ou stockage.
+Les règles de ce formulaire sont des choix de démonstration à reprendre dans le futur
+contrat serveur ; elles ne décrivent pas un workflow métier déployé.
+
+L'état disparaît au départ, au rechargement ou au changement d'`incidentId`, y compris depuis
+le récapitulatif ou la confirmation. Modifier seulement `q`, `priority`, `status` conserve
+la saisie. Ces trois critères normalisés sont les seuls paramètres transmis aux retours
+explicites vers le signalement puis la liste ; la saisie exacte de `q` est conservée.
+Interventions reste actif pendant les trois étapes, y compris dans le menu mobile Responsable.
+
+Le formulaire reste en une colonne lorsque la place manque. À partir de **560 px de largeur
+du composant**, agent et date partagent une ligne ; la requête de conteneur tient compte de
+la sidebar, donc conserve une colonne à 768 px de fenêtre. À 1440 px les deux champs sont
+côte à côte. Les actions se replient, les textes longs reviennent à la ligne et les contrôles
+mesurent au moins 48 px de haut. Le focus rejoint le premier champ invalide, le titre du
+récapitulatif/de la confirmation ou le titre saisi lors de Modifier. Le clavier et les quatre
+formats sont contrôlés sans refonte du shell ni contournement lié au diagnostic #33.
+Dépendances et politique npm sont conservées. La validation humaine et la fusion restent à Arthur.
+
+## 2026-10-30 — Consultation des signalements et priorité frontend (issue #39, fusionnée)
 
 Arthur valide la priorité aux parcours frontend pour son **oral de décembre 2026** : liste
 et détail des signalements côté Responsable, réutilisés côté Agent. PostgreSQL
 ([issue #38](https://github.com/arthurb1348/terrimaint/issues/38)) est différé sans modifier
 la cible de persistance. L'[issue #39](https://github.com/arthurb1348/terrimaint/issues/39)
-reste une consultation locale et publique, en revue jusqu'à fusion.
+est intégrée par la [PR #40 fusionnée](https://github.com/arthurb1348/terrimaint/pull/40)
+le 30 octobre 2026 (commit `4eefc19a510a44e140d41425504fb02895ed2268`). Elle reste une
+consultation locale et publique.
 
 Les prototypes [liste `188:10487`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-10487)
 et [détail `188:10497`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-10497)

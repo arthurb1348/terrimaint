@@ -43,6 +43,20 @@
         <p>Matériel introuvable</p>
       }
     </section>
+    @if (isResponsible && equipment()) {
+      @if (item.status === 'closed') {
+        <p class="planning-note">
+          Ce signalement est clôturé. Aucune intervention ne peut y être programmée.
+        </p>
+      } @else {
+        <a
+          class="planning-link"
+          [routerLink]="['../../interventions/nouvelle', item.id]"
+          [queryParams]="query()"
+          >Programmer une intervention</a
+        >
+      }
+    }
     @if (item.risk) {
       <p class="risk-note">
         <strong>Risque ou impossibilité d'utilisation signalé.</strong> Ce signalement ne change pas

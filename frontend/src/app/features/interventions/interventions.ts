@@ -6,11 +6,11 @@ import { Component } from '@angular/core';
   template: `
     <section class="feature-page" aria-labelledby="interventions-title">
       <h1 id="interventions-title">Interventions</h1>
+      <p>La liste et le détail des interventions seront développés dans un prochain incrément.</p>
       <p>
-        La consultation et la planification des interventions seront développées dans une prochaine
-        étape.
+        La programmation de démonstration est accessible depuis un signalement ouvert ou en cours de
+        l’espace Responsable.
       </p>
-      <p>Cette rubrique ne propose pas encore de fonctionnalité métier.</p>
     </section>
   `,
 })

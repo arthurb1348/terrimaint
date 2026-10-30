@@ -127,4 +127,34 @@ describe('Détail local du signalement', () => {
     await harness.fixture.whenStable();
     expect(content().querySelectorAll('tbody tr')).toHaveLength(1);
   });
+
+  it.each(['INC-2026-045', 'INC-2026-047'])(
+    'propose la programmation au Responsable pour %s et conserve les filtres',
+    async (id) => {
+      await harness.navigateByUrl(
+        `/responsable/incidents/${id}?q=%20OUT%20&priority=high&status=in-progress`,
+        IncidentDetail,
+      );
+      expect(content().querySelector('.planning-link')?.getAttribute('href')).toBe(
+        `/responsable/interventions/nouvelle/${id}?q=%20OUT%20&priority=high&status=in-progress`,
+      );
+      expect(content().querySelector('.planning-note')).toBeNull();
+    },
+  );
+
+  it('explique le blocage d’un signalement clôturé au Responsable sans action factice', async () => {
+    await harness.navigateByUrl('/responsable/incidents/INC-2026-049', IncidentDetail);
+    expect(content().querySelector('.planning-link')).toBeNull();
+    expect(content().querySelector('.planning-note')?.textContent).toContain('clôturé');
+    expect(content().querySelector('button[disabled]')).toBeNull();
+  });
+
+  it.each(['INC-2026-045', 'INC-2026-047', 'INC-2026-049'])(
+    'préserve la consultation Agent sans programmation pour %s',
+    async (id) => {
+      await harness.navigateByUrl(`/agent/incidents/${id}`, IncidentDetail);
+      expect(content().querySelector('.planning-link')).toBeNull();
+      expect(content().querySelector('.planning-note')).toBeNull();
+    },
+  );
 });

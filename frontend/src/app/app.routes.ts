@@ -67,6 +67,14 @@ export const routes: Routes = [
     },
   ]),
   {
+    // Cette entrée appartient au parcours Responsable ; ce n'est pas une autorisation métier.
+    path: 'responsable/interventions/nouvelle/:incidentId',
+    loadComponent: () =>
+      import('./features/interventions/intervention-planning').then((m) => m.InterventionPlanning),
+    title: 'Programmer une intervention — TerriMaint',
+    data: { label: 'Interventions' },
+  },
+  {
     path: 'responsable/interventions',
     loadComponent: interventionsPage,
     title: 'Interventions — TerriMaint',

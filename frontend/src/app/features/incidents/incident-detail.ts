@@ -17,6 +17,9 @@ import { DEMO_INCIDENTS } from './incidents-demo';
 export class IncidentDetail {
   private readonly route = inject(ActivatedRoute);
   private readonly document = inject(DOCUMENT);
+  // Contexte de présentation uniquement : les routes publiques ne contrôlent pas des permissions.
+  protected readonly isResponsible =
+    this.route.snapshot.routeConfig?.path?.startsWith('responsable/');
   private readonly params = toSignal(this.route.paramMap, {
     initialValue: this.route.snapshot.paramMap,
   });
