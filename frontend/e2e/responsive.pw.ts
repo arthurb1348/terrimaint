@@ -15,11 +15,15 @@ const routes = [
   '/',
   '/agent',
   '/agent/equipements',
+  '/agent/equipements/EQ-OUT-0003',
+  '/agent/equipements/inconnu',
   '/agent/incidents',
   '/agent/scanner',
   '/agent/profil',
   '/responsable',
   '/responsable/equipements',
+  '/responsable/equipements/EQ-OUT-0003',
+  '/responsable/equipements/inconnu',
   '/responsable/incidents',
   '/responsable/interventions',
   '/responsable/agents',
@@ -137,6 +141,120 @@ for (const space of ['agent', 'responsable']) {
       'href',
       `/${space}/equipements`,
     );
+    await expectNoHorizontalOverflow(page);
+  });
+
+  test(`La fiche Matériel conserve la recherche et le clavier dans l’espace ${space}`, async ({
+    page,
+  }, info) => {
+    const base = `/${space}/equipements`;
+    const query = '  tONDeUSE  ';
+    await page.goto(base);
+    const main = page.getByRole('main');
+    const input = main.getByRole('searchbox', { name: 'Rechercher par nom ou identifiant' });
+    await input.focus();
+    await page.keyboard.type(query);
+    await expect(main.getByRole('listitem')).toHaveCount(1);
+    await expect(page).toHaveURL(
+      (url) => url.pathname === base && url.searchParams.get('q') === query,
+    );
+    const equipment = main.getByRole('link', { name: 'Tondeuse autoportée', exact: true });
+    const detailUrl = new URL((await equipment.getAttribute('href'))!, page.url());
+    expect(detailUrl.pathname).toBe(`${base}/EQ-OUT-0001`);
+    expect(detailUrl.searchParams.get('q')).toBe(query);
+
+    await page.keyboard.press('Tab');
+    await expect(main.getByRole('button', { name: 'Effacer la recherche' })).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(equipment).toBeFocused();
+    await expect(equipment).toBeInViewport({ ratio: 1 });
+    if (space === 'agent') {
+      const linkBounds = (await equipment.boundingBox())!;
+      const navigationBounds = (await page.locator('nav').boundingBox())!;
+      expect(
+        linkBounds.y + linkBounds.height,
+        'Le lien focalisé reste au-dessus de la barre basse',
+      ).toBeLessThanOrEqual(navigationBounds.y);
+    }
+    await capture(page, info, 'lien-fiche-focus');
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(
+      (url) => url.pathname === `${base}/EQ-OUT-0001` && url.searchParams.get('q') === query,
+    );
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Tondeuse autoportée');
+    await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+    await expect(main.getByText('EQ-OUT-0001', { exact: true })).toBeVisible();
+    await expect(main.getByText('Centre technique municipal', { exact: true })).toBeVisible();
+    await expect(page.locator('nav a[aria-current="page"]')).toHaveAttribute('href', base);
+    await expect(page.locator('nav')).toHaveAttribute(
+      'aria-label',
+      space === 'agent' ? 'Navigation Agent' : 'Navigation Responsable',
+    );
+    await expect(main).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+    await capture(page, info, 'fiche-materiel');
+
+    await page.keyboard.press('Tab');
+    await expect(main.getByRole('link', { name: 'Retour au matériel', exact: true })).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(
+      (url) => url.pathname === base && url.searchParams.get('q') === query,
+    );
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Matériel');
+    await expect(input).toHaveValue(query);
+    await expect(main.getByRole('listitem')).toHaveCount(1);
+    await expect(equipment).toBeVisible();
+    await expect(page.locator('nav a[aria-current="page"]')).toHaveAttribute('href', base);
+    await expect(main).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(input).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+    await capture(page, info, 'retour-recherche');
+  });
+
+  test(`La fiche Matériel de ${space} fonctionne en accès direct, après rechargement et avec un id inconnu`, async ({
+    page,
+  }, info) => {
+    const base = `/${space}/equipements`;
+    const main = page.getByRole('main');
+    await page.goto(`${base}/EQ-OUT-0003`);
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Débroussailleuse n°3');
+    await expect(main.getByText('Atelier municipal', { exact: true })).toBeVisible();
+    const back = main.getByRole('link', { name: 'Retour au matériel', exact: true });
+    await expect(back).toHaveAttribute('href', base);
+    await page.reload();
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Débroussailleuse n°3');
+    await expect(main.getByText('EQ-OUT-0003', { exact: true })).toBeVisible();
+    await expect(page.locator('nav a[aria-current="page"]')).toHaveAttribute('href', base);
+    await expectNoHorizontalOverflow(page);
+    await back.click();
+    await expect(page).toHaveURL(new RegExp(`${base}$`));
+    await expect(main.getByRole('listitem')).toHaveCount(6);
+
+    await page.goto(`${base}/EQ-VEH-0042`);
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Fourgon de voirie');
+    await expect(main).not.toContainText('Débroussailleuse');
+    await expect(main.getByText('Garage municipal', { exact: true })).toBeVisible();
+
+    const query = '  eq-veh-0042  ';
+    await page.goto(`${base}/inconnu?${new URLSearchParams({ q: query })}`);
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Équipement introuvable');
+    await expect(main).not.toContainText('Fourgon de voirie');
+    await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+    await expect(page.locator('nav a[aria-current="page"]')).toHaveAttribute('href', base);
+    await expectNoHorizontalOverflow(page);
+    await capture(page, info, 'equipement-introuvable');
+    await back.click();
+    await expect(page).toHaveURL(
+      (url) => url.pathname === base && url.searchParams.get('q') === query,
+    );
+    const input = main.getByRole('searchbox', { name: 'Rechercher par nom ou identifiant' });
+    await expect(input).toHaveValue(query);
+    await expect(main.getByRole('listitem')).toHaveCount(1);
+    await expect(main.getByRole('link', { name: 'Fourgon de voirie', exact: true })).toBeVisible();
+    await page.reload();
+    await expect(input).toHaveValue(query);
+    await expect(main.getByRole('listitem')).toHaveCount(1);
     await expectNoHorizontalOverflow(page);
   });
 }

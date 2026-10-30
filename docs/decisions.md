@@ -1,6 +1,25 @@
 # Décisions techniques et métier
 
-## 2026-10-30 — Outillage frontend et scripts npm examinés (en revue)
+## 2026-10-30 — Fiche Matériel locale et recherche dans l'URL (issue #31, en revue)
+
+La consultation de l'[issue #31](https://github.com/arthurb1348/terrimaint/issues/31) partage
+un seul composant entre `/agent/equipements/:id` et `/responsable/equipements/:id` et lit
+la source typée existante, sans seconde liste de données. Le paramètre `id` est observé pour
+suivre sa modification lorsque le routeur réutilise le composant ; un identifiant absent
+de la source produit un état introuvable explicite avec retour.
+
+La recherche devient un paramètre d'URL **`q`**. Les liens liste/fiche/retour transmettent
+la saisie exacte ; le filtrage normalise seulement sa propre comparaison. `replaceUrl`
+évite une étape d'historique par lettre. Le retour vise la liste du même espace, même
+après accès direct, sans dépendre d'un historique ni d'un stockage persistant. Matériel
+reste actif sur sa liste et ses fiches ; les routes demeurent publiques, sans permissions.
+
+La fiche affiche uniquement nom, identifiant, emplacement et mention de démonstration.
+Statuts, historiques, formulaires, modification, scanner et API métier restent hors périmètre.
+La charte et les parties pertinentes des prototypes sont reprises sans simuler leurs
+fonctions futures. Cet incrément reste **en revue jusqu'à fusion**.
+
+## 2026-10-30 — Outillage frontend et scripts npm examinés (fusionnée)
 
 La maintenance sur `fix/frontend-toolchain-security` fixe `@angular/build` à **22.2.5**
 pour suivre sa dépendance officielle Vite **8.3.5**, avec lockfile régénéré par npm.
@@ -14,7 +33,9 @@ compilation de repli dans l'environnement Linux contrôlé. Le `.npmrc` du front
 `strict-allow-scripts=true` pour refuser toute nouvelle version avec script non examinée.
 Le [guide du code](code-guide.md#dépendances-frontend-et-scripts-dinstallation-npm) détaille
 les fichiers relus, les raisons, les contrôles et la procédure de mise à jour. Windows et
-macOS restent à vérifier. Cette maintenance reste **en revue jusqu'à fusion**.
+macOS restent à vérifier. Cette maintenance est intégrée par la
+[PR #30](https://github.com/arthurb1348/terrimaint/pull/30), fusionnée le 30 octobre 2026
+(commit `fdaa85d531c77a34eb73b6075aa12200df163546`).
 
 ## 2026-10-30 — Accès Scanner selon la présentation (issue #21, fusionnée)
 

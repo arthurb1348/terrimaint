@@ -23,11 +23,12 @@
     [class.expanded]="expanded()"
   >
     @for (destination of destinations(); track destination.path) {
+      <!-- Matériel reste actif sur ses fiches et lorsque la recherche q est présente. -->
       <a
         [class.scanner-link]="destination.path === '/agent/scanner'"
         [routerLink]="destination.path"
         routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
+        [routerLinkActiveOptions]="{ exact: !destination.path.endsWith('/equipements') }"
         ariaCurrentWhenActive="page"
         (click)="closeNavigation()"
       >

@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { Home } from './home/home';
 
 const equipmentPage = () => import('./features/equipements/equipements').then((m) => m.Equipements);
+const equipmentDetailPage = () =>
+  import('./features/equipements/equipment-detail').then((m) => m.EquipmentDetail);
 const incidentsPage = () => import('./features/incidents/incidents').then((m) => m.Incidents);
 const interventionsPage = () =>
   import('./features/interventions/interventions').then((m) => m.Interventions);
@@ -28,6 +30,12 @@ export const routes: Routes = [
     data: { label: 'Tableau de bord' },
   },
   ...(['agent', 'responsable'] as const).flatMap((space): Routes => [
+    {
+      path: `${space}/equipements/:id`,
+      loadComponent: equipmentDetailPage,
+      title: 'Fiche matériel — TerriMaint',
+      data: { label: 'Matériel' },
+    },
     {
       path: `${space}/equipements`,
       loadComponent: equipmentPage,

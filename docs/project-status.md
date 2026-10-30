@@ -4,7 +4,7 @@
 
 - Date de vérification : 2026-10-30 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `4f5e3fc7b331482c5a2a994309f6481ee3f2acb1`, vérifié sur GitHub et par Git distant.
+- Code de référence : `main`, commit `fdaa85d531c77a34eb73b6075aa12200df163546`, vérifié sur GitHub et par Git distant.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -77,7 +77,7 @@ Sources : [API](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc
 | --- | --- | --- |
 | Backend | Python 3.12 pour le socle/CI ; Django 6.1.2, DRF 3.18.3 ; SQLite local configuré, sans persistance métier | [.python-version](../.python-version), [pyproject.toml](../pyproject.toml), [uv.lock](../uv.lock) |
 | Qualité Python | uv, pytest 9.1.1, pytest-django 4.14.0, Ruff 0.17.2, pre-commit | [uv.lock](../uv.lock), [hooks](../.pre-commit-config.yaml) |
-| Frontend | Angular 22.2.1, CLI 22.2.4, TypeScript 6.0.3, RxJS, HTML/CSS | [package.json](../frontend/package.json), [package-lock.json](../frontend/package-lock.json) |
+| Frontend | Angular 22.2.1, CLI 22.2.4, builder 22.2.5, Vite 8.3.5, TypeScript 6.0.3, RxJS, HTML/CSS | [package.json](../frontend/package.json), [package-lock.json](../frontend/package-lock.json) |
 | Outillage frontend | Node 24.21.0 LTS, npm 11.19.0, ESLint/angular-eslint, Vitest et jsdom | [.nvmrc](../.nvmrc), [package.json](../frontend/package.json) |
 | Suivi et CI | Git/GitHub, GitHub Actions, Dependabot | [CI](../.github/workflows/ci.yml), [Dependabot](../.github/dependabot.yml) |
 
@@ -121,10 +121,11 @@ L'[issue #21](https://github.com/arthurb1348/terrimaint/issues/21) est réalisé
 Matériel/recherche, Plus, la navigation Responsable et la route directe sont conservés.
 Le [guide du code](code-guide.md#accès-scanner-et-seuil-de-présentation-issue-21) détaille le choix.
 
-## Travaux en cours
+## Maintenance de l'outillage intégrée
 
-La présente maintenance, sur `fix/frontend-toolchain-security`, est **en revue jusqu'à fusion**.
-Elle fixe `@angular/build` à 22.2.5, dont le manifeste officiel déclare Vite 8.3.5. Le lockfile
+La [PR #30](https://github.com/arthurb1348/terrimaint/pull/30) est **fusionnée le 30 octobre 2026**
+(commit `fdaa85d531c77a34eb73b6075aa12200df163546`). Elle fixe `@angular/build` à 22.2.5,
+dont le manifeste officiel déclare Vite 8.3.5. Le lockfile
 régénéré par npm ne contient plus que Vite 8.3.5, au lieu de 8.3.3 à la racine et de 8.3.0
 sous le builder. L'audit de départ signale Vite et son parent, soit deux paquets affectés ;
 les contrôles après mise à jour puis après installation propre ne signalent aucune vulnérabilité.
@@ -139,9 +140,33 @@ pour refuser avant exécution les versions avec script non examinées. L'install
 avec `npm ci --foreground-scripts` n'exécute que le `postinstall` d'esbuild ;
 `npm install-scripts ls` ne présente plus de script non couvert. Les modules natifs et le
 démarrage/rechargement Angular sont contrôlés sous Linux ; Windows et macOS restent à vérifier.
-Les résultats complets et la CI du commit proposé sont consignés dans la PR de maintenance.
+Les résultats complets sont consignés dans la PR #30. Sa
+[CI](https://github.com/arthurb1348/terrimaint/actions/runs/41048825375) et son
+[Responsive](https://github.com/arthurb1348/terrimaint/actions/runs/41048825272) réussis concernent
+le commit proposé `cdffa3ac9430cf22521a46a35757a6c21ac051f1`, avant fusion.
 Le [guide](code-guide.md#dépendances-frontend-et-scripts-dinstallation-npm) et la
 [décision](decisions.md) expliquent les autorisations et les limites.
+
+## Travaux en cours
+
+L'[issue #31](https://github.com/arthurb1348/terrimaint/issues/31), sur
+`feat/31-equipment-detail`, propose une **fiche Matériel de démonstration en revue jusqu'à fusion**.
+Chaque nom de la liste devient un lien réel vers `/agent/equipements/:id` ou
+`/responsable/equipements/:id`. Les deux chemins chargent le même composant, qui affiche
+nom, identifiant et emplacement depuis la même source typée que la liste, avec une mention
+visible « Données de démonstration ». L'état introuvable conserve un retour à Matériel.
+
+La recherche est portée par `q` dans l'URL, transmise à la fiche puis à la liste par
+« Retour au matériel ». La saisie et les résultats sont donc retrouvés, y compris après
+rechargement, sans stockage persistant. Le contexte, Matériel actif et le parcours clavier
+sont conservés. L'identifiant est observé pour actualiser une fiche réutilisée par le routeur.
+La source fictive, les versions de dépendances et la politique npm de la PR #30 sont conservées.
+
+Cet incrément est local et public : aucune API métier, permission, modification d'équipement,
+formulaire d'incident, statut métier, historique ou scanner ajouté. Le
+[guide du code](code-guide.md#fiche-partagée-et-circulation-des-données-issue-31-en-revue)
+explique les routes, les paramètres et les endroits à modifier. Les résultats réels des
+contrôles et les captures sont consignés dans la PR ; ils ne valent pas validation humaine.
 
 Les tests responsive sont déjà **intégrés** par la
 [PR #19](https://github.com/arthurb1348/terrimaint/pull/19), fusionnée le 23 octobre 2026
@@ -228,9 +253,18 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   et le [Responsive](https://github.com/arthurb1348/terrimaint/actions/runs/41036057013) réussis
   concernent le commit proposé `6d129a072923a5de183cccb1782f9931a29d844b`, avant fusion.
   La santé HTTP est simulée dans tous les tests responsive.
-- La maintenance de l'outillage ne change aucun scénario ni code applicatif. Elle vérifie
+- La PR #30 fusionnée ne change aucun scénario ni code applicatif. Elle vérifie
   aussi l'installation propre, l'audit, les décisions de scripts et le démarrage/rechargement
-  Angular. La description de sa PR fournit les résultats du nouveau commit et leurs limites.
+  Angular. La description de sa PR fournit les résultats du commit concerné et leurs limites.
+- L'issue #31 propose **16 cas Vitest supplémentaires**, soit **66 dans cinq fichiers** :
+  fiche correcte, état introuvable, changement d'identifiant dans une même instance, paramètres
+  de recherche, contexte et navigation aller-retour. Les tests existants de recherche passent
+  désormais par le routeur pour observer `q`.
+  Elle propose **104 scénarios Playwright**, soit 32 de plus : 15 URL de référence, dont les
+  fiches valides/inconnues, et parcours clavier, accès direct, rechargement et retour dans les
+  deux espaces aux quatre formats. Ces ajouts restent en revue jusqu'à fusion ; les résultats
+  de la PR distinguent navigateur local et CI. La santé HTTP est simulée, sans intégration réelle
+  Django/proxy ni validation de permissions.
 - Aucun test de persistance ou de parcours métier complet présent.
 - Commandes : `uv run --locked python scripts/check.py` à la racine ;
   `npm run lint`, `npm test`, `npm run build`, `npm run test:responsive` dans `frontend/`.
@@ -285,7 +319,7 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire la PR de maintenance de l'outillage frontend et les décisions de scripts npm, puis décider sa fusion manuelle ; les PR #20 et #29 sont déjà fusionnées.
+1. Relire la PR de fiche Matériel de l'issue #31, ses tests et captures, puis décider sa fusion manuelle ; les PR #20, #29 et #30 sont déjà fusionnées.
 2. Définir les critères du premier parcours métier avant de développer ses écrans et son API.
 3. Préciser le modèle métier et la persistance PostgreSQL avec ORM/migrations Django,
    puis les parcours MVP en petits incréments, avec règles d'accès entre collectivités.
@@ -295,7 +329,8 @@ selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humain
 
 Cet ordre indique des dépendances de travail, sans planning engagé. Aucune de ces protections
 métier n'est implémentée aujourd'hui. Le workflow responsive et ses 72 scénarios sont déjà
-intégrés ; cette maintenance ne modifie pas les jobs `Backend`/`Frontend` ni les protections distantes.
+intégrés ; la nouvelle fiche complète les parcours sans modifier les jobs `Backend`/`Frontend`
+ni les protections distantes.
 
 ## Règles de mise à jour du bilan
 

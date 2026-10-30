@@ -16,8 +16,8 @@ en français expliquent les choix ; les identifiants restent en anglais pour sui
    Les erreurs de démarrage sont journalisées dans la console ; aucun mécanisme
    d’authentification ou de gestion de jetons n’est présent.
 3. `app.ts`, `app.html` et `app.css` portent le shell commun : en-tête, navigation,
-   contenu routé et pied de page. `app.routes.ts` conserve `/` vers `Home`, charge les cinq
-   rubriques à la demande et redirige les URL inconnues vers l'accueil.
+   contenu routé et pied de page. `app.routes.ts` conserve `/` vers `Home`, charge les pages
+   métier à la demande et redirige les URL inconnues vers l'accueil.
 4. `home/home.ts` vérifie l'API à l'initialisation. Le signal `state` actualise la vue.
    `refresh()` ne prend aucun paramètre et ne retourne rien : il lance une requête et
    stocke son résultat. `takeUntilDestroyed` annule la requête lorsque la page disparaît.
@@ -58,7 +58,7 @@ La route `**` reste en dernier et renvoie les URL inconnues vers `/`.
 
 `loadComponent: () => import('./features/incidents/incidents').then((m) => m.Incidents)`
 charge le code de cette page lors de la première navigation vers `/incidents`.
-Le build produit cinq fichiers différés, un par rubrique. `Home` reste importé directement,
+Le build produit des fichiers différés pour ces pages. `Home` reste importé directement,
 car c'est l'entrée habituelle. Ajouter des fichiers de routes enfants ou une stratégie de
 préchargement n'est pas utile à ce stade. Ce mécanisme optimise le chargement : il ne
 protège pas l'accès à une page et ne met rien hors connexion.
@@ -118,8 +118,8 @@ conteneur de déclarations Angular) n'est nécessaire.
 | --- | --- |
 | `src/app/features/equipements/equipment.ts` | L'interface TypeScript `Equipment` décrit un objet affiché : `id`, `name`, `location`, tous des textes (`string`). Elle vérifie les usages à la compilation et ne valide pas un JSON reçu du réseau. |
 | `src/app/features/equipements/equipements-demo.ts` | Source des six équipements fictifs, avec identifiants stables. `readonly` interdit les modifications via ces types, sans figer les objets à l'exécution. |
-| `src/app/features/equipements/equipements.ts` | État local de la recherche et calcul de la liste filtrée. Aucune requête ni sauvegarde. |
-| `src/app/features/equipements/equipements.html` | Titre, mention de démonstration, champ étiqueté, bouton d'effacement, résultat annoncé et liste. |
+| `src/app/features/equipements/equipements.ts` | Lecture de la recherche `q` dans l'URL et calcul de la liste filtrée. Aucune API métier ni stockage persistant. |
+| `src/app/features/equipements/equipements.html` | Titre, mention de démonstration, champ étiqueté, effacement, résultat annoncé et liens vers les fiches. |
 | `src/app/features/equipements/equipements.css` | Palette existante, focus du champ, contrôles qui passent à la ligne et cartes : une colonne jusqu'à 760 px, deux au-delà. Les textes longs peuvent revenir à la ligne. |
 | `src/app/features/equipements/equipements.spec.ts` | Tests des comportements visibles via saisie et clic : données initiales, nom/identifiant, casse, espaces, aucun résultat et effacement/focus. |
 | `e2e/responsive.pw.ts` | Ajoute la recherche dans les deux espaces aux quatre formats, avec effacement au clavier, contexte et débordement contrôlés. |
@@ -127,15 +127,15 @@ conteneur de déclarations Angular) n'est nécessaire.
 
 ### De la saisie aux cartes
 
-1. `search = signal('')` conserve la saisie. Un **signal** est une valeur réactive : Angular
-   sait actualiser la vue quand elle change. Le rapprochement Vue est `ref('')` ; Angular
-   lit avec `search()` et écrit avec `search.set(...)`, là où le script Vue utilise `.value`.
-2. `[value]="search()"` relie la valeur du champ au signal. `(input)` reçoit l'événement
-   de saisie et appelle `search.set(searchInput.value)`. `#searchInput` est une référence
-   au champ HTML dans ce template, comparable à une template ref Vue. Cela correspond
-   à `:value="search"` et `@input="search = $event.target.value"` côté template Vue,
-   avec le typage de l'événement à adapter en TypeScript. On n'utilise pas ici de liaison
-   bidirectionnelle telle que `v-model`.
+1. L'URL est la source de la recherche : `?q=Tondeuse`. `ActivatedRoute.queryParamMap`
+   émet les changements de paramètres et `toSignal` rend cette valeur observable lisible
+   comme un signal Angular. Un **signal** est une valeur réactive : Angular actualise la
+   vue quand elle change. `search = computed(...)` lit `q`, ou `''` si le paramètre est absent.
+2. `[value]="search()"` relie le champ à cette valeur dérivée. `(input)` appelle
+   `updateSearch(searchInput.value)`, qui modifie `q` avec le routeur. `replaceUrl: true`
+   remplace l'entrée courante au lieu d'ajouter une étape d'historique par lettre.
+   `#searchInput` est une référence au champ HTML, comparable à une template ref Vue.
+   La liste n'utilise ni formulaire ni liaison bidirectionnelle supplémentaire.
 3. `computed(...)` définit une valeur **dérivée** de `search`, comme `computed()` dans Vue.
    Angular mémorise son résultat et le recalcule au besoin quand le signal lu change.
    `trim()` enlève les espaces de début et de fin ; `toLowerCase()` normalise la casse.
@@ -150,17 +150,19 @@ conteneur de déclarations Angular) n'est nécessaire.
    l'index du tableau ne serait pas une identité stable. `@if` joue le rôle de `v-if` pour
    afficher la liste ou le message vide. Le paragraphe `role="status"` annonce le résultat
    aux technologies d'assistance sans déplacer le focus pendant la saisie.
-6. Effacer remet le signal à `''`, met à jour la valeur du champ et la liste, puis rend le
-   focus au champ pour continuer au clavier. Quitter la page détruit cet état local : la
-   recherche n'est conservée ni dans l'URL, ni dans un stockage, ni dans un store global.
+6. Effacer retire `q` de l'URL : `search()` redevient `''`, toute la liste revient et le focus
+   rejoint le champ. Les liens de fiche transmettent la saisie exacte dans `q` ; le lien de
+   retour la retransmet à la liste. Espaces et casse restent visibles dans le champ, même
+   si le filtre les normalise. Un rechargement reconstruit donc la recherche à partir de l'URL,
+   sans localStorage, sessionStorage, IndexedDB ou store global.
 
 ### Où changer les données et le comportement
 
 Pour modifier les exemples, intervenir dans `equipements-demo.ts`. Pour changer les champs
 affichés, adapter `Equipment` et le template ; pour changer la recherche, adapter le `computed`
-et ses tests. Pour le futur raccordement, remplacer l'import de `DEMO_EQUIPMENT` dans le
-composant par une source réactive alimentée par une API propre aux équipements. Le filtre
-pourra lire cette source plutôt que la constante. Il faudra alors définir le contrat JSON,
+et ses tests. Pour le futur raccordement, remplacer les imports de `DEMO_EQUIPMENT` dans la
+liste et la fiche par une source réactive alimentée par une API propre aux équipements.
+Le filtre et la sélection par identifiant pourront lire cette source. Il faudra alors définir le contrat JSON,
 valider les réponses, gérer chargement/erreur et tester les autorisations serveur ; l'interface
 TypeScript seule n'assure aucune de ces protections. Aucun service générique n'est anticipé.
 
@@ -168,8 +170,63 @@ Figma a été consulté en lecture seule : fiche matériel Agent `188:29` dans l
 `188:3`, et présentation des équipements du parcours Responsable `188:6` (écran `188:10487`).
 Ces parcours ne présentent pas de liste Matériel dédiée. Les cartes reprennent leur hiérarchie
 nom/référence/emplacement et la charte existante ; il ne s'agit pas d'une fidélité vérifiée
-à un prototype complet de cette liste. Les actions de fiche, statuts et synchronisation
-restent hors de cet incrément.
+à un prototype complet de cette liste. Les statuts, historiques, actions d'incident et
+synchronisation restent hors de la consultation de démonstration.
+
+### Fiche partagée et circulation des données (issue #31, en revue)
+
+Les routes `/agent/equipements/:id` et `/responsable/equipements/:id` utilisent le même
+`EquipmentDetail`, chargé par `loadComponent`. `:id` est une partie variable du chemin :
+dans `/agent/equipements/EQ-OUT-0003`, sa valeur est `EQ-OUT-0003`. Le composant lit ce
+paramètre et cherche l'objet correspondant dans **la même constante `DEMO_EQUIPMENT`** que
+la liste, sans recopier les équipements. Il affiche son nom, son identifiant et son emplacement,
+avec la mention « Données de démonstration » ; aucune information métier supplémentaire.
+
+Le flux est : **saisie → URL `q` → liste filtrée → lien contenant `id` et `q` → fiche → lien
+de retour contenant `q` → liste filtrée**. `q` garde le texte de recherche ; `id` identifie
+un équipement et doit correspondre exactement à un identifiant de la source. Angular encode
+les paramètres des liens ; il n'est pas nécessaire de concaténer ou décoder la saisie à la main.
+
+`paramMap` est transformé en signal puis lu dans un `computed`. Lire seulement un instantané
+au démarrage laisserait une ancienne fiche si Angular réutilisait le composant pour un autre
+`id`. Les tests vérifient une même instance successivement valide, différente, inconnue puis
+valide. En l'absence d'objet, le template affiche « Équipement introuvable » et conserve le
+lien « Retour au matériel » ; l'ancienne fiche n'est plus affichée.
+
+`[routerLink]="[equipment.id]"` prolonge le chemin de la liste. Dans la fiche,
+`[routerLink]="['..']"` revient au chemin parent dans le même espace : ce lien fonctionne
+même si aucune liste n'a été visitée auparavant. Il ne dépend pas de l'historique du
+navigateur. La liste et la fiche restent publiques ; un préfixe `/responsable` ne donne aucun droit.
+
+La navigation utilise une correspondance de chemin partielle **uniquement pour Matériel** :
+son lien racine reste actif sur `/equipements/:id` et quand `q` est présent. Les autres
+destinations gardent leur correspondance exacte. Pour le clavier, la fiche place le focus sur
+le `main` permanent du shell après rendu : Tab atteint le retour. Au retour, ce repère garde
+le focus, puis Tab retrouve le champ de recherche. Le CSS utilise les couleurs existantes,
+des espacements de 16/24 px et le retour à la ligne pour les contenus longs, sans largeur minimale rigide.
+Dans `equipements.css`, `scroll-margin-bottom: calc(104px + env(safe-area-inset-bottom))`
+réserve le dégagement de défilement des liens de carte : 88 px pour la navigation Agent,
+16 px de marge et l'éventuelle zone sûre du téléphone. Sans ce dégagement, un lien focalisé
+à 320 px peut être dans la fenêtre mais caché par la barre fixe. Cette règle ne change pas
+la taille des cartes ; elle guide le défilement automatique au focus. Playwright vérifie
+la position du lien au-dessus de la barre avant de l'activer au clavier.
+
+| Endroit à modifier | Rôle |
+| --- | --- |
+| `src/app/app.routes.ts` | Deux chemins avec `:id`, chargement partagé, titre et libellé Matériel. |
+| `src/app/features/equipements/equipment-detail.ts` | Lecture réactive d'`id` et de `q`, sélection dans la source, focus du contenu. |
+| `equipment-detail.html` et `equipment-detail.css` dans le même dossier | Fiche ou état introuvable, retour, mentions, champs et présentation responsive. |
+| `equipements.ts` et `equipements.html` | Recherche dans l'URL et liens de liste contenant `id` et `q`. |
+| `src/app/shared/main-navigation/main-navigation.html` | Matériel actif sur sa liste et ses fiches. |
+| `equipment-detail.spec.ts`, `equipements.spec.ts`, `src/app/app.spec.ts` | Paramètres, réutilisation du composant, contexte, recherche et retour. |
+| `e2e/responsive.pw.ts` | Parcours clavier, accès direct, rechargement et captures aux quatre formats. |
+
+Figma a été relu sans modification : fiche Agent `188:29`, carte `255:11049`, et parcours
+Responsable `188:6` avec l'écran `188:10487`. Ce dernier contient une présentation d'équipements
+mais aucune fiche Matériel dédiée. La consultation reprend la hiérarchie nom/référence/emplacement
+et conserve le shell déjà intégré. Le lien de retour est explicite en texte. Les statuts,
+synchronisation, entretien et actions des prototypes ne sont pas simulés. Aucune fidélité
+pixel par pixel à l'écran métier complet n'est revendiquée.
 
 ### Essai manuel court et compréhension
 
@@ -181,9 +238,15 @@ vide. Depuis le champ, utiliser Tab puis Entrée sur « Effacer la recherche » 
 reviennent et le focus rejoint le champ. Vérifier le lien Matériel actif, les navigations
 existantes et l'absence de défilement horizontal. Django n'est pas requis pour cette liste.
 
-1. Pourquoi modifier `search` suffit-il à actualiser les cartes sans appeler une fonction de rendu ?
-2. Pourquoi l'effacement peut-il retrouver les six équipements après un résultat vide ?
-3. Quels fichiers et quelles vérifications faudrait-il faire évoluer pour recevoir les équipements d'une API ?
+Pour la fiche : chercher `  tONDeUSE  `, puis Tab jusqu'au lien « Tondeuse autoportée » et
+Entrée. Vérifier les trois informations et Matériel actif ; Tab puis Entrée sur le retour
+doit retrouver la saisie et un résultat. Refaire dans les deux espaces. Ouvrir directement
+`/agent/equipements/EQ-OUT-0003`, puis son équivalent Responsable, et recharger : la fiche
+reste correcte. Remplacer l'identifiant par `inconnu` : message explicite et retour utilisable.
+
+1. Quelle différence y a-t-il entre `id` dans le chemin et `q` dans la recherche de l'URL ?
+2. Pourquoi faut-il observer `paramMap` plutôt que lire seulement l'identifiant au démarrage ?
+3. Comment le lien de retour peut-il retrouver la recherche sans stockage ni visite précédente de la liste ?
 
 ## Backend et script de contrôle
 
@@ -238,8 +301,9 @@ démarrage hors debug avec un secret fourni.
 | --- | --- |
 | `src/app/home/home.spec.ts` | Attente et bouton désactivé, JSON valide, erreur HTTP, erreur réseau, quatre réponses invalides, récupération après relance et annulation à la destruction. Les helpers lisent le statut rendu et attendent sa mise à jour. |
 | `src/app/core/api-health.spec.ts` | Sans réponse, aucun résultat avant 5 s puis indisponibilité et annulation du GET. L'horloge fictive est restaurée après le test. |
-| `src/app/app.spec.ts` | Accueil et URL inconnues, un seul repère main, lien d'évitement, accès direct aux cinq pages, titres et lien actif, navigation Responsable → Agent → Incidents → Accueil, annulation du GET puis relance au retour. |
-| `src/app/features/equipements/equipements.spec.ts` | Liste locale, démonstration, recherche par nom/identifiant, casse et espaces, emplacement exclu, résultat vide et effacement avec retour du focus. |
+| `src/app/app.spec.ts` | Accueil et URL inconnues, un seul repère main, lien d'évitement, pages/fiches directes, titres et lien actif, contexte et retour de fiche avec recherche, annulation du GET puis relance au retour. |
+| `src/app/features/equipements/equipements.spec.ts` | Liste locale, démonstration, recherche par nom/identifiant, casse et espaces, emplacement exclu, résultat vide, effacement/focus et paramètre `q`. |
+| `src/app/features/equipements/equipment-detail.spec.ts` | Fiches directes dans les deux espaces, champs existants, identifiant inconnu, changement d'`id` dans une même instance et mise à jour de `q`. |
 
 `provideHttpClientTesting()` remplace le transport réel après `provideHttpClient()`.
 `expectOne()` contrôle l'URL, `flush()` fournit une réponse et `error()` simule le réseau.
@@ -455,7 +519,8 @@ Chromium : 320 × 568 et 390 × 844 avec toucher mobile, 768 × 1024 avec touche
 Les tests `.pw.ts` restent séparés des `.spec.ts` de Vitest ; `tsconfig.e2e.json` vérifie
 leurs types avant leur exécution, et ESLint analyse aussi ces fichiers et la configuration.
 
-`frontend/e2e/responsive.pw.ts` parcourt les 11 URL présentes. Il attend le contenu réellement
+`frontend/e2e/responsive.pw.ts` parcourt 15 URL de référence : les 11 entrées initiales,
+deux fiches valides et deux identifiants inconnus, dans les deux espaces. Il attend le contenu réellement
 rendu puis mesure le débordement du document, avec un pixel de tolérance pour les arrondis.
 Le menu Agent vérifie séparément que les quatre libellés mobiles tiennent dans leurs boutons
 sur une ligne : une simple largeur de document correcte ne suffirait pas à détecter leur
@@ -474,8 +539,17 @@ et leur seuil de présentation : visibilité sur l'accueil et dans la navigation
 des deux liens quand ils sont visibles, URL directe à toute largeur, tabulation, et accès
 à Matériel. Le redimensionnement couvre 1024, 1199, 1200, 1201 et 1440 px puis revient jusqu'à
 320 px sans rechargement. Les liens directs visibles doivent avoir des largeurs égales et
-occuper tout l'espace intérieur de navigation, sans intervalle vide. Le total proposé pour
-l'issue #21 est de **72 scénarios** (64 intégrés par la PR #20, plus huit).
+occuper tout l'espace intérieur de navigation, sans intervalle vide. La PR #29 a intégré
+**72 scénarios** (64 intégrés par la PR #20, plus huit).
+
+L'issue #31 propose **104 scénarios**, soit 32 de plus : quatre URL de fiche aux quatre
+formats et deux parcours supplémentaires par espace dans chaque format. Ils vérifient les
+liens Tab/Entrée, la conservation exacte de `q`, le retour du focus, les champs de la fiche,
+Matériel actif, l'accès direct, le rechargement des fiches et de la liste filtrée, puis l'état
+introuvable avec retour. Le lien de carte focalisé doit rester visible au-dessus de la barre
+Agent fixe. Les captures `lien-fiche-focus`, `fiche-materiel`, `retour-recherche` et
+`equipement-introuvable` servent à la relecture. La réutilisation d'une même instance lors
+du changement d'`id` est vérifiée séparément avec le routeur Angular dans Vitest.
 
 La fixture `page` intercepte uniquement `/api/v1/health` et répond `{"status":"ok"}`.
 L'objectif est la mise en page et la navigation : aucun serveur Django ni authentification

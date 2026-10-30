@@ -82,6 +82,10 @@ li p {
   color: var(--muted);
   font-size: 0.875rem;
 }
+/* Au focus clavier, laisser le lien visible au-dessus de la navigation Agent fixée en bas. */
+.equipment-list a {
+  scroll-margin-bottom: calc(104px + env(safe-area-inset-bottom));
+}
 @media (min-width: 761px) {
   .equipment-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
