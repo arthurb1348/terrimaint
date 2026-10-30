@@ -395,7 +395,9 @@ permission serveur. Le formulaire de déclaration ne crée ni ne modifie ces obj
 correspondant pour lire son nom et son emplacement, sans dupliquer ces valeurs. Les tests
 vérifient que les six références existent et que les identifiants de signalement sont uniques.
 Une description absente s'affiche Non renseignée, sans créer de texte métier. Les dates
-sont rendues par `DatePipe` au format `dd/MM/yyyy` en UTC pour rester fixes selon le fuseau.
+sont rendues par `DatePipe` au format `dd/MM/yyyy`, sans forcer UTC : une date ISO sans heure
+est une date calendaire, pas un instant à convertir. Le forçage UTC afficherait la veille
+en Europe/Paris. Les nouveaux parcours Playwright utilisent ce fuseau et vérifient les dates.
 
 ### Filtrage et URL
 

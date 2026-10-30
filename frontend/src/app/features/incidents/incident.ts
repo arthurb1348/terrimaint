@@ -12,6 +12,7 @@ export interface Incident {
   readonly equipmentId: string;
   readonly priority: keyof typeof INCIDENT_PRIORITIES;
   readonly status: keyof typeof INCIDENT_STATUSES;
+  // Date calendaire sans heure : forcer UTC dans le rendu pourrait afficher la veille.
   readonly reportedOn: string;
   readonly risk?: boolean;
 }

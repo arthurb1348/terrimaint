@@ -24,9 +24,7 @@
       <div>
         <dt>Signalé le</dt>
         <dd>
-          <time [attr.datetime]="item.reportedOn">{{
-            item.reportedOn | date: 'dd/MM/yyyy' : 'UTC'
-          }}</time>
+          <time [attr.datetime]="item.reportedOn">{{ item.reportedOn | date: 'dd/MM/yyyy' }}</time>
         </dd>
       </div>
     </dl>
