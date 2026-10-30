@@ -68,6 +68,11 @@ npm ci
 npm start
 ```
 
+Le projet limite les scripts d'installation npm à des versions examinées. Si `npm ci`
+signale `ESTRICTALLOWSCRIPTS`, consulter le
+[guide des dépendances et scripts](docs/code-guide.md#dépendances-frontend-et-scripts-dinstallation-npm)
+avant de modifier les autorisations ; conserver Node et npm aux versions déclarées.
+
 Ouvrir <http://localhost:4200>. Le proxy de développement transmet `/api/**` à
 `http://127.0.0.1:8000` ; aucune ouverture CORS n'est nécessaire sur le backend.
 La page vérifie l'API à son ouverture et au clic sur « Vérifier à nouveau ».

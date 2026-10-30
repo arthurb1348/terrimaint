@@ -253,7 +253,7 @@ que d'insérer des commentaires non reconnus par leurs outils.
 
 | Fichier | Clés importantes et liens |
 | --- | --- |
-| `frontend/package.json` | `scripts` déclare start/lint/test/build. `dependencies` contient Angular et RxJS ; `devDependencies` les outils CLI, TypeScript, Vitest, jsdom, ESLint et Prettier. `engines` impose Node 24 et npm 11 compatibles ; `packageManager` précise npm 11.19.0. `private` évite une publication npm accidentelle. |
+| `frontend/package.json` | `scripts` déclare start/lint/test/build. `dependencies` contient Angular et RxJS ; `devDependencies` les outils CLI, TypeScript, Vitest, jsdom, ESLint et Prettier. `engines` impose Node 24 et npm 11 compatibles ; `packageManager` précise npm 11.19.0. `allowScripts` autorise ou refuse les scripts de versions examinées (voir ci-dessous). `private` évite une publication npm accidentelle. |
 | `frontend/package-lock.json` | Versions résolues, liens de téléchargement et empreintes d'intégrité. Généré par npm, jamais édité à la main ; `npm ci` exige sa cohérence avec package.json. |
 | `frontend/angular.json` | `projects.terrimaint` décrit l'application. `build` associe main.ts, tsconfig, styles et assets ; la production optimise, nomme les fichiers par empreinte et impose des budgets. `serve` référence le proxy et le build de développement. `test` utilise le runner Vitest natif d'Angular ; `lint` utilise le builder angular-eslint. `cli.analytics=false` désactive la télémétrie. |
 | `frontend/proxy.conf.json` | `/api/**` comprend les sous-chemins avec le serveur Vite de la CLI. `target` vise Django en IPv4 sur le port 8000 ; `changeOrigin` adapte l'en-tête Host. Ce proxy ne s'applique qu'à `npm start`. |
@@ -270,6 +270,73 @@ que d'insérer des commentaires non reconnus par leurs outils.
 En production, servir le build avec un retour vers `index.html` pour les routes Angular et
 transmettre `/api/**` au backend via le serveur web. Le proxy de développement n'est pas
 embarqué dans le build. Aucun déploiement ni configuration CORS distante n'est ajouté ici.
+
+## Dépendances frontend et scripts d'installation npm
+
+Une **dépendance indirecte** est installée parce qu'un outil du projet en a besoin : ici
+`@angular/build` utilise Vite pour le serveur de développement. Le manifeste fixe l'outil
+direct, tandis que le lockfile enregistre aussi les versions indirectes réellement résolues.
+Il faut contrôler tous les emplacements du lockfile : avant cette maintenance, Vite 8.3.3
+à la racine coexistait avec **8.3.0 sous `@angular/build`**, encore signalé par l'audit.
+
+La **mise à jour corrective** `@angular/build` **22.2.1 → 22.2.5** suit son manifeste
+officiel, qui déclare Vite **8.3.5**. Le lockfile régénéré par npm contient une seule
+résolution de Vite, en 8.3.5. Architect/Core 22.2.5, Rolldown 1.2.15, PostCSS 8.5.32 et
+le repli WASM optionnel d'oxc évoluent avec cette chaîne ; Angular 22.2.1, la CLI 22.2.4,
+TypeScript 6.0.3, Node 24.21.0 et npm 11.19.0 sont conservés. Les contraintes du builder
+acceptent Angular `^22.0.0`, TypeScript `>=6.0 <6.1`, Vitest `^4.0.8 || ^5.0.0` et
+Node `^24.15.0` sur notre version majeure. Aucun override Vite n'est nécessaire.
+`npm audit` interroge les alertes connues à l'instant du contrôle ; son résultat n'est
+pas une garantie permanente ni une preuve de sécurité du code applicatif.
+
+Un paquet peut déclarer des commandes `preinstall`, `install` ou `postinstall`, exécutables
+pendant l'installation. Ce sont des **scripts de dépendances**, distincts de nos commandes
+`npm start`, `npm test` ou `npm run build`. Leur examen porte sur les scripts réellement
+livrés, leurs fichiers appelés et leur utilité ; leur seul nom ne suffit pas.
+
+`frontend/package.json#allowScripts` utilise des clés **nom@version exacte**. `true`
+autorise les scripts de cette seule version ; `false` les refuse explicitement, sans
+empêcher l'installation du paquet ni de ses dépendances optionnelles.
+
+| Version examinée | Script livré et fichiers relus | Décision et raison |
+| --- | --- | --- |
+| `esbuild@0.28.2` | `postinstall: node install.js` ; lecture complète de `install.js` | **Autorisé** : prépare le binaire adapté à la plateforme et vérifie sa version. Si le paquet binaire optionnel manque, le script prévoit un téléchargement de la même version sur npm, avec vérification de son empreinte. Ce repli réseau n'a pas été nécessaire dans notre installation Linux. |
+| `@parcel/watcher@2.6.0` | `install: node scripts/build-from-source.js` ; lecture du script et de `index.js` | **Refusé** : le script ne compile que si `npm_config_build_from_source=true`. Le fonctionnement normal charge le paquet précompilé de la plateforme ; un événement réel de création de fichier a été vérifié sous Linux. |
+| `lmdb@3.5.6` | `install: node-gyp-build-optional-packages` ; lecture de son `bin.js`, du test de chargement, du chargeur et de l'entrée LMDB | **Refusé** : teste le module natif puis peut lancer une compilation `node-gyp` en cas d'échec. Le chargeur peut utiliser directement le paquet précompilé sans ce script ; écriture et lecture LMDB vérifiées après installation propre sous Linux. |
+| `msgpackr-extract@3.0.4` | Même script ; lecture de `index.js`, du chargeur commun et du chargement dans msgpackr | **Refusé** : compilation de repli inutile pour les binaires disponibles. Le module natif, l'accélération active et un aller-retour MessagePack ont été vérifiés sous Linux. |
+
+`frontend/.npmrc` active **`strict-allow-scripts=true`**. Avec npm 11.19.0, une dépendance
+avec script non couverte devient une erreur `ESTRICTALLOWSCRIPTS` avant exécution ; les
+refus explicites restent ignorés. Cela évite qu'une future version bénéficie d'une ancienne
+autorisation. Les trois refus sont eux aussi limités aux versions examinées : toute nouvelle
+version avec script doit être réexaminée. `npm install-scripts ls` ne montre que les cas
+non couverts ; une liste vide signifie « chaque script a une décision », pas « tout est autorisé ».
+Une copie temporaire privée de l'autorisation esbuild a confirmé ce refus avant installation.
+
+Pour une prochaine mise à jour, depuis `frontend/` :
+
+1. Lire `npm audit` et le manifeste officiel avec `npm view <paquet>@<version>` ; vérifier
+   moteurs et dépendances pairs, sans `npm audit fix --force` ni override automatique.
+2. Installer la version choisie avec `npm install --ignore-scripts --save-dev --save-exact
+   <paquet>@<version>`. Cette option sert seulement à examiner les nouveaux fichiers avant
+   exécution ; elle ne remplace pas la validation normale par `npm ci`.
+3. Relancer `npm install-scripts ls`, lire chaque script et ses fichiers appelés, puis
+   mettre à jour uniquement les décisions nécessaires. `npm install-scripts approve esbuild
+   --allow-scripts-pin` écrit une autorisation exacte après examen. Conserver aussi des clés
+   exactes pour les refus ; la commande `deny` écrit, elle, un refus par nom pour toutes les versions.
+4. Relire le diff du manifeste et du lockfile, vérifier les versions de Vite dans le lockfile,
+   puis lancer `npm ci --foreground-scripts`, `npm install-scripts ls`, `npm audit`, lint,
+   tests, build et tests responsive. Vérifier `npm start` et la recompilation après modification.
+
+Conserver les dépendances optionnelles : elles apportent les binaires de chaque plateforme.
+La compilation depuis les sources n'est pas autorisée par cette politique. Les essais locaux
+et la CI de cette maintenance sont sous Linux ; **Windows et macOS restent à vérifier** avec
+les mêmes versions Node/npm, une installation propre, le démarrage et la recompilation.
+Les tests responsive simulent la santé HTTP ; ils ne prouvent pas l'intégration Django/proxy.
+
+Sources : [manifeste officiel du builder](https://registry.npmjs.org/@angular/build/22.2.5),
+[commandes de revue des scripts npm](https://docs.npmjs.com/cli/v11/commands/npm-install-scripts),
+[contrôle strict npm](https://docs.npmjs.com/cli/v11/using-npm/config#strict-allow-scripts).
 
 ## Autres fichiers de configuration
 

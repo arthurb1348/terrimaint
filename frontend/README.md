@@ -11,6 +11,15 @@ npm ci
 npm start
 ```
 
+L'outil `@angular/build` est fixé à **22.2.5** et le lockfile résout Vite **8.3.5**.
+`package.json#allowScripts` autorise uniquement `esbuild@0.28.2` et refuse explicitement
+les scripts des versions examinées de Parcel, LMDB et msgpackr-extract. Leurs binaires
+précompilés restent installés : ne pas omettre les dépendances optionnelles.
+`.npmrc` active `strict-allow-scripts` : une nouvelle version avec script non examinée
+fait échouer l'installation avant exécution. `npm install-scripts ls` liste les cas à
+examiner, y compris après une mise à jour ; une liste vide inclut aussi les refus explicites.
+Voir [l'examen des scripts et la procédure de mise à jour](../docs/code-guide.md#dépendances-frontend-et-scripts-dinstallation-npm).
+
 Depuis la racine, dans un second terminal :
 
 ```sh
@@ -21,6 +30,8 @@ Ouvrir http://localhost:4200. Le proxy redirige /api/** vers http://127.0.0.1:80
 L'accueil vérifie la santé à l'ouverture ou au clic, avec un délai maximal de cinq secondes.
 
 ```sh
+npm audit
+npm install-scripts ls
 npm run lint
 npm test
 npm run build
