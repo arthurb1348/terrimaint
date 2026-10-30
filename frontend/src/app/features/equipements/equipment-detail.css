@@ -34,3 +34,14 @@ dt {
 dd {
   margin: 4px 0 0;
 }
+.feature-page .declaration-link {
+  min-height: 48px;
+  margin-top: 24px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--green);
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  scroll-margin-bottom: calc(104px + env(safe-area-inset-bottom));
+}

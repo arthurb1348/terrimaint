@@ -1,0 +1,190 @@
+<section class="feature-page" aria-labelledby="incident-title-heading">
+  @if (equipment(); as item) {
+    <a [routerLink]="['../../../equipements', item.id]" [queryParams]="{ q: search() || null }">
+      Retour à la fiche matériel
+    </a>
+  } @else {
+    <a [routerLink]="['../../../equipements']" [queryParams]="{ q: search() || null }">
+      Retour au matériel
+    </a>
+  }
+
+  <p class="demo-label">Données de démonstration</p>
+  <p class="demo-notice">
+    Cette simulation n'enregistre et n'envoie rien. La saisie reste uniquement en mémoire : elle est
+    perdue en quittant cette page ou en la rechargeant.
+  </p>
+
+  @if (equipment(); as item) {
+    <h1 id="incident-title-heading" tabindex="-1">
+      @switch (step()) {
+        @case ('form') {
+          Déclarer un incident
+        }
+        @case ('review') {
+          Vérifier la déclaration
+        }
+        @case ('complete') {
+          Simulation terminée
+        }
+      }
+    </h1>
+    <section class="equipment-summary" aria-labelledby="incident-equipment-name">
+      <h2 id="incident-equipment-name">{{ item.name }}</h2>
+      <p>{{ item.id }} · {{ item.location }}</p>
+    </section>
+
+    @switch (step()) {
+      @case ('form') {
+        <form [formGroup]="form" (ngSubmit)="review()" novalidate>
+          <p>Intitulé, description et priorité sont obligatoires.</p>
+          <div class="field">
+            <label for="incident-title">Intitulé</label>
+            <input
+              id="incident-title"
+              type="text"
+              formControlName="title"
+              [attr.maxlength]="titleLimit"
+              [attr.aria-invalid]="invalid('title')"
+              [attr.aria-describedby]="invalid('title') ? 'title-help title-error' : 'title-help'"
+              required
+            />
+            <p id="title-help" class="help">
+              Résumez le problème en quelques mots. {{ titleLimit }} caractères maximum.
+            </p>
+            @if (invalid('title')) {
+              <p id="title-error" class="error">
+                @if (form.controls.title.hasError('maxlength')) {
+                  L'intitulé ne doit pas dépasser {{ titleLimit }} caractères.
+                } @else {
+                  Renseignez un intitulé, avec au moins un caractère autre qu'un espace.
+                }
+              </p>
+            }
+          </div>
+          <div class="field">
+            <label for="incident-description">Description</label>
+            <textarea
+              #descriptionInput
+              id="incident-description"
+              formControlName="description"
+              rows="5"
+              (focus)="revealDescription(descriptionInput)"
+              [attr.maxlength]="descriptionLimit"
+              [attr.aria-invalid]="invalid('description')"
+              [attr.aria-describedby]="
+                invalid('description') ? 'description-help description-error' : 'description-help'
+              "
+              required
+            ></textarea>
+            <p id="description-help" class="help">
+              Décrivez ce que vous observez sur le terrain. {{ descriptionLimit }} caractères
+              maximum.
+            </p>
+            @if (invalid('description')) {
+              <p id="description-error" class="error">
+                @if (form.controls.description.hasError('maxlength')) {
+                  La description ne doit pas dépasser {{ descriptionLimit }} caractères.
+                } @else {
+                  Renseignez une description, avec au moins un caractère autre qu'un espace.
+                }
+              </p>
+            }
+          </div>
+          <fieldset [attr.aria-describedby]="invalid('priority') ? 'priority-error' : null">
+            <legend>Priorité (obligatoire)</legend>
+            @for (priority of priorities; track priority.value) {
+              <label class="choice" [for]="'priority-' + priority.value">
+                <input
+                  [id]="'priority-' + priority.value"
+                  type="radio"
+                  name="priority"
+                  formControlName="priority"
+                  [value]="priority.value"
+                  [attr.aria-invalid]="invalid('priority')"
+                  [attr.aria-describedby]="invalid('priority') ? 'priority-error' : null"
+                  required
+                />
+                <span>{{ priority.label }} — {{ priority.explanation }}</span>
+              </label>
+            }
+            @if (invalid('priority')) {
+              <p id="priority-error" class="error">
+                Choisissez une priorité : Faible, Haute ou Urgente.
+              </p>
+            }
+          </fieldset>
+          <div class="field">
+            <label class="choice" for="incident-risk">
+              <input
+                id="incident-risk"
+                type="checkbox"
+                formControlName="risk"
+                aria-describedby="risk-help"
+              />
+              <span>Je signale un risque ou une impossibilité d'utilisation</span>
+            </label>
+            <p id="risk-help" class="help">
+              Facultatif. Ce signalement ne change pas le statut du matériel. L'immobilisation
+              officielle relève du Responsable.
+            </p>
+          </div>
+          <div class="actions">
+            <button type="submit">Vérifier la déclaration</button>
+            <a
+              [routerLink]="['../../../equipements', item.id]"
+              [queryParams]="{ q: search() || null }"
+              >Annuler</a
+            >
+          </div>
+        </form>
+      }
+      @case ('review') {
+        <dl class="review-values">
+          <div>
+            <dt>Intitulé</dt>
+            <dd>{{ form.controls.title.value }}</dd>
+          </div>
+          <div>
+            <dt>Description</dt>
+            <dd>{{ form.controls.description.value }}</dd>
+          </div>
+          <div>
+            <dt>Priorité</dt>
+            <dd>{{ priorityLabel() }}</dd>
+          </div>
+          <div>
+            <dt>Risque ou impossibilité d'utilisation signalé</dt>
+            <dd>{{ form.controls.risk.value ? 'Oui' : 'Non' }}</dd>
+          </div>
+        </dl>
+        <p>Le statut du matériel reste inchangé. Aucun incident ne sera enregistré ni envoyé.</p>
+        <div class="actions">
+          <button type="button" (click)="complete()">Terminer la simulation</button>
+          <button type="button" class="secondary" (click)="edit()">Modifier</button>
+          <a
+            [routerLink]="['../../../equipements', item.id]"
+            [queryParams]="{ q: search() || null }"
+            >Annuler</a
+          >
+        </div>
+      }
+      @case ('complete') {
+        <p>Aucun incident n'a été enregistré ni envoyé. Le statut du matériel reste inchangé.</p>
+        <a
+          class="return-link"
+          [routerLink]="['../../../equipements', item.id]"
+          [queryParams]="{ q: search() || null }"
+        >
+          Retour à la fiche
+        </a>
+      }
+    }
+  } @else {
+    <h1 id="incident-title-heading" tabindex="-1">Équipement introuvable</h1>
+    <p>
+      Aucun équipement de démonstration ne correspond à cet identifiant. La déclaration est
+      indisponible.
+    </p>
+  }
+</section>

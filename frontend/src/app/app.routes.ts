@@ -5,6 +5,8 @@ const equipmentPage = () => import('./features/equipements/equipements').then((m
 const equipmentDetailPage = () =>
   import('./features/equipements/equipment-detail').then((m) => m.EquipmentDetail);
 const incidentsPage = () => import('./features/incidents/incidents').then((m) => m.Incidents);
+const incidentDeclarationPage = () =>
+  import('./features/incidents/incident-declaration').then((m) => m.IncidentDeclaration);
 const interventionsPage = () =>
   import('./features/interventions/interventions').then((m) => m.Interventions);
 const upcomingPage = () =>
@@ -41,6 +43,12 @@ export const routes: Routes = [
       loadComponent: equipmentPage,
       title: 'Matériel — TerriMaint',
       data: { label: 'Matériel' },
+    },
+    {
+      path: `${space}/incidents/nouveau/:equipmentId`,
+      loadComponent: incidentDeclarationPage,
+      title: 'Déclarer un incident — TerriMaint',
+      data: { label: 'Incidents' },
     },
     {
       path: `${space}/incidents`,

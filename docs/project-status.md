@@ -4,7 +4,7 @@
 
 - Date de vérification : 2026-10-30 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `fdaa85d531c77a34eb73b6075aa12200df163546`, vérifié sur GitHub et par Git distant.
+- Code de référence : `main`, commit `ab29cc512a384cbe5a583b3e42b7f24312932dc0`, vérifié sur GitHub et par Git distant.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -27,8 +27,8 @@ Source : [contexte produit](project.md).
 La [PR #16 fusionnée](https://github.com/arthurb1348/terrimaint/pull/16) intègre les navigations
 des prototypes Agent et Responsable : barre basse Agent, barre latérale Responsable sur ordinateur et menu repliable
 sur mobile. Les deux espaces restent accessibles sur chaque format. Les liens actifs,
-repères de focus et lien d'évitement sont conservés. Hormis Matériel de démonstration intégré
-par la PR #20, les pages restent des espaces réservés, sans formulaire métier,
+repères de focus et lien d'évitement sont conservés. Hormis Matériel de démonstration et ses
+fiches intégrés par les PR #20 et #32, les pages restent des espaces réservés, sans formulaire métier,
 authentification, modèle métier ou API supplémentaire. Le contrôle de santé
 reste sur l'accueil général ; aucun statut de synchronisation n'est simulé.
 
@@ -93,8 +93,9 @@ les bornes déclarées dans les manifestes ne doivent pas être prises pour des 
 | Anciennes routes API | `/openapi.json`, `/docs` et `/redoc` renvoient 404 ; aucune UI OpenAPI ajoutée | [tests HTTP](https://github.com/arthurb1348/terrimaint/blob/1990d02c4445648bc364893a2c9927b2b8b8bf6f/backend/tests/test_health.py) |
 | Accueil responsive | Signature du projet, statut de l'API et bouton de relance ; attente, disponible ou indisponible | [composant Home](../frontend/src/app/home/home.ts), [template](../frontend/src/app/home/home.html), [styles](../frontend/src/app/home/home.css) |
 | Gestion des échecs HTTP | Validation du JSON, erreurs réseau/HTTP et délai maximal de cinq secondes ; annulation en quittant la page | [service intégré](../frontend/src/app/core/api-health.ts), [composant](../frontend/src/app/home/home.ts) |
-| Routage | Accueil sur `/`, onze URL avec contexte Agent/Responsable, anciennes URL redirigées et retour des URL inconnues à l’accueil | [routes](../frontend/src/app/app.routes.ts) |
+| Routage | Accueil, listes et fiches publiques avec contexte Agent/Responsable, anciennes URL redirigées et retour des URL inconnues à l’accueil | [routes](../frontend/src/app/app.routes.ts) |
 | Matériel de démonstration | Six équipements fictifs, recherche locale par nom/identifiant et effacement avec retour du focus, dans les deux espaces ; aucune API métier | [PR #20 fusionnée](https://github.com/arthurb1348/terrimaint/pull/20), [composant](../frontend/src/app/features/equipements/equipements.ts) |
+| Fiche Matériel de démonstration | Liens clavier, composant partagé, état introuvable, accès direct/rechargement, retour conservant la recherche `q` et Matériel actif | [PR #32 fusionnée](https://github.com/arthurb1348/terrimaint/pull/32), [fiche](../frontend/src/app/features/equipements/equipment-detail.ts) |
 
 ## Matériel de démonstration intégré
 
@@ -107,7 +108,7 @@ les espaces de début/fin ; une recherche vide affiche tout. Le message vide et 
 avec retour du focus au champ sont inclus. La source typée est séparée du composant.
 
 Cet incrément intégré ne constitue pas un parcours connecté à une
-API métier : aucune requête d'équipements, sauvegarde, fiche, CRUD, authentification, permission,
+API métier : aucune requête d'équipements, sauvegarde, CRUD, authentification, permission,
 scan QR ou synchronisation. Les navigations existantes sont conservées. Le [guide du code](code-guide.md#matériel--première-liste-de-démonstration)
 explique les fichiers, le filtrage et le futur point de raccordement API.
 
@@ -147,10 +148,11 @@ le commit proposé `cdffa3ac9430cf22521a46a35757a6c21ac051f1`, avant fusion.
 Le [guide](code-guide.md#dépendances-frontend-et-scripts-dinstallation-npm) et la
 [décision](decisions.md) expliquent les autorisations et les limites.
 
-## Travaux en cours
+## Fiche Matériel intégrée
 
-L'[issue #31](https://github.com/arthurb1348/terrimaint/issues/31), sur
-`feat/31-equipment-detail`, propose une **fiche Matériel de démonstration en revue jusqu'à fusion**.
+L'[issue #31](https://github.com/arthurb1348/terrimaint/issues/31) est intégrée par la
+[PR #32](https://github.com/arthurb1348/terrimaint/pull/32), **fusionnée le 30 octobre 2026**
+(commit `ab29cc512a384cbe5a583b3e42b7f24312932dc0`, présent dans le dernier `origin/main` vérifié).
 Chaque nom de la liste devient un lien réel vers `/agent/equipements/:id` ou
 `/responsable/equipements/:id`. Les deux chemins chargent le même composant, qui affiche
 nom, identifiant et emplacement depuis la même source typée que la liste, avec une mention
@@ -164,9 +166,30 @@ La source fictive, les versions de dépendances et la politique npm de la PR #30
 
 Cet incrément est local et public : aucune API métier, permission, modification d'équipement,
 formulaire d'incident, statut métier, historique ou scanner ajouté. Le
-[guide du code](code-guide.md#fiche-partagée-et-circulation-des-données-issue-31-en-revue)
+[guide du code](code-guide.md#fiche-partagée-et-circulation-des-données-issue-31-fusionnée)
 explique les routes, les paramètres et les endroits à modifier. Les résultats réels des
 contrôles et les captures sont consignés dans la PR ; ils ne valent pas validation humaine.
+
+## Travaux en cours
+
+L'[issue #34](https://github.com/arthurb1348/terrimaint/issues/34), sur
+`feat/34-incident-declaration-demo`, propose une **déclaration locale d'incident en revue
+jusqu'à fusion**. Un lien de fiche valide ouvre le même formulaire dans les deux espaces,
+avec le matériel identifié depuis la source existante. Intitulé et description obligatoires
+(120/2000 caractères maximum), priorité explicite Faible/Haute/Urgente et risque facultatif
+conduisent à un récapitulatif modifiable, puis à une confirmation sans enregistrement.
+Incidents reste actif, y compris Plus sur mobile Agent. Annuler ou revenir après la simulation
+retrouve la fiche du même espace et sa recherche `q`.
+
+Les valeurs restent en mémoire et disparaissent au départ, au rechargement ou au changement
+de matériel. Un inconnu affiche un retour sans formulaire. Aucun type d'incident, statut
+modifié, photo/audio/GPS, stockage persistant ou appel métier n'est ajouté. Les routes restent
+publiques et la validation locale n'impose aucune permission. Dépendances et politique npm
+sont inchangées. L'issue #33 reste un diagnostic séparé, sans contournement ajouté ici.
+La [décision](decisions.md) explique le formulaire regroupé à partir des deux prototypes ;
+le [guide](code-guide.md#déclaration-locale-dincident-issue-34-en-revue) détaille le flux,
+les fichiers et le test manuel. Les preuves des contrôles du commit proposé figurent dans
+la PR ; la validation humaine et la fusion restent à Arthur.
 
 Les tests responsive sont déjà **intégrés** par la
 [PR #19](https://github.com/arthurb1348/terrimaint/pull/19), fusionnée le 23 octobre 2026
@@ -181,7 +204,7 @@ et [PR](https://github.com/arthurb1348/terrimaint/pulls), sans recopier une list
 Le [contexte produit](project.md) documente les intentions suivantes, sans échéance
 ni ordre d'implémentation engagé :
 
-- Liste d’équipements connectée à une API métier, fiches et accès par QR code.
+- Liste et fiches d’équipements connectées à une API métier, accès par QR code.
 - Déclaration d'incidents par agent ou responsable, pièces jointes et localisation.
 - Suivi/priorisation des incidents et historique partagé.
 - Création, affectation et planification des interventions.
@@ -216,11 +239,12 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 - Backend : **12 cas pytest-django** dans [test_health.py](../backend/tests/test_health.py)
   et [test_settings.py](../backend/tests/test_settings.py) : contrat santé JSON, méthodes,
   routes absentes, hôtes et configuration de la clé secrète. Aucun accès DB métier.
-- Frontend intégré : **50 cas Vitest dans 4 fichiers** :
+- Frontend intégré : **66 cas Vitest dans 5 fichiers** :
   [routage et navigation](../frontend/src/app/app.spec.ts),
   [service HTTP](../frontend/src/app/core/api-health.spec.ts),
   [accueil](../frontend/src/app/home/home.spec.ts),
-  [Matériel](../frontend/src/app/features/equipements/equipements.spec.ts).
+  [Matériel](../frontend/src/app/features/equipements/equipements.spec.ts),
+  [fiches](../frontend/src/app/features/equipements/equipment-detail.spec.ts).
   Ils couvrent l'attente, le succès, les JSON invalides, les erreurs HTTP/réseau,
   la relance, l'annulation, le délai de cinq secondes et les routes inconnues.
   HTTP simulé ; aucun serveur réel requis.
@@ -237,7 +261,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   a été consultée : [CI réussie](https://github.com/arthurb1348/terrimaint/actions/runs/39932815516)
   et [Responsive réussi](https://github.com/arthurb1348/terrimaint/actions/runs/39932815661).
 - La [PR #20 fusionnée](https://github.com/arthurb1348/terrimaint/pull/20) ajoute
-  **12 cas Vitest** pour Matériel (inclus dans les 50 ci-dessus) et deux parcours Playwright
+  **12 cas Vitest** pour Matériel (inclus dans les 66 ci-dessus) et deux parcours Playwright
   dans quatre formats (soit **64 scénarios intégrés**). Les scénarios
   Matériel contrôlent la recherche dans les deux espaces, le résultat vide, l'effacement au
   clavier, le focus, le contexte et le débordement après saisie/effacement.
@@ -256,15 +280,26 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 - La PR #30 fusionnée ne change aucun scénario ni code applicatif. Elle vérifie
   aussi l'installation propre, l'audit, les décisions de scripts et le démarrage/rechargement
   Angular. La description de sa PR fournit les résultats du commit concerné et leurs limites.
-- L'issue #31 propose **16 cas Vitest supplémentaires**, soit **66 dans cinq fichiers** :
+- La PR #32 fusionnée ajoute **16 cas Vitest**, soit **66 dans cinq fichiers** :
   fiche correcte, état introuvable, changement d'identifiant dans une même instance, paramètres
   de recherche, contexte et navigation aller-retour. Les tests existants de recherche passent
   désormais par le routeur pour observer `q`.
-  Elle propose **104 scénarios Playwright**, soit 32 de plus : 15 URL de référence, dont les
+  Elle intègre **104 scénarios Playwright**, soit 32 de plus : 15 URL de référence, dont les
   fiches valides/inconnues, et parcours clavier, accès direct, rechargement et retour dans les
-  deux espaces aux quatre formats. Ces ajouts restent en revue jusqu'à fusion ; les résultats
-  de la PR distinguent navigateur local et CI. La santé HTTP est simulée, sans intégration réelle
+  deux espaces aux quatre formats. Sa [CI](https://github.com/arthurb1348/terrimaint/actions/runs/41059308918)
+  et son [Responsive](https://github.com/arthurb1348/terrimaint/actions/runs/41059308992) réussis
+  concernent le commit proposé `8631d118031cfcc64e61e831cd1da517883d8689`, avant fusion.
+  La santé HTTP est simulée, sans intégration réelle
   Django/proxy ni validation de permissions.
+- L'issue #34 propose **93 cas Vitest dans six fichiers** (27 de plus) et **136 scénarios
+  Playwright** (32 de plus), encore en revue : formulaire partagé, identifiant inconnu,
+  champs vides/blancs et bornes, trois priorités, risque sans mutation, récapitulatif/modification,
+  simulation, annulation et `q`, accès direct/rechargement, réinitialisation à chaque changement
+  de matériel. Les parcours des deux espaces contrôlent clavier, erreurs, focus dégagé de la
+  barre Agent, navigation active et débordement aux quatre formats. Les tests navigateur
+  vérifient aussi l'absence de requête métier et de stockage local/session pendant le parcours.
+  Les résultats et limites d'exécution locale/CI sont consignés dans sa PR ; aucun appareil
+  physique, backend métier, Windows ou Safari n'est validé par ces scénarios.
 - Aucun test de persistance ou de parcours métier complet présent.
 - Commandes : `uv run --locked python scripts/check.py` à la racine ;
   `npm run lint`, `npm test`, `npm run build`, `npm run test:responsive` dans `frontend/`.
@@ -319,8 +354,8 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire la PR de fiche Matériel de l'issue #31, ses tests et captures, puis décider sa fusion manuelle ; les PR #20, #29 et #30 sont déjà fusionnées.
-2. Définir les critères du premier parcours métier avant de développer ses écrans et son API.
+1. Relire la PR de simulation d'incident de l'issue #34, ses tests et captures, puis décider sa fusion manuelle ; les PR #20, #29, #30 et #32 sont fusionnées.
+2. Définir les prochains incréments métier (médias, localisation, validation serveur et envoi) avant de développer leur API.
 3. Préciser le modèle métier et la persistance PostgreSQL avec ORM/migrations Django,
    puis les parcours MVP en petits incréments, avec règles d'accès entre collectivités.
 4. Prévoir la validation des entrées, l'authentification, les autorisations, les tests d'accès
@@ -328,8 +363,8 @@ selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humain
 5. Définir l'hébergement et les contrôles d'intégration/navigateur au fil des parcours.
 
 Cet ordre indique des dépendances de travail, sans planning engagé. Aucune de ces protections
-métier n'est implémentée aujourd'hui. Le workflow responsive et ses 72 scénarios sont déjà
-intégrés ; la nouvelle fiche complète les parcours sans modifier les jobs `Backend`/`Frontend`
+métier n'est implémentée aujourd'hui. Le workflow responsive et ses 104 scénarios sont déjà
+intégrés ; la simulation proposée complète les parcours sans modifier les jobs `Backend`/`Frontend`
 ni les protections distantes.
 
 ## Règles de mise à jour du bilan
