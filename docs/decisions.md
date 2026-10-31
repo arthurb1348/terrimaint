@@ -1,6 +1,15 @@
 # Décisions techniques et métier
 
-## 2026-10-31 — Harmonisation issue de la revue utilisateur (issue #51, en revue)
+## 2026-10-31 — Contrastes interactifs (issue #53, en revue)
+
+Depuis main `4722b2403b5592e96a0d8d645dea94bd721fb9ee` intégrant #52, séparer
+`--focus: #A5682D` de l’accent décoratif et `--control-border: #6B7C72` des bordures
+décoratives. Conserver le focus blanc sur le vert de la sidebar et les cartes discrètes.
+Le [rapport de contraste](contrast-accessibility.md) documente les usages, rapports sRGB,
+seuils non arrondis, contrôle des styles rendus, procédure et limites WCAG.
+#53 reste **en revue jusqu’à fusion** ; images dans #43, validation et fusion par Arthur.
+
+## 2026-10-31 — Harmonisation issue de la revue utilisateur (issue #51, fusionnée)
 
 Arthur valide **Faible → Basse** pour la priorité visible, avec **Haute / Urgente** conservées.
 Cette évolution concerne déclaration, aide/erreur, récapitulatif, filtres, badges et contexte
@@ -9,8 +18,8 @@ propriétés, routes et paramètres d'URL ne changent pas. Les décisions antér
 vocabulaire historique ; cette entrée datée décrit le choix actuel.
 
 La consultation #42/PR #50 est fusionnée dans le dernier `origin/main` revérifié au démarrage,
-`876b8b0a5a9dadff6bff5e0beaea7e1bd1d8cb05`. L'harmonisation #51 reste **en revue jusqu'à
-fusion**. Elle devient l'incrément **4/10**, après ajout de ce retour utilisateur au programme
+`876b8b0a5a9dadff6bff5e0beaea7e1bd1d8cb05`. L'harmonisation #51 est intégrée par la PR #52, fusionnée le 31 octobre 2026
+(commit `4722b2403b5592e96a0d8d645dea94bd721fb9ee`). Elle devient l'incrément **4/10**, après ajout de ce retour utilisateur au programme
 initial de neuf PR. Les images/photos appartiennent à #43 ; PostgreSQL #38 reste différé.
 
 Les actions de page partagent des styles CSS réellement communs : `.page-action` est pleine
@@ -23,8 +32,8 @@ leurs liens ; Scanner reste masqué à partir de 1200 px, sans changement du she
 
 Une navigation reste un `<a routerLink>` avec `href`, utilisable au clavier et dans un autre
 onglet ; une opération de formulaire reste un `<button>` typé. Ces actions ne sont soulignées
-ni au repos ni au survol/focus/activation/visite. Le contour de focus existant, 3 px dans
-l'accent de la charte, est conservé. Les noms/références de listes restent des liens textuels
+ni au repos ni au survol/focus/activation/visite. Le contour de focus de 3 px est conservé ; l'issue #53 ci-dessus sépare ensuite
+sa couleur de l'accent décoratif. Les noms/références de listes restent des liens textuels
 soulignés ; aucune suppression globale de leur repère. Les cibles d'action mesurent au moins
 48 px de haut, se replient et réservent le dégagement de la navigation Agent fixe.
 

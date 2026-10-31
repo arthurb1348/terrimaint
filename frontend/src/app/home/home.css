@@ -116,7 +116,7 @@ button:disabled {
 }
 /* Un repère visible conserve la navigation au clavier. */
 button:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
 .health-note {

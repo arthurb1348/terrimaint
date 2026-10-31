@@ -221,7 +221,7 @@ img {
   .close-more {
     display: block;
     min-height: 44px;
-    border: 1px solid var(--border);
+    border: 1px solid var(--control-border);
     border-radius: 8px;
     background: white;
     color: var(--green);

@@ -2,6 +2,8 @@
 :root {
   --green: #234e3f;
   --accent: #c3823e;
+  --focus: #a5682d;
+  --control-border: #6b7c72;
   --surface: #e4ece8;
   --card-surface: #f4f8f5;
   --border: #d5dfd9;
@@ -25,7 +27,7 @@ a:focus-visible,
 button:focus-visible,
 [tabindex]:focus-visible,
 summary:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
 .feature-page {
