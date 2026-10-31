@@ -25,10 +25,10 @@ l'[issue #41](https://github.com/arthurb1348/terrimaint/issues/41) est intégré
 La consultation d'un jeu fixe d'interventions de l'[issue #42](https://github.com/arthurb1348/terrimaint/issues/42)
 est intégrée par la [PR #50](https://github.com/arthurb1348/terrimaint/pull/50), fusionnée le
 31 octobre 2026. Les simulations n'alimentent pas ce jeu. L'[issue #51](https://github.com/arthurb1348/terrimaint/issues/51)
-porte ensuite l'harmonisation UX demandée par Arthur, **en revue jusqu'à fusion** : Basse/Haute/
+porte l’harmonisation UX intégrée par la PR #52 : Basse/Haute/
 Urgente, actions hiérarchisées sans soulignement, retours fléchés avec libellé et cartes légèrement
 teintées. C'est l'incrément **4/10**, après ajout de ce retour utilisateur au programme initial.
-Les images/photos restent pour #43 ; elles ne sont pas incluses dans l'harmonisation.
+Les contrastes #53/PR #54 sont intégrés. Les images/photos #43 restent en revue jusqu’à fusion.
 Ces parcours restent locaux et explicitement fictifs.
 PostgreSQL ([#38](https://github.com/arthurb1348/terrimaint/issues/38)) est **différé** et ne
 bloque pas ces écrans. La cible Django/DRF/PostgreSQL est conservée ; cette priorité ne

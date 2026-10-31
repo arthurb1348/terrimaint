@@ -1182,7 +1182,12 @@ Sources : [configuration CI Playwright](https://playwright.dev/docs/ci-intro),
 [émulation](https://playwright.dev/docs/emulation),
 [serveur de test](https://playwright.dev/docs/test-webserver).
 
-## Contrastes interactifs (issue #53, en revue)
+## Contrastes interactifs (issue #53, fusionnée)
 
 Le [guide de contraste](contrast-accessibility.md) explique les jetons, les mesures du rendu,
 les fichiers à modifier, la procédure manuelle et les limites du contrôle WCAG ciblé.
+
+## Images et photos (issue #43, en revue)
+
+Voir le [guide photos](photos-demo.md) pour les sources, la préparation des visuels,
+le cycle de vie des fichiers, les tests et la procédure manuelle.

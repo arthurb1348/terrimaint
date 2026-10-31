@@ -6,6 +6,7 @@ import {
   effect,
   ElementRef,
   inject,
+  DestroyRef,
   Injector,
   signal,
 } from '@angular/core';
@@ -18,6 +19,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { IncidentPhotos } from './incident-photos';
 import { DEMO_EQUIPMENT } from '../equipements/equipements-demo';
 
 const nonBlank: ValidatorFn = (control) =>
@@ -47,6 +49,7 @@ export class IncidentDeclaration {
   );
   protected readonly search = computed(() => this.queryParams().get('q') ?? '');
   protected readonly step = signal<'form' | 'review' | 'complete'>('form');
+  protected readonly media = new IncidentPhotos();
   protected readonly submitted = signal(false);
   protected readonly priorities = [
     { value: 'low', label: 'Basse', explanation: 'intervention à planifier' },
@@ -82,10 +85,12 @@ export class IncidentDeclaration {
   });
 
   constructor() {
+    inject(DestroyRef).onDestroy(() => this.media.clear());
     effect(() => {
       // Le routeur réutilise le composant : aucune saisie ne doit passer à un autre matériel.
       // q reste indépendant : modifier la recherche seule n'efface pas le formulaire.
       this.equipmentId();
+      this.media.clear();
       this.form.reset();
       this.submitted.set(false);
       this.step.set('form');
@@ -95,13 +100,27 @@ export class IncidentDeclaration {
     });
   }
 
+  protected selectPhotos(input: HTMLInputElement): void {
+    const files = Array.from(input.files ?? []);
+    input.value = '';
+    if (files.length) void this.media.add(files);
+  }
+
+  protected removePhoto(id: number): void {
+    const photos = this.media.photos();
+    const index = photos.findIndex((photo) => photo.id === id);
+    this.media.remove(id);
+    const next = this.media.photos()[index] ?? this.media.photos()[index - 1];
+    this.focusAfterRender(next ? `#remove-photo-${next.id}` : '#incident-photos');
+  }
+
   protected invalid(field: 'title' | 'description' | 'priority'): boolean {
     const control = this.form.controls[field];
     return control.invalid && (this.submitted() || control.touched);
   }
 
   protected review(): void {
-    if (!this.equipment() || this.step() !== 'form') return;
+    if (this.media.busy() || !this.equipment() || this.step() !== 'form') return;
     this.submitted.set(true);
     this.form.markAllAsTouched();
     if (this.form.invalid) {
@@ -123,6 +142,7 @@ export class IncidentDeclaration {
   protected complete(): void {
     if (!this.equipment() || this.step() !== 'review' || this.form.invalid) return;
     // Cette étape ne transmet rien et n'attribue aucun numéro d'incident.
+    this.media.clear();
     this.step.set('complete');
     this.focusAfterRender('#incident-title-heading');
   }

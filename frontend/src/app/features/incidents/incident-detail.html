@@ -32,6 +32,15 @@
         </dd>
       </div>
     </dl>
+    <section aria-labelledby="example-photos-title">
+      <h2 id="example-photos-title">Photos d’exemple</h2>
+      <p>Images fictives pour la démonstration, sans preuve de l’état réel.</p>
+      <div class="photo-gallery">
+        @for (photo of item.photos ?? []; track photo.src) {
+          <app-demo-image [source]="photo" [eager]="$first" />
+        } @empty { <p>Aucune photo pour ce signalement.</p> }
+      </div>
+    </section>
     <h2>Description</h2>
     <p class="description">{{ description() }}</p>
     <section class="equipment-summary business-card" aria-labelledby="related-equipment-title">

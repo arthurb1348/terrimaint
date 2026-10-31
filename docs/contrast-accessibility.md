@@ -1,10 +1,10 @@
-# Contrastes interactifs — issue #53, en revue
+# Contrastes interactifs — issue #53, fusionnée
 
 ## Résultat et choix
 
 Branche `fix/53-accessible-contrast`, créée depuis `origin/main`
 `4722b2403b5592e96a0d8d645dea94bd721fb9ee`, vérifié par Git et GitHub :
-la PR #52 est fusionnée. #53 reste **en revue jusqu'à fusion par Arthur**.
+la PR #52 est fusionnée. #53 est intégrée par la PR #54, fusionnée le 31 octobre 2026.
 Les images/photos restent dans #43 ; aucune dépendance ni fonctionnalité ajoutée.
 
 Le focus utilise `--focus: #A5682D`, distinct de `--accent: #C3823E`.
