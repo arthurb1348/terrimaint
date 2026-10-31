@@ -12,7 +12,11 @@
       [value]="search()"
       (input)="updateSearch(searchInput.value)"
     />
-    <button type="button" (click)="updateSearch(''); searchInput.focus()">
+    <button
+      class="page-action secondary"
+      type="button"
+      (click)="updateSearch(''); searchInput.focus()"
+    >
       Effacer la recherche
     </button>
   </div>
@@ -29,7 +33,7 @@
   @if (filteredEquipment().length > 0) {
     <ul class="equipment-list" aria-label="Équipements">
       @for (equipment of filteredEquipment(); track equipment.id) {
-        <li>
+        <li class="business-card">
           <h2>
             <a [routerLink]="[equipment.id]" [queryParams]="{ q: search() || null }">{{
               equipment.name

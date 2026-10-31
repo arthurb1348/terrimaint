@@ -48,7 +48,9 @@
         }
       </select>
     </div>
-    <button type="button" (click)="resetFilters(searchInput)">Réinitialiser les filtres</button>
+    <button class="page-action secondary" type="button" (click)="resetFilters(searchInput)">
+      Réinitialiser les filtres
+    </button>
   </div>
   <p role="status">
     {{ filteredIncidents().length }} signalement{{
@@ -73,7 +75,7 @@
       </thead>
       <tbody role="rowgroup">
         @for (row of filteredIncidents(); track row.incident.id) {
-          <tr role="row">
+          <tr role="row" class="business-card">
             <th scope="row" role="rowheader">
               <a [routerLink]="[row.incident.id]" [queryParams]="query()">
                 <span class="reference">{{ row.incident.id }}</span>

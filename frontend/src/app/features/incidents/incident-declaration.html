@@ -1,12 +1,18 @@
 <section class="feature-page" aria-labelledby="incident-title-heading">
   @if (equipment(); as item) {
-    <a [routerLink]="['../../../equipements', item.id]" [queryParams]="{ q: search() || null }">
-      Retour à la fiche matériel
-    </a>
+    <a
+      class="page-action back-link secondary"
+      [routerLink]="['../../../equipements', item.id]"
+      [queryParams]="{ q: search() || null }"
+      ><span aria-hidden="true">←</span><span>Retour à la fiche matériel</span></a
+    >
   } @else {
-    <a [routerLink]="['../../../equipements']" [queryParams]="{ q: search() || null }">
-      Retour au matériel
-    </a>
+    <a
+      class="page-action back-link secondary"
+      [routerLink]="['../../../equipements']"
+      [queryParams]="{ q: search() || null }"
+      ><span aria-hidden="true">←</span><span>Retour au matériel</span></a
+    >
   }
 
   <p class="demo-label">Données de démonstration</p>
@@ -29,7 +35,7 @@
         }
       }
     </h1>
-    <section class="equipment-summary" aria-labelledby="incident-equipment-name">
+    <section class="equipment-summary business-card" aria-labelledby="incident-equipment-name">
       <h2 id="incident-equipment-name">{{ item.name }}</h2>
       <p>{{ item.id }} · {{ item.location }}</p>
     </section>
@@ -105,7 +111,7 @@
             }
             @if (invalid('priority')) {
               <p id="priority-error" class="error">
-                Choisissez une priorité : Faible, Haute ou Urgente.
+                Choisissez une priorité : Basse, Haute ou Urgente.
               </p>
             }
           </fieldset>
@@ -125,8 +131,9 @@
             </p>
           </div>
           <div class="actions">
-            <button type="submit">Vérifier le signalement</button>
+            <button class="page-action" type="submit">Vérifier le signalement</button>
             <a
+              class="page-action secondary"
               [routerLink]="['../../../equipements', item.id]"
               [queryParams]="{ q: search() || null }"
               >Annuler</a
@@ -135,7 +142,7 @@
         </form>
       }
       @case ('review') {
-        <dl class="review-values">
+        <dl class="review-values business-card">
           <div>
             <dt>Intitulé</dt>
             <dd>{{ form.controls.title.value }}</dd>
@@ -158,11 +165,19 @@
           Démonstration : aucun signalement n'est réellement transmis ou enregistré.
         </p>
         <div class="actions">
-          <button type="button" aria-describedby="simulation-notice" (click)="complete()">
+          <button
+            class="page-action"
+            type="button"
+            aria-describedby="simulation-notice"
+            (click)="complete()"
+          >
             Envoyer le signalement
           </button>
-          <button type="button" class="secondary" (click)="edit()">Modifier le signalement</button>
+          <button type="button" class="secondary page-action" (click)="edit()">
+            Modifier le signalement
+          </button>
           <a
+            class="page-action secondary"
             [routerLink]="['../../../equipements', item.id]"
             [queryParams]="{ q: search() || null }"
             >Annuler</a
@@ -175,12 +190,11 @@
           matériel reste inchangé.
         </p>
         <a
-          class="return-link"
+          class="return-link page-action back-link"
           [routerLink]="['../../../equipements', item.id]"
           [queryParams]="{ q: search() || null }"
+          ><span aria-hidden="true">←</span><span>Retour à la fiche</span></a
         >
-          Retour à la fiche
-        </a>
       }
     }
   } @else {

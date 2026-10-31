@@ -1,11 +1,82 @@
 # Décisions techniques et métier
 
-## 2026-10-31 — Consulter et filtrer les interventions (issue #42, en revue)
+## 2026-10-31 — Harmonisation issue de la revue utilisateur (issue #51, en revue)
+
+Arthur valide **Faible → Basse** pour la priorité visible, avec **Haute / Urgente** conservées.
+Cette évolution concerne déclaration, aide/erreur, récapitulatif, filtres, badges et contexte
+de programmation, dans les deux espaces. Les valeurs techniques `low/high/urgent`, les sources,
+propriétés, routes et paramètres d'URL ne changent pas. Les décisions antérieures gardent leur
+vocabulaire historique ; cette entrée datée décrit le choix actuel.
+
+La consultation #42/PR #50 est fusionnée dans le dernier `origin/main` revérifié au démarrage,
+`876b8b0a5a9dadff6bff5e0beaea7e1bd1d8cb05`. L'harmonisation #51 reste **en revue jusqu'à
+fusion**. Elle devient l'incrément **4/10**, après ajout de ce retour utilisateur au programme
+initial de neuf PR. Les images/photos appartiennent à #43 ; PostgreSQL #38 reste différé.
+
+Les actions de page partagent des styles CSS réellement communs : `.page-action` est pleine
+dans le vert de la charte ; `.secondary` apporte un contour vert et un fond blanc, légèrement
+teinté au survol. Déclarer, Programmer, Vérifier et Envoyer sont principaux ; Modifier, Annuler,
+Voir le matériel, effacer/réinitialiser et les retours de contexte sont secondaires. Dans le
+détail d'intervention, Voir le signalement est principal et Voir le matériel secondaire ; après
+une simulation, le retour final devient l'action principale. Les raccourcis d'accueil gardent
+leurs liens ; Scanner reste masqué à partir de 1200 px, sans changement du shell.
+
+Une navigation reste un `<a routerLink>` avec `href`, utilisable au clavier et dans un autre
+onglet ; une opération de formulaire reste un `<button>` typé. Ces actions ne sont soulignées
+ni au repos ni au survol/focus/activation/visite. Le contour de focus existant, 3 px dans
+l'accent de la charte, est conservé. Les noms/références de listes restent des liens textuels
+soulignés ; aucune suppression globale de leur repère. Les cibles d'action mesurent au moins
+48 px de haut, se replient et réservent le dégagement de la navigation Agent fixe.
+
+Les retours explicites existants reçoivent une flèche **accompagnée du libellé de destination**,
+sur mobile et ordinateur. La flèche est un texte décoratif dans un `span aria-hidden="true"` :
+elle ne double pas l'annonce du lien. Les destinations, espaces, filtres et accès directs sont
+conservés ; aucun `history.back()` ni retour ajouté aux accueils/listes racines. Ce traitement
+vient de la revue utilisateur du 31 octobre, **pas d'une nouvelle maquette Figma validée**.
+
+Les cartes matériel, signalements, interventions et résumés/récapitulatifs partagent
+`.business-card` : teinte très légère `--card-surface: #f4f8f5`, bordure discrète existante et
+rayon de 12 px. Les bandes de contexte et repères de priorité/statut restent distincts et
+textuels. Les composants gardent leur disposition ; les tableaux retrouvent leurs lignes
+blanches/alternées à 960 px disponibles, sans modifier les seuils responsive intégrés.
+
+Les prototypes [Agent `188:3`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-3)
+et [Responsable `188:6`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-6)
+ont été consultés en lecture seule : charte et hiérarchie de boutons guident la présentation,
+avec priorité aux adaptations validées ici. Aucune image, dépendance, API, persistance,
+authentification, permission ou règle métier ajoutée. La validation et la fusion restent à Arthur.
+
+### Synchroniser le test Matériel sur le lien réellement rendu
+
+L'[échec historique Responsive](https://github.com/arthurb1348/terrimaint/actions/runs/41187204526)
+sur `eb86283…` porte sur les deux parcours de fiche Matériel à 320 px : l'URL était attendue
+avec `q` exact, puis le test lisait immédiatement `href`, où il manquait un ou deux espaces
+finaux. La suite main après #50 est verte ; ce succès ne démontre pas une correction de cet
+échec intermittent. Les journaux ont été relus avant modification UX.
+
+Avant modification, dix répétitions par espace à 320 px réussissent, soit 20/20 : l'échec exact
+n'est pas reproduit. Une observation temporaire hors dépôt, sans ajouter de délai au rendu,
+relève en revanche dix fois par espace le moment où `history.replaceState` vient d'actualiser
+`q` : URL et champ contiennent la saisie entière, mais `href` porte encore la valeur précédente.
+Dans les vingt observations, le lien converge ensuite vers la valeur exacte, sans perte de
+saisie constatée. Cela établit cette fenêtre d'actualisation et justifie l'attente du lien ;
+cela ne prouve pas rétrospectivement la cause unique de l'exécution historique.
+
+Le test emploie désormais `expect.poll` sur **chemin + `q` décodé du lien**, avec les deux
+espaces avant/après conservés. Aucun délai fixe, `trim`, scénario ignoré, retry ou timeout
+augmenté. Aucun correctif de saisie applicatif n'est ajouté, faute de perte réelle établie.
+Le résultat ciblé, la suite et la CI du dernier commit sont rapportés dans la PR ; cette
+synchronisation du test ne vaut pas annonce d'une résolution définitive sur une seule CI verte.
+
+## 2026-10-31 — Consulter et filtrer les interventions (issue #42, fusionnée)
 
 La programmation #41 est intégrée par la PR #49 dans `origin/main`, revérifié au démarrage
 à `eb86283f9898b88450401680fdbb5356c0c60733`. La consultation #42 est l'incrément 3/9 du
-programme frontend pour décembre 2026 ; elle reste **en revue jusqu'à fusion**. PostgreSQL
-#38 demeure différé. Aucune simulation de programmation ou de déclaration n'alimente le jeu fixe.
+programme frontend initial pour décembre 2026. Elle est intégrée par la
+[PR #50](https://github.com/arthurb1348/terrimaint/pull/50), fusionnée le 31 octobre 2026
+(commit `876b8b0a5a9dadff6bff5e0beaea7e1bd1d8cb05`, revérifié dans le dernier `origin/main`
+avant #51). Le programme compte désormais dix incréments après ajout de l'harmonisation UX.
+PostgreSQL #38 demeure différé. Aucune simulation de programmation ou de déclaration n'alimente le jeu fixe.
 
 `interventions-demo.ts` contient six interventions typées, avec références `INT-…` uniques,
 titre, consignes facultatives, `incidentId`, `agentId`, date calendaire et statut fictif

@@ -4,7 +4,7 @@
 
 - Date de vérification : 2026-10-31 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `eb86283f9898b88450401680fdbb5356c0c60733` (PR #49 fusionnée), vérifié sur GitHub et par Git distant.
+- Code de référence : `main`, commit `876b8b0a5a9dadff6bff5e0beaea7e1bd1d8cb05` (PR #50 fusionnée), vérifié sur GitHub et par Git distant.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -29,9 +29,12 @@ L'[issue #39](https://github.com/arthurb1348/terrimaint/issues/39) et la PR #40 
 consultation des signalements avec priorité à la présentation Responsable, partagée avec Agent.
 L'[issue #41](https://github.com/arthurb1348/terrimaint/issues/41) est intégrée par la
 [PR #49](https://github.com/arthurb1348/terrimaint/pull/49), fusionnée le 31 octobre 2026 :
-programmation simulée depuis un signalement Responsable. L'[issue #42](https://github.com/arthurb1348/terrimaint/issues/42)
-propose la consultation d'un jeu fixe d'interventions, **en revue jusqu'à fusion**.
-C'est l'incrément 3/9 du programme frontend ; les programmations simulées ne créent aucune entrée.
+programmation simulée depuis un signalement Responsable. La consultation d'un jeu fixe
+d'interventions #42 est intégrée par la [PR #50](https://github.com/arthurb1348/terrimaint/pull/50),
+fusionnée le 31 octobre 2026 ; les programmations simulées ne créent aucune entrée.
+L'[issue #51](https://github.com/arthurb1348/terrimaint/issues/51) propose ensuite l'harmonisation
+UX validée par Arthur, **en revue jusqu'à fusion**. C'est l'incrément **4/10**, après ajout de
+ce retour utilisateur au programme initial. Les images/photos restent pour #43.
 PostgreSQL ([#38](https://github.com/arthurb1348/terrimaint/issues/38)) est **différé** et ne
 bloque pas cet incrément. La cible Django/DRF/PostgreSQL reste prévue ; la démonstration
 locale ne prétend pas fournir persistance, authentification ou permissions métier.
@@ -113,6 +116,7 @@ les bornes déclarées dans les manifestes ne doivent pas être prises pour des 
 | Fiche Matériel de démonstration | Liens clavier, composant partagé, état introuvable, accès direct/rechargement, retour conservant la recherche `q` et Matériel actif | [PR #32 fusionnée](https://github.com/arthurb1348/terrimaint/pull/32), [fiche](../frontend/src/app/features/equipements/equipment-detail.ts) |
 | Simulation locale d'incident | Formulaire partagé, validation, récapitulatif modifiable, confirmation sans enregistrement ni envoi, retours avec `q` ; état en mémoire seul | [PR #35 fusionnée](https://github.com/arthurb1348/terrimaint/pull/35), [composant](../frontend/src/app/features/incidents/incident-declaration.ts) |
 | Programmation simulée Responsable | Origine Ouvert/En cours, titre, consignes facultatives, agent fictif, date locale, récapitulatif modifiable et confirmation en mémoire ; aucun enregistrement | [PR #49 fusionnée](https://github.com/arthurb1348/terrimaint/pull/49), [composant](../frontend/src/app/features/interventions/intervention-planning.ts) |
+| Consultation locale des interventions | Six exemples fixes, filtres combinés dans l’URL, détail Responsable, origines sans filtres étrangers, dates calendaires et retours ; les simulations n’alimentent pas le jeu | [PR #50 fusionnée](https://github.com/arthurb1348/terrimaint/pull/50), [liste](../frontend/src/app/features/interventions/interventions.ts), [détail](../frontend/src/app/features/interventions/intervention-detail.ts) |
 | Consultation locale des signalements | Six exemples fixes liés au matériel, recherche/filtres combinés dans l'URL, détail partagé, retours conservés, états absents et clavier | [PR #40 fusionnée](https://github.com/arthurb1348/terrimaint/pull/40), [liste](../frontend/src/app/features/incidents/incidents.ts), [détail](../frontend/src/app/features/incidents/incident-detail.ts) |
 
 ## Matériel de démonstration intégré
@@ -281,11 +285,12 @@ Dépendances et politique npm sont conservées. Le [guide](code-guide.md#program
 explique le flux et les fichiers ; les [décisions](decisions.md) documentent règles et adaptation.
 Les résultats réels et les captures du commit proposé avant fusion figurent dans la PR #49.
 
-## Travaux en cours — consultation des interventions
+## Consultation des interventions intégrée
 
-L'[issue #42](https://github.com/arthurb1348/terrimaint/issues/42), sur
-`feat/42-intervention-list-detail`, propose liste et détail **Responsable en revue jusqu'à
-fusion**. Six interventions fixes liées aux signalements, au matériel et aux agents existants
+L'[issue #42](https://github.com/arthurb1348/terrimaint/issues/42) est intégrée par la
+[PR #50](https://github.com/arthurb1348/terrimaint/pull/50), fusionnée le 31 octobre 2026
+(commit `876b8b0a5a9dadff6bff5e0beaea7e1bd1d8cb05`, revérifié au démarrage de #51).
+La consultation liste/détail Responsable est locale et publique. Six interventions fixes liées aux signalements, au matériel et aux agents existants
 couvrent Planifiée, En cours, Terminée et des consignes absentes. Les noms/emplacements
 ne sont pas recopiés. Recherche, statut et agent se combinent ; effectifs réels, vide et
 réinitialisation sont inclus. `q`, `status`, `assignee` conservent la saisie et les critères
@@ -297,14 +302,41 @@ les filtres aux autres domaines. Les dates restent calendaires, contrôlées à 
 Interventions reste actif sur liste/détail et au menu mobile. Les cartes deviennent un tableau
 à 960 px disponibles ; résumé et origines passent sur deux colonnes à 880 px disponibles.
 Les références Figma ont été consultées en lecture seule ; les
-[décisions](decisions.md) et le [guide](code-guide.md#liste-et-détail-des-interventions-issue-42-en-revue)
+[décisions](decisions.md) et le [guide](code-guide.md#liste-et-détail-des-interventions-issue-42-fusionnée)
 documentent les adaptations et le parcours manuel.
 
 La route de programmation #41 et ses consignes facultatives sont conservées. Déclaration
 et programmation ne modifient pas le jeu fixe ni les sources liées. Aucune gestion Agent,
 API métier, persistance, permission, notification ou dépendance ajoutée ; PostgreSQL #38
-reste différé. Les contrôles et captures du dernier commit proposé seront rapportés dans
-la PR ; la validation humaine et la fusion restent à Arthur.
+reste différé. Les contrôles et captures du commit proposé avant fusion figurent dans la PR #50.
+
+## Travaux en cours — harmonisation UX
+
+L'[issue #51](https://github.com/arthurb1348/terrimaint/issues/51), sur
+`fix/51-ux-consistency`, reste **en revue jusqu'à fusion**. Elle reprend le retour validé
+d'Arthur : Basse/Haute/Urgente, valeur `low` inchangée ; actions principales pleines et
+secondaires à contour, sans soulignement ; retours fléchés avec libellé et liens explicites ;
+teinte très légère des cartes et résumés. Les styles communs remplacent les duplications
+locales, sans refonte du shell ni changement de route, filtre ou règle métier. La navigation
+Scanner à partir de 1200 px, les descriptions/consignes facultatives et les simulations
+sans mutation restent inchangées. Les images/photos restent pour #43.
+
+Les prototypes Figma ont été lus en lecture seule. Le traitement des retours provient de
+la revue utilisateur, sans annoncer une nouvelle maquette Figma validée. Les
+[décisions](decisions.md) et le [guide](code-guide.md#harmonisation-ux-issue-51-en-revue)
+expliquent les choix, les fichiers à modifier et la procédure manuelle. Les contrôles et
+captures du dernier commit proposé sont rapportés dans la PR ; Arthur garde la validation
+humaine et la fusion.
+
+L'échec historique [Responsive après #49](https://github.com/arthurb1348/terrimaint/actions/runs/41187204526)
+a été examiné avant modification. Les 20 répétitions à 320 px passent, mais une observation
+temporaire relève un décalage d'actualisation entre URL/champ et lien dans chacun des vingt
+cas, suivi d'une convergence exacte sans perte de saisie constatée. Le test attend désormais
+chemin et `q` décodé du lien via `expect.poll`, en conservant tous les espaces, le clavier et
+les retours. Aucun délai fixe, retry/timeout accru ou correction applicative de saisie ajouté.
+Les vingt répétitions après correction passent aussi. Le diagnostic ne prétend pas établir
+avec certitude la cause unique de l'exécution historique ni sa résolution définitive sur
+le seul constat d'une CI verte.
 
 Les tests responsive sont déjà **intégrés** par la
 [PR #19](https://github.com/arthurb1348/terrimaint/pull/19), fusionnée le 23 octobre 2026
@@ -354,7 +386,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 - Backend : **12 cas pytest-django** dans [test_health.py](../backend/tests/test_health.py)
   et [test_settings.py](../backend/tests/test_settings.py) : contrat santé JSON, méthodes,
   routes absentes, hôtes et configuration de la clé secrète. Aucun accès DB métier.
-- Frontend intégré : **176 cas Vitest dans 10 fichiers** :
+- Frontend intégré : **199 cas Vitest dans 12 fichiers** :
   [routage et navigation](../frontend/src/app/app.spec.ts),
   [service HTTP](../frontend/src/app/core/api-health.spec.ts),
   [accueil](../frontend/src/app/home/home.spec.ts),
@@ -364,7 +396,9 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   [liste des signalements](../frontend/src/app/features/incidents/incidents.spec.ts),
   [détail des signalements](../frontend/src/app/features/incidents/incident-detail.spec.ts),
   [programmation](../frontend/src/app/features/interventions/intervention-planning.spec.ts) et
-  [dates locales](../frontend/src/app/features/interventions/planning-date.spec.ts).
+  [dates locales](../frontend/src/app/features/interventions/planning-date.spec.ts),
+  [liste des interventions](../frontend/src/app/features/interventions/interventions.spec.ts) et
+  [détail des interventions](../frontend/src/app/features/interventions/intervention-detail.spec.ts).
   Ils couvrent l'attente, le succès, les JSON invalides, les erreurs HTTP/réseau,
   la relance, l'annulation, le délai de cinq secondes et les routes inconnues.
   HTTP simulé ; aucun serveur réel requis.
@@ -381,7 +415,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   a été consultée : [CI réussie](https://github.com/arthurb1348/terrimaint/actions/runs/39932815516)
   et [Responsive réussi](https://github.com/arthurb1348/terrimaint/actions/runs/39932815661).
 - La [PR #20 fusionnée](https://github.com/arthurb1348/terrimaint/pull/20) ajoute
-  **12 cas Vitest** pour Matériel (inclus dans les 176 ci-dessus) et deux parcours Playwright
+  **12 cas Vitest** pour Matériel (inclus dans les 199 ci-dessus) et deux parcours Playwright
   dans quatre formats (soit **64 scénarios intégrés**). Les scénarios
   Matériel contrôlent la recherche dans les deux espaces, le résultat vide, l'effacement au
   clavier, le focus, le contexte et le débordement après saisie/effacement.
@@ -454,7 +488,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   les liens de CI du dernier commit et le rapport responsive. Santé HTTP simulée ; aucune
   intégration navigateur Django/proxy, appareil physique, Windows/macOS, Safari ou lecteur
   d'écran validé. La commande standard de CI reste distincte de l'essai local alternatif.
-- L'issue #42 propose **199 cas Vitest dans douze fichiers** et **232 scénarios Playwright**.
+- La PR #50 fusionnée a intégré **199 cas Vitest dans douze fichiers** et **232 scénarios Playwright**.
   Les nouveaux cas vérifient relations intervention/signalement/matériel/agent, filtres et
   paramètres inconnus, compteurs, consignes absentes, retours/rechargement, dates Paris/New York,
   origines sans pollution de recherche et changements d'id dans une même instance. La
@@ -467,6 +501,18 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   Les captures ont été relues aux quatre formats ; la PR fournit les résultats CI et le rapport
   du dernier commit proposé. Santé HTTP simulée, sans intégration Django/proxy réelle ni appareil
   physique, Windows/macOS, Safari ou lecteur d'écran validé.
+- L'issue #51 conserve **199 tests Vitest dans douze fichiers** et propose **248 scénarios
+  Playwright** (16 nouveaux parcours UX). Lint, tests et build réussissent localement avec
+  Node 24.21.0/npm 11.19.0. Le parcours Matériel ciblé réussit 20/20 avant modification puis
+  20/20 après synchronisation du lien à 320 px ; les deux scénarios d'observation temporaires
+  hors dépôt relèvent vingt fenêtres URL/champ/lien sans perte finale. Les tests UX contrôlent
+  clavier, focus, hiérarchie, soulignement, cartes, retours/filtres et autre onglet. La suite
+  complète réussit **248/248 en 6,7 min** avec Chromium système ; après les dernières retouches
+  visuelles, les **16 parcours UX repassent en 57,3 s**, puis les huit parcours communs aux deux
+  espaces repassent en 39,8 s avec une capture supplémentaire du focus limitée à la fenêtre.
+  Les captures et la CI du dernier commit figurent dans la PR. La commande
+  responsive standard locale s'arrête avant tout parcours faute de navigateur Playwright ;
+  la variante locale utilise Chromium système 151.0.7922.173, sans modifier le dépôt ou la CI.
 - Aucun test de persistance ou de parcours métier complet présent.
 - Commandes : `uv run --locked python scripts/check.py` à la racine ;
   `npm run lint`, `npm test`, `npm run build`, `npm run test:responsive` dans `frontend/`.
@@ -521,8 +567,8 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire la consultation des interventions de l'issue #42, ses tests et captures, puis décider sa fusion ; #41/PR #49 sont intégrées.
-2. Poursuivre les incréments du programme frontend pour décembre 2026 avec des critères validés par Arthur.
+1. Relire l'harmonisation UX #51, son diagnostic ciblé, ses tests et captures, puis décider sa fusion ; #42/PR #50 sont intégrées.
+2. Poursuivre par #43 (images/photos), puis les incréments du programme frontend pour décembre 2026 avec des critères validés par Arthur.
 3. Reprendre ultérieurement PostgreSQL #38, le modèle métier et les migrations Django,
    avec validation serveur, envoi et règles d'accès entre collectivités.
 4. Prévoir la validation des entrées, l'authentification, les autorisations, les tests d'accès
@@ -531,7 +577,7 @@ selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humain
 
 La priorité frontend est validée pour préparer l'oral, sans annonce de déploiement métier.
 Aucune de ces protections métier n'est implémentée aujourd'hui. Le workflow responsive et ses
-204 scénarios sont déjà intégrés ; le parcours proposé complète les contrôles sans modifier les jobs `Backend`/`Frontend`
+232 scénarios sont déjà intégrés ; le parcours proposé complète les contrôles sans modifier les jobs `Backend`/`Frontend`
 ni les protections distantes.
 
 ## Règles de mise à jour du bilan

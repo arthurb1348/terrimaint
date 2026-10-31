@@ -25,8 +25,7 @@ label {
   font-weight: 600;
 }
 input,
-select,
-button {
+select {
   min-height: 48px;
   max-width: 100%;
   padding: 10px 12px;
@@ -40,14 +39,6 @@ input,
 select {
   width: 100%;
   min-width: 0;
-}
-button {
-  color: var(--green);
-  border-color: var(--green);
-  cursor: pointer;
-}
-button:hover {
-  background: var(--surface);
 }
 input:focus-visible,
 select:focus-visible {
@@ -83,11 +74,6 @@ thead {
 tbody {
   display: grid;
   gap: 16px;
-}
-tbody tr {
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
 }
 th {
   font-weight: 600;
@@ -138,6 +124,7 @@ td {
     width: 24%;
   }
   tbody tr {
+    background: white;
     border: 0;
     border-bottom: 1px solid var(--border);
   }

@@ -51,7 +51,11 @@ describe('Programmation locale d’une intervention', () => {
   }
   async function click(text: string): Promise<void> {
     Array.from(content().querySelectorAll<HTMLAnchorElement | HTMLButtonElement>('a, button'))
-      .find((control) => control.textContent?.trim() === text)!
+      .find((control) => {
+        const label = control.cloneNode(true) as HTMLElement;
+        label.querySelectorAll('[aria-hidden="true"]').forEach((icon) => icon.remove());
+        return label.textContent?.trim() === text;
+      })!
       .click();
     await harness.fixture.whenStable();
   }
@@ -69,7 +73,7 @@ describe('Programmation locale d’une intervention', () => {
     for (const value of [
       'INC-2026-045',
       'Moteur qui cale à l’accélération',
-      'Faible',
+      'Basse',
       'Débroussailleuse n°3',
       'EQ-OUT-0003',
       'Atelier municipal',

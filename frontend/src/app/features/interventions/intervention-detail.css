@@ -1,10 +1,6 @@
 :host {
   container-type: inline-size;
 }
-.back-link {
-  min-height: 44px;
-  margin-bottom: 16px;
-}
 h1 {
   margin: 16px 0 24px;
 }
@@ -17,12 +13,6 @@ h2 {
   display: grid;
   gap: 24px;
   min-width: 0;
-}
-.intervention-summary {
-  min-width: 0;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
 }
 .metadata {
   display: flex;
@@ -43,10 +33,7 @@ dd {
 }
 .origin-summary,
 .equipment-summary {
-  padding: 16px;
   border-left: 4px solid var(--green);
-  border-radius: 12px;
-  background: var(--surface);
 }
 .origin h2,
 .origin p {

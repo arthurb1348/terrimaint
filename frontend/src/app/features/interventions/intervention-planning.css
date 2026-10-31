@@ -14,10 +14,7 @@ h1 {
 }
 .origin-summary {
   margin: 24px 0;
-  padding: 16px;
   border-left: 4px solid var(--green);
-  border-radius: 12px;
-  background: var(--surface);
 }
 .origin-summary h2 {
   margin: 16px 0 4px;
@@ -80,30 +77,6 @@ textarea:focus-visible {
 }
 textarea {
   scroll-margin-block: 24px;
-}
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-}
-button,
-.feature-page .return-link {
-  min-height: 48px;
-  max-width: 100%;
-  padding: 10px 16px;
-  border: 1px solid var(--green);
-  border-radius: 8px;
-  background: var(--green);
-  color: white;
-  font: inherit;
-  font-weight: 600;
-  text-align: center;
-  cursor: pointer;
-}
-button.secondary {
-  background: white;
-  color: var(--green);
 }
 dd {
   margin: 4px 0 0;

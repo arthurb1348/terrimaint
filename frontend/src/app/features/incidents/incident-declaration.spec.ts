@@ -50,7 +50,11 @@ describe('Déclaration locale d’incident', () => {
   }
   async function click(text: string): Promise<void> {
     Array.from(content().querySelectorAll<HTMLButtonElement | HTMLAnchorElement>('button, a'))
-      .find((item) => item.textContent?.trim() === text)!
+      .find((control) => {
+        const label = control.cloneNode(true) as HTMLElement;
+        label.querySelectorAll('[aria-hidden="true"]').forEach((icon) => icon.remove());
+        return label.textContent?.trim() === text;
+      })!
       .click();
     await harness.fixture.whenStable();
   }
@@ -258,7 +262,7 @@ describe('Déclaration locale d’incident', () => {
   );
 
   it.each([
-    ['low', 'Faible — intervention à planifier'],
+    ['low', 'Basse — intervention à planifier'],
     ['high', 'Haute — intervention rapide'],
     ['urgent', 'Urgente — danger immédiat'],
   ])('accepte le choix explicite %s et le risque reste facultatif', async (value, label) => {

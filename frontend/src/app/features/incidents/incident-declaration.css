@@ -25,10 +25,7 @@ h1 {
 }
 .equipment-summary {
   margin: 24px 0;
-  padding: 16px;
-  background: var(--surface);
   border-left: 4px solid var(--green);
-  border-radius: 12px;
 }
 .equipment-summary h2 {
   margin: 0;
@@ -117,30 +114,6 @@ legend {
 }
 [aria-invalid='true'] {
   border-color: #9a2a22;
-}
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-}
-button,
-.feature-page .return-link {
-  min-height: 48px;
-  max-width: 100%;
-  padding: 10px 16px;
-  border: 1px solid var(--green);
-  border-radius: 8px;
-  background: var(--green);
-  color: white;
-  font: inherit;
-  font-weight: 600;
-  text-align: center;
-  cursor: pointer;
-}
-button.secondary {
-  color: var(--green);
-  background: white;
 }
 dd {
   margin: 4px 0 0;

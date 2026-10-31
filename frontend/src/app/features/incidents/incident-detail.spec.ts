@@ -33,7 +33,7 @@ describe('Détail local du signalement', () => {
         'Le moteur cale lors de l’accélération et devient difficile à redémarrer.',
       );
       expect(content().querySelector('time')?.textContent).toBe('28/10/2026');
-      expect(content().querySelector('.metadata')?.textContent).toContain('Faible');
+      expect(content().querySelector('.metadata')?.textContent).toContain('Basse');
       expect(content().querySelector('.metadata')?.textContent).toContain('Ouvert');
       expect(content().querySelector('.equipment-summary')?.textContent).toContain(
         'Débroussailleuse n°3',
