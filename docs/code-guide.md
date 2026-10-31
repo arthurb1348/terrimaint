@@ -80,7 +80,7 @@ JSON validé → signal `state` → texte rendu. Quitter l'accueil annule l'abon
 | `shared/main-navigation/` | Élément d'interface commun au shell, sans état de rôle ni accès HTTP. `shared` n'importe pas les pages métier. Aucun composant générique supplémentaire n'est anticipé. |
 | `features/agent/`, `features/responsable/` | Pages d'entrée des espaces ; elles pointent vers les mêmes rubriques. Le Responsable dispose aussi d'un lien vers l'espace Agent. |
 | `features/equipements/` | Liste locale de démonstration et recherche, partagées par les deux espaces. Le futur accès API restera dans ce domaine. |
-| `features/incidents/`, `features/interventions/` | Pages d'attente explicites ; les futurs composants et services propres au domaine y seront regroupés. |
+| `features/incidents/`, `features/interventions/` | Consultation et simulations locales, sources typées et filtres d'URL propres à chaque domaine. |
 | `home/` | Accueil existant conservé à son emplacement pour limiter les déplacements ; sa logique API ne change pas. |
 | `app.*` | Assemblage du shell et des routes ; `styles.css` porte palette, focus et présentation commune des petites pages. |
 
@@ -474,13 +474,14 @@ Questions de compréhension :
 2. Comment les paramètres d'URL permettent-ils de retrouver recherche et filtres sans stockage ?
 3. Pourquoi les statuts Ouvert/En cours/Clôturé ne changent-ils pas celui du matériel ?
 
-## Programmation locale d'une intervention (issue #41, en revue)
+## Programmation locale d'une intervention (issue #41, fusionnée)
 
-Le parcours proposé reste en revue jusqu'à fusion. La PR #40 a intégré la consultation
-des signalements ; ce nouvel écran utilise les mêmes objets, sans transformer la simulation
-de déclaration en création réelle. La [décision](decisions.md) explique l'adaptation des
+La [PR #49](https://github.com/arthurb1348/terrimaint/pull/49), fusionnée le 31 octobre 2026,
+a intégré ce parcours après la consultation des signalements de #40. Il utilise les mêmes
+objets, sans transformer la simulation de déclaration en création réelle. La [décision](decisions.md) explique l'adaptation des
 références Figma : un formulaire regroupé, un récapitulatif modifiable, puis la confirmation.
-PostgreSQL #38 reste différé ; la liste et le détail des interventions ne sont pas réalisés ici.
+PostgreSQL #38 reste différé ; la consultation de l'issue #42 reste un incrément distinct,
+en revue jusqu'à fusion, sans enregistrement depuis ce formulaire.
 
 ### Route, contexte et circulation des données
 
@@ -609,6 +610,102 @@ Questions de compréhension :
 1. Comment `incidentId` puis `equipmentId` permettent-ils d'afficher le contexte sans recopier les sources ?
 2. Pourquoi conserver les filtres dans l'URL mais les champs et l'étape du formulaire en mémoire ?
 3. Pourquoi la date locale, la validation TypeScript et l'attribut HTML `min` ont-ils chacun un rôle ?
+
+## Liste et détail des interventions (issue #42, en revue)
+
+La programmation #41/PR #49 est intégrée. Cette nouvelle consultation Responsable reste
+**en revue jusqu'à fusion** ; PostgreSQL #38 demeure différé. La liste de consultation
+est indépendante des simulations : programmer ne crée aucun objet consultable.
+
+### Relations et filtres
+
+`intervention.ts` définit les champs et les clés `planned`, `in-progress`, `completed`,
+affichées Planifiée, En cours, Terminée. `interventions-demo.ts` est l'unique source de
+six interventions fixes, avec une référence `INT-…`, titre, consignes facultatives,
+`incidentId`, `agentId`, `plannedOn` et statut. Les tests contrôlent unicité et relations.
+
+Le flux de consultation est **intervention → `incidentId` → signalement → `equipmentId`
+→ matériel**, plus **`agentId` → agent dans `agents-demo.ts`**. Liste et détail lisent ces
+sources pour retrouver noms et emplacements ; seules les références sont stockées dans
+l'intervention. Le modèle est `readonly` côté TypeScript : il ne constitue pas une protection
+serveur ni un gel JavaScript. Les formulaires simulés ne modifient aucune de ces sources.
+
+`intervention-filters.ts` interprète les seuls critères `q`, `status`, `assignee`, partagés
+par la liste et le détail. `Object.hasOwn` contrôle le statut et une recherche dans les agents
+contrôle l'affectation ; valeurs inconnues, dont `toString` ou `__proto__`, signifient Tous.
+Les liens générés et la prochaine interaction omettent les valeurs étrangères ; l'affichage
+ne redirige pas automatiquement l'URL saisie. Une recherche garde exactement casse et espaces
+dans `q`, mais compare titre/référence/nom/id matériel avec `trim().toLowerCase()`.
+
+`toSignal(queryParamMap)` réagit aux changements d'URL. `computed` combine les trois critères
+et produit les lignes et leur compteur ; les effectifs par statut viennent du jeu complet.
+`updateFilter` conserve les autres critères et utilise `replaceUrl`. Réinitialiser attend
+la navigation avant de remettre le focus sur la recherche. Aucun stockage local n'est requis
+pour revenir ou recharger ; l'URL suffit. Chaque `<option>` porte sa sélection pour l'appliquer
+aussi après la création des options par `@for`, comme dans la liste des signalements.
+
+### Détail, navigation et présentation
+
+`/responsable/interventions/:id` charge `InterventionDetail`. `paramMap` est observé pour
+actualiser la fiche et ses relations quand Angular réutilise le composant ; l'état introuvable
+ne conserve aucun ancien contenu. Des consignes absentes/blanches deviennent **Non renseignées**
+à l'affichage. Retour aux interventions vise une URL explicite avec les critères connus,
+même après accès direct. Voir le signalement et Voir le matériel visent le même espace
+Responsable **sans paramètres de recherche**, pour éviter de donner un autre sens à `q`.
+
+La route `nouvelle/:incidentId` reste avant le détail variable et garde sa simulation en
+mémoire. Les filtres de retour de cette programmation restent ceux des signalements, avec
+`incident-filters.ts` : ils ne sont pas interprétés comme filtres de consultation des interventions.
+Interventions reste actif par correspondance de sous-chemin dans la navigation existante,
+y compris au menu mobile. Agent ne reçoit aucune entrée ni route de gestion.
+
+Les dates `YYYY-MM-DD` sont des jours de calendrier, pas des instants. Le rendu utilise
+`DatePipe` sans imposer de fuseau UTC, comme dans la programmation intégrée. Les tests
+navigateur vérifient les six dates de la liste et les détails dans **Europe/Paris** et
+**America/New_York** ; une conversion implicite en instant ne doit pas afficher la veille.
+
+Les références Figma Agent, Responsable et détail `188:11306` ont été lues sans modification.
+Le shell et les styles communs de `incident-presentation.css`, déjà réutilisés par la
+programmation, sont conservés. Le tableau à cinq colonnes (intervention, matériel, agent,
+date, statut) devient des cartes sous **960 px de largeur du composant**, sans dupliquer
+les liens ou les contenus. Le détail empile résumé et origines sous **880 px disponibles** ;
+au-dessus ils occupent deux colonnes. La sidebar laisse ainsi les cartes à 768 px de fenêtre.
+Les textes longs se replient ; les en-têtes, labels, boutons de 48 px et focus restent utilisables.
+La chronologie, les heures/durées, la disponibilité et les rappels du prototype sont omis
+conformément au périmètre. Ces écrans publics n'accordent aucun rôle ou droit métier.
+
+| Fichier dans `src/app/features/interventions/` sauf indication | Où intervenir |
+| --- | --- |
+| `intervention.ts`, `interventions-demo.ts` | Champs, statuts et exemples avec références valides. |
+| `agents-demo.ts` | Agents fictifs communs à programmation et consultation. |
+| `intervention-filters.ts` | Lecture et construction des critères d'URL autorisés. |
+| `interventions.ts`, `.html`, `.css` | Relations, recherche, filtres, effectifs, vide et tableau/cartes. |
+| `intervention-detail.ts`, `.html`, `.css` | Sélection réactive par identifiant, consignes, origines, date et état introuvable. |
+| `src/app/app.routes.ts`, `src/app/app.spec.ts` | Priorité de nouvelle/, navigation active et simulations sans mutation. |
+| `interventions.spec.ts`, `intervention-detail.spec.ts`, `e2e/responsive.pw.ts` | Relations, critères, réutilisation, retours/rechargement, clavier, dates et quatre formats. |
+
+### Procédure manuelle courte et compréhension
+
+Avec Node/npm déclarés, lancer `npm ci` puis `npm start` dans `frontend/` :
+
+1. Ouvrir `/responsable/interventions`, chercher `  EQ-OUT  `, choisir En cours puis Camille
+   Durand. Ouvrir INT-2026-035 au clavier : vérifier Non renseignées et la date 30/10/2026.
+2. Revenir et recharger : retrouver les trois critères exacts. Choisir Terminée pour obtenir
+   le vide, puis Réinitialiser ; vérifier les six entrées et le focus sur la recherche.
+3. Ouvrir directement `/responsable/interventions/INT-2026-034?q=%20CHAUDI%C3%88RE%20&status=in-progress&assignee=AG-DEMO-002`,
+   recharger puis suivre les liens d'origine : aucun filtre d'intervention dans leurs URL.
+   Revenir au détail et à la liste ; essayer aussi `inconnu` avec des critères inconnus.
+4. Programmer depuis un signalement ouvert, puis revenir à Interventions : toujours les mêmes
+   six exemples. Refaire à 320 × 568, 390 × 844, 768 × 1024 et 1440 × 1024, avec Tab,
+   Maj+Tab et Entrée ; vérifier focus, menu actif et absence de débordement. Refaire les dates
+   avec les fuseaux Paris et New York. Django n'est pas nécessaire pour les données fictives.
+
+Questions de compréhension :
+
+1. Pourquoi l'intervention conserve-t-elle `incidentId` et `agentId` plutôt que noms/emplacements ?
+2. Comment `replaceUrl` et le retour explicite préservent-ils les critères après rechargement ?
+3. Pourquoi la programmation simulée et une date calendaire ne doivent-elles pas devenir,
+   respectivement, un enregistrement et un instant UTC ?
 
 ## Backend et script de contrôle
 
@@ -881,9 +978,9 @@ Chromium : 320 × 568 et 390 × 844 avec toucher mobile, 768 × 1024 avec touche
 Les tests `.pw.ts` restent séparés des `.spec.ts` de Vitest ; `tsconfig.e2e.json` vérifie
 leurs types avant leur exécution, et ESLint analyse aussi ces fichiers et la configuration.
 
-`frontend/e2e/responsive.pw.ts` parcourt 23 URL de référence : les 11 entrées initiales,
-quatre fiches Matériel, quatre déclarations et quatre détails de signalement valides/inconnus
-dans les deux espaces.
+`frontend/e2e/responsive.pw.ts` parcourt désormais 28 URL de référence : les 11 entrées initiales,
+quatre fiches Matériel, quatre déclarations, quatre détails de signalement, trois programmations
+et deux détails d'intervention valides/inconnus. Les deux dernières URL sont proposées par #42.
 Il attend le contenu réellement
 rendu puis mesure le débordement du document, avec un pixel de tolérance pour les arrondis.
 Le menu Agent vérifie séparément que les quatre libellés mobiles tiennent dans leurs boutons
@@ -946,12 +1043,23 @@ plus étroits. Les captures `signalements-liste`, `signalements-filtres`, `signa
 le rapport. `signalement-intitule-long-focus` vérifie aussi un lien à intitulé long focalisé.
 Les tests ne prouvent ni permissions ni persistance : les données sont locales.
 
-L'issue #41 en revue porte le total à **204 scénarios**, soit 28 de plus : trois URL de
+La PR #49 fusionnée a intégré **204 scénarios**, soit 28 de plus : trois URL de
 programmation (valide, clôturée, inconnue), le parcours complet Paris/New York, accès direct
 avec rechargement/annulation et consultation Agent sans programmation, aux quatre formats.
 Les **176 tests Vitest dans dix fichiers** vérifient en complément les validations et les
 réutilisations de composant. Les résultats et limites réels, dont navigateur système local
 distinct du navigateur Playwright standard de CI, figurent dans le bilan et la PR.
+
+L'issue #42 propose **232 scénarios**, soit 28 de plus : deux URL de détail et deux parcours
+(liste/filtres et détail/origines) dans chacun des fuseaux Paris/New York, plus la vérification
+des deux simulations sans ajout à la consultation, aux quatre formats. Les tests Agent
+contrôlent aussi l'absence de nouvelles routes de gestion. Les **199 tests Vitest dans douze
+fichiers** complètent ces parcours par les relations et changements d'identifiant dans une
+même instance. Captures utiles : `interventions-liste`, `interventions-filtres`,
+`intervention-titre-long-focus`, `intervention-detail-sans-consignes`,
+`intervention-detail-long`, `interventions-aucun-resultat`, `intervention-introuvable`.
+Le rapport HTML de Responsive contient ces pièces jointes pour chaque projet/fuseau ;
+les résultats réels du dernier commit sont indiqués dans la PR.
 
 La fixture `page` intercepte uniquement `/api/v1/health` et répond `{"status":"ok"}`.
 L'objectif est la mise en page et la navigation : aucun serveur Django ni authentification

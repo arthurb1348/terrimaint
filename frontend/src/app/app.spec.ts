@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from './app';
 import { routes } from './app.routes';
 import { DEMO_INCIDENTS } from './features/incidents/incidents-demo';
+import { DEMO_INTERVENTIONS } from './features/interventions/interventions-demo';
 
 describe('Shell et routage', () => {
   let fixture: ComponentFixture<App>;
@@ -155,7 +156,7 @@ describe('Shell et routage', () => {
   it.each(['agent', 'responsable'])(
     'garde Incidents actif pendant formulaire, récapitulatif et fin dans %s, y compris Plus',
     async (space) => {
-      const source = JSON.stringify(DEMO_INCIDENTS);
+      const source = JSON.stringify([DEMO_INCIDENTS, DEMO_INTERVENTIONS]);
       await navigate(`/${space}/incidents/nouveau/EQ-OUT-0003?q=OUT`);
       const assertNavigation = () => {
         expect(element.querySelector('.screen-title')?.textContent).toBe('Incidents');
@@ -188,7 +189,7 @@ describe('Shell et routage', () => {
       assertNavigation();
       await navigate(`/${space}/incidents`);
       expect(element.querySelectorAll('main tbody tr')).toHaveLength(6);
-      expect(JSON.stringify(DEMO_INCIDENTS)).toBe(source);
+      expect(JSON.stringify([DEMO_INCIDENTS, DEMO_INTERVENTIONS])).toBe(source);
       http.expectNone(() => true);
     },
   );
@@ -238,6 +239,7 @@ describe('Shell et routage', () => {
   );
 
   it('garde Interventions actif pendant les trois étapes de programmation sans requête métier', async () => {
+    const source = JSON.stringify(DEMO_INTERVENTIONS);
     await navigate('/responsable/interventions/nouvelle/INC-2026-045?q=OUT');
     const assertNavigation = () => {
       expect(element.querySelector('.screen-title')?.textContent).toBe('Interventions');
@@ -263,10 +265,26 @@ describe('Shell et routage', () => {
     expect(element.querySelector('main h1')?.textContent).toContain('Programmation simulée');
     assertNavigation();
     await navigate('/responsable/interventions');
-    expect(element.querySelector('main')?.textContent).toContain('prochain incrément');
-    expect(element.querySelector('main li')).toBeNull();
+    expect(element.querySelectorAll('main tbody tr')).toHaveLength(6);
+    expect(JSON.stringify(DEMO_INTERVENTIONS)).toBe(source);
     http.expectNone(() => true);
   });
+
+  it.each(['INT-2026-032', 'inconnu'])(
+    'garde Interventions actif sur le détail %s, y compris au menu mobile',
+    async (id) => {
+      await navigate(`/responsable/interventions/${id}?q=OUT&status=planned&assignee=AG-DEMO-001`);
+      expect(element.querySelector('app-intervention-detail')).not.toBeNull();
+      expect(element.querySelector('.screen-title')?.textContent).toBe('Interventions');
+      const toggle = element.querySelector<HTMLButtonElement>('.menu-toggle')!;
+      toggle.click();
+      await fixture.whenStable();
+      const active = element.querySelectorAll('nav a[aria-current="page"]');
+      expect(active).toHaveLength(1);
+      expect(active[0].getAttribute('href')).toBe('/responsable/interventions');
+      http.expectNone(() => true);
+    },
+  );
 
   it('annonce et referme le menu Responsable après navigation', async () => {
     await navigate('/responsable');

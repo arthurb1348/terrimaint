@@ -1,12 +1,62 @@
 # Décisions techniques et métier
 
-## 2026-10-30 — Programmation d'une intervention de démonstration (issue #41, en revue)
+## 2026-10-31 — Consulter et filtrer les interventions (issue #42, en revue)
+
+La programmation #41 est intégrée par la PR #49 dans `origin/main`, revérifié au démarrage
+à `eb86283f9898b88450401680fdbb5356c0c60733`. La consultation #42 est l'incrément 3/9 du
+programme frontend pour décembre 2026 ; elle reste **en revue jusqu'à fusion**. PostgreSQL
+#38 demeure différé. Aucune simulation de programmation ou de déclaration n'alimente le jeu fixe.
+
+`interventions-demo.ts` contient six interventions typées, avec références `INT-…` uniques,
+titre, consignes facultatives, `incidentId`, `agentId`, date calendaire et statut fictif
+Planifiée/En cours/Terminée. Le signalement fournit son `equipmentId` ; noms, emplacements
+et agents sont lus dans les sources existantes, dont `agents-demo.ts`, sans copie de ces
+informations. Les effectifs sont calculés depuis le jeu, indépendamment des filtres.
+Ces statuts n'agissent sur aucun signalement/matériel et ne définissent pas un workflow serveur.
+
+L'URL conserve la saisie exacte `q`, le `status` connu et l'`assignee` présent dans les agents
+fictifs. La recherche compare titre/référence/nom/id matériel avec `trim().toLowerCase()`.
+Les trois critères sont combinables ; une valeur inconnue signifie Tous. `replaceUrl`
+évite un historique par lettre ; réinitialiser efface les critères puis focalise la recherche.
+La liste et le détail partagent l'interprétation des paramètres. Le retour explicite vise
+`/responsable/interventions`, même après accès direct. Les liens vers le signalement et
+le matériel restent Responsable et ne transmettent aucun filtre d'intervention.
+
+Le détail observe `id` : un changement actualise toutes les relations, un inconnu efface
+l'ancienne fiche et affiche **Intervention introuvable**, avec retour. Des consignes absentes
+affichent **Non renseignées**. `DatePipe` rend la chaîne calendaire ISO sans imposer UTC ni
+créer un instant avec `new Date('YYYY-MM-DD')`. Les parcours vérifient les mêmes dates dans
+Europe/Paris et America/New_York. La route spécifique `nouvelle/:incidentId` garde sa priorité
+et son fonctionnement ; aucune entrée ni route de gestion Agent n'est ajoutée.
+
+Les références Figma [Agent `188:3`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-3),
+[Responsable `188:6`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-6)
+et [détail `188:11306`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-11306)
+ont été consultées en lecture seule. Le shell, ses icônes locales et ses variables de charte
+sont réutilisés. Le résumé et les origines remplacent la chronologie du prototype : aucun
+historique, créneau horaire, durée, disponibilité, rappel relatif ou action de statut inventé.
+Les liens utilisateur deviennent **Voir le signalement** et **Voir le matériel**.
+
+Adaptations responsive : le même tableau passe en cartes sous **960 px disponibles dans le
+composant**, avec les cinq informations et les mêmes liens. Le détail empile résumé et origines
+sous **880 px disponibles**, puis les place sur deux colonnes. Ces requêtes de conteneur tiennent
+compte de la sidebar à 768 px. Les en-têtes restent accessibles, les contrôles mesurent au moins
+48 px, les textes longs se replient et le focus est visible. Les quatre formats sont vérifiés
+sans refonte du shell. Aucune fidélité pixel par pixel n'est revendiquée.
+
+Les routes restent publiques. API métier, stockage, permissions, modification, suppression,
+notification, PWA et hors connexion ne sont pas ajoutés. Dépendances, lockfiles, politique npm
+et protections CI sont conservés. La validation humaine et la fusion restent à Arthur.
+
+## 2026-10-30 — Programmation d'une intervention de démonstration (issue #41, fusionnée)
 
 La [PR #40](https://github.com/arthurb1348/terrimaint/pull/40) est fusionnée dans le dernier
 `origin/main` vérifié, au commit `4eefc19a510a44e140d41425504fb02895ed2268`.
 L'[issue #41](https://github.com/arthurb1348/terrimaint/issues/41) poursuit la priorité frontend
-pour décembre 2026. Son parcours reste **en revue jusqu'à fusion** ; PostgreSQL #38 est
-différé. La liste et le détail des interventions appartiennent au prochain incrément.
+pour décembre 2026. Elle est intégrée par la [PR #49](https://github.com/arthurb1348/terrimaint/pull/49),
+fusionnée le 31 octobre 2026 au commit `eb86283f9898b88450401680fdbb5356c0c60733`,
+vérifié dans le dernier `origin/main` avant l'issue #42. PostgreSQL #38 reste différé.
+La consultation de l'issue #42 reste distincte de cette programmation simulée.
 
 Les références Figma ont été consultées en lecture seule :
 [détail du signalement `188:10497`](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-10497),

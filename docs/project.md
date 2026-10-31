@@ -19,9 +19,12 @@ responsive utilisable sur mobile et sur ordinateur ; le rôle ne détermine pas 
 Arthur privilégie la réalisation rapide des parcours frontend pour préparer son oral de
 décembre 2026. La liste et le détail des signalements de l'[issue #39](https://github.com/arthurb1348/terrimaint/issues/39)
 sont intégrés par la PR #40 fusionnée, avec priorité à la présentation Responsable et composants
-partagés avec Agent. L'[issue #41](https://github.com/arthurb1348/terrimaint/issues/41) propose
-ensuite la programmation d'une intervention depuis un signalement Responsable, en revue
-jusqu'à fusion. La liste et le détail des interventions restent pour l'incrément suivant.
+partagés avec Agent. La programmation simulée depuis un signalement Responsable de
+l'[issue #41](https://github.com/arthurb1348/terrimaint/issues/41) est intégrée par la
+[PR #49](https://github.com/arthurb1348/terrimaint/pull/49), fusionnée le 31 octobre 2026.
+L'[issue #42](https://github.com/arthurb1348/terrimaint/issues/42) propose maintenant liste,
+filtres et détail d'un jeu fixe d'interventions, **en revue jusqu'à fusion**. Elle constitue
+l'incrément 3/9 du programme frontend ; les simulations n'alimentent pas ce jeu.
 Ces parcours restent locaux et explicitement fictifs.
 PostgreSQL ([#38](https://github.com/arthurb1348/terrimaint/issues/38)) est **différé** et ne
 bloque pas ces écrans. La cible Django/DRF/PostgreSQL est conservée ; cette priorité ne

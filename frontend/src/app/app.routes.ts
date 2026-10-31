@@ -75,6 +75,14 @@ export const routes: Routes = [
     data: { label: 'Interventions' },
   },
   {
+    // La programmation nouvelle/:incidentId reste prioritaire sur le détail par id.
+    path: 'responsable/interventions/:id',
+    loadComponent: () =>
+      import('./features/interventions/intervention-detail').then((m) => m.InterventionDetail),
+    title: 'Détail de l’intervention — TerriMaint',
+    data: { label: 'Interventions' },
+  },
+  {
     path: 'responsable/interventions',
     loadComponent: interventionsPage,
     title: 'Interventions — TerriMaint',
