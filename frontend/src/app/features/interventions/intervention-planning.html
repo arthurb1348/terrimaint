@@ -1,12 +1,18 @@
 <section class="feature-page" aria-labelledby="planning-heading">
   @if (step() !== 'complete') {
     @if (incident(); as item) {
-      <a class="back-link" [routerLink]="['../../../incidents', item.id]" [queryParams]="query()"
-        >Retour au signalement</a
+      <a
+        class="back-link page-action secondary"
+        [routerLink]="['../../../incidents', item.id]"
+        [queryParams]="query()"
+        ><span aria-hidden="true">←</span><span>Retour au signalement</span></a
       >
     } @else {
-      <a class="back-link" [routerLink]="['../../../incidents']" [queryParams]="query()"
-        >Retour aux signalements</a
+      <a
+        class="back-link page-action secondary"
+        [routerLink]="['../../../incidents']"
+        [queryParams]="query()"
+        ><span aria-hidden="true">←</span><span>Retour aux signalements</span></a
       >
     }
   }
@@ -41,7 +47,7 @@
       Cette programmation est une démonstration. Aucune intervention n’est enregistrée et aucun
       agent n’est notifié. La saisie est perdue en quittant ou en rechargeant cette page.
     </p>
-    <section class="origin-summary" aria-labelledby="planning-origin-heading">
+    <section class="origin-summary business-card" aria-labelledby="planning-origin-heading">
       <h2 id="planning-origin-heading">Signalement d’origine</h2>
       <p>
         {{ incident()!.title }}<span class="reference">{{ incident()!.id }}</span>
@@ -157,15 +163,18 @@
             </div>
           </div>
           <div class="actions">
-            <button type="submit">Vérifier l’intervention</button>
-            <a [routerLink]="['../../../incidents', incident()!.id]" [queryParams]="query()"
+            <button class="page-action" type="submit">Vérifier l’intervention</button>
+            <a
+              class="page-action secondary"
+              [routerLink]="['../../../incidents', incident()!.id]"
+              [queryParams]="query()"
               >Annuler</a
             >
           </div>
         </form>
       }
       @case ('review') {
-        <dl class="review-values">
+        <dl class="review-values business-card">
           <div>
             <dt>Titre de l’intervention</dt>
             <dd>{{ form.controls.title.value }}</dd>
@@ -191,11 +200,21 @@
           Démonstration : cette action n’enregistre aucune intervention et ne notifie aucun agent.
         </p>
         <div class="actions">
-          <button type="button" aria-describedby="planning-demo-notice" (click)="complete()">
+          <button
+            class="page-action"
+            type="button"
+            aria-describedby="planning-demo-notice"
+            (click)="complete()"
+          >
             Programmer l’intervention
           </button>
-          <button type="button" class="secondary" (click)="edit()">Modifier l’intervention</button>
-          <a [routerLink]="['../../../incidents', incident()!.id]" [queryParams]="query()"
+          <button type="button" class="secondary page-action" (click)="edit()">
+            Modifier l’intervention
+          </button>
+          <a
+            class="page-action secondary"
+            [routerLink]="['../../../incidents', incident()!.id]"
+            [queryParams]="query()"
             >Annuler</a
           >
         </div>
@@ -206,10 +225,10 @@
           notifié.
         </p>
         <a
-          class="return-link"
+          class="return-link page-action back-link"
           [routerLink]="['../../../incidents', incident()!.id]"
           [queryParams]="query()"
-          >Retour au signalement</a
+          ><span aria-hidden="true">←</span><span>Retour au signalement</span></a
         >
       }
     }

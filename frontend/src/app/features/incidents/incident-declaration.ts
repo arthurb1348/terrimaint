@@ -49,7 +49,7 @@ export class IncidentDeclaration {
   protected readonly step = signal<'form' | 'review' | 'complete'>('form');
   protected readonly submitted = signal(false);
   protected readonly priorities = [
-    { value: 'low', label: 'Faible', explanation: 'intervention à planifier' },
+    { value: 'low', label: 'Basse', explanation: 'intervention à planifier' },
     { value: 'high', label: 'Haute', explanation: 'intervention rapide' },
     { value: 'urgent', label: 'Urgente', explanation: 'danger immédiat' },
   ] as const;

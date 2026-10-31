@@ -399,7 +399,7 @@ for (const space of ['agent', 'responsable']) {
     await page.keyboard.type('Le moteur cale');
     await verify.focus();
     await page.keyboard.press('Enter');
-    const low = main.getByRole('radio', { name: 'Faible — intervention à planifier', exact: true });
+    const low = main.getByRole('radio', { name: 'Basse — intervention à planifier', exact: true });
     await expectFocusedControlVisible(page, low, space);
     await expect(main.locator('#priority-error')).toContainText('Choisissez une priorité');
     await expect(main.getByRole('radio', { checked: true })).toHaveCount(0);
@@ -496,7 +496,7 @@ for (const space of ['agent', 'responsable']) {
     await expect(description).not.toHaveAttribute('required');
     await title.fill('Bruit au démarrage');
     await main
-      .getByRole('radio', { name: 'Faible — intervention à planifier', exact: true })
+      .getByRole('radio', { name: 'Basse — intervention à planifier', exact: true })
       .check();
     for (const value of ['', '   ']) {
       await description.fill(value);
@@ -518,7 +518,7 @@ for (const space of ['agent', 'responsable']) {
       await expect(title).toHaveValue('Bruit au démarrage');
       await expect(description).toHaveValue(value);
       await expect(
-        main.getByRole('radio', { name: 'Faible — intervention à planifier', exact: true }),
+        main.getByRole('radio', { name: 'Basse — intervention à planifier', exact: true }),
       ).toBeChecked();
       await expect(main.locator('.error')).toHaveCount(0);
     }
@@ -657,9 +657,15 @@ for (const space of ['agent', 'responsable']) {
       (url) => url.pathname === base && url.searchParams.get('q') === query,
     );
     const equipment = main.getByRole('link', { name: 'Tondeuse autoportée', exact: true });
-    const detailUrl = new URL((await equipment.getAttribute('href'))!, page.url());
-    expect(detailUrl.pathname).toBe(`${base}/EQ-OUT-0001`);
-    expect(detailUrl.searchParams.get('q')).toBe(query);
+    // L'URL peut précéder le rendu du href : attendre aussi la destination exacte du lien.
+    await expect
+      .poll(async () => {
+        const href = await equipment.getAttribute('href');
+        if (!href) return null;
+        const detailUrl = new URL(href, page.url());
+        return { path: detailUrl.pathname, q: detailUrl.searchParams.get('q') };
+      })
+      .toEqual({ path: `${base}/EQ-OUT-0001`, q: query });
 
     await page.keyboard.press('Tab');
     await expect(main.getByRole('button', { name: 'Effacer la recherche' })).toBeFocused();
@@ -1445,7 +1451,7 @@ test('Déclarer et programmer restent des simulations sans ajout au jeu fixe de 
   await main.getByRole('link', { name: /Débroussailleuse n°3/ }).click();
   await main.getByRole('link', { name: 'Déclarer un incident', exact: true }).click();
   await main.getByLabel('Intitulé', { exact: true }).fill('Exemple à ne pas ajouter');
-  await main.getByRole('radio', { name: 'Faible — intervention à planifier', exact: true }).check();
+  await main.getByRole('radio', { name: 'Basse — intervention à planifier', exact: true }).check();
   await main.getByRole('button', { name: 'Vérifier le signalement', exact: true }).click();
   await main.getByRole('button', { name: 'Envoyer le signalement', exact: true }).click();
   await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement simulé');
@@ -1473,4 +1479,263 @@ test('Déclarer et programmer restent des simulations sans ajout au jeu fixe de 
     await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length })),
   ).toEqual({ local: 0, session: 0 });
   expect(await page.evaluate(() => indexedDB.databases())).toEqual([]);
+});
+
+async function expectPageAction(
+  page: Page,
+  action: Locator,
+  level: 'primary' | 'secondary',
+  space: string,
+): Promise<void> {
+  await expect(action).toHaveClass(/page-action/);
+  await action.scrollIntoViewIfNeeded();
+  await page.mouse.move(0, 0);
+  await expect(action).toHaveCSS(
+    'background-color',
+    level === 'primary' ? 'rgb(35, 78, 63)' : 'rgb(255, 255, 255)',
+  );
+  await expect(action).toHaveCSS(
+    'color',
+    level === 'primary' ? 'rgb(255, 255, 255)' : 'rgb(35, 78, 63)',
+  );
+  await expect(action).toHaveCSS('text-decoration-line', 'none');
+  expect((await action.boundingBox())!.height).toBeGreaterThanOrEqual(48);
+  await action.hover();
+  await expect(action).toHaveCSS('text-decoration-line', 'none');
+  // Tab établit une interaction clavier avant le focus programmatique sur la cible testée.
+  await page.keyboard.press('Tab');
+  await action.focus();
+  await expectFocusedControlVisible(page, action, space);
+  await expect(action).toHaveCSS('text-decoration-line', 'none');
+  await expect(action).toHaveCSS('outline-style', 'solid');
+  await expect(action).toHaveCSS('outline-width', '3px');
+}
+
+async function expectBackAction(page: Page, back: Locator, space: string): Promise<void> {
+  await expect(back.locator('span[aria-hidden="true"]')).toHaveText('←');
+  await expectPageAction(page, back, 'secondary', space);
+}
+
+async function expectBusinessCard(card: Locator): Promise<void> {
+  await expect(card).toHaveCSS('background-color', 'rgb(244, 248, 245)');
+  await expect(card).toHaveCSS('border-top-width', '1px');
+}
+
+for (const space of ['agent', 'responsable']) {
+  test(`L’harmonisation UX de ${space} conserve Basse/low, les liens, les retours et les formulaires au clavier`, async ({
+    page,
+  }, info) => {
+    const main = page.getByRole('main');
+    await page.goto(`/${space}`);
+    await expect(main.locator('.back-link')).toHaveCount(0);
+    await expectPageAction(
+      page,
+      main.getByRole('link', { name: 'Matériel', exact: true }),
+      'secondary',
+      space,
+    );
+    const q = '  EQ-OUT-0003  ';
+    const base = `/${space}/equipements`;
+    const detail = `${base}/EQ-OUT-0003`;
+    await page.goto(`${base}?${new URLSearchParams({ q })}`);
+    await expect(main.locator('.back-link')).toHaveCount(0);
+    await expectBusinessCard(main.getByRole('listitem'));
+    const equipment = main.getByRole('link', { name: 'Débroussailleuse n°3', exact: true });
+    await expect(equipment).toHaveCSS('text-decoration-line', 'underline');
+    await equipment.focus();
+    await page.keyboard.press('Enter');
+    const back = main.getByRole('link', { name: 'Retour au matériel', exact: true });
+    await expectBackAction(page, back, space);
+    await expectBusinessCard(main.locator('dl'));
+    const declare = main.getByRole('link', { name: 'Déclarer un incident', exact: true });
+    await expectPageAction(page, declare, 'primary', space);
+    await expect(declare).toHaveAttribute(
+      'href',
+      `/${space}/incidents/nouveau/EQ-OUT-0003?q=${encodeURIComponent(q)}`,
+    );
+    await expectNoHorizontalOverflow(page);
+    await info.attach('ux-fiche-materiel-focus-fenetre', {
+      body: await page.screenshot({ animations: 'disabled' }),
+      contentType: 'image/png',
+    });
+    await capture(page, info, 'ux-fiche-materiel-actions');
+    await page.keyboard.press('Enter');
+    await expectIncidentsActive(page, space);
+    const formBack = main.getByRole('link', { name: 'Retour à la fiche matériel', exact: true });
+    await expectBackAction(page, formBack, space);
+    await page.reload();
+    await expect(formBack).toHaveAttribute('href', `${detail}?q=${encodeURIComponent(q)}`);
+    await expect(main.getByText('Données de démonstration', { exact: true })).toHaveCSS(
+      'background-color',
+      'rgb(228, 236, 232)',
+    );
+    await expectBusinessCard(main.locator('.equipment-summary'));
+    await main
+      .getByRole('textbox', { name: 'Intitulé', exact: true })
+      .fill('Contrôle de démonstration');
+    const low = main.getByRole('radio', { name: 'Basse — intervention à planifier', exact: true });
+    await expect(low).toHaveAttribute('id', 'priority-low');
+    await low.check();
+    await expect(low).toBeChecked();
+    await expect(main).not.toContainText('Faible');
+    const verify = main.getByRole('button', { name: 'Vérifier le signalement', exact: true });
+    await expect(verify).toHaveAttribute('type', 'submit');
+    await expectPageAction(page, verify, 'primary', space);
+    await capture(page, info, 'ux-declaration-basse');
+    await page.keyboard.press('Enter');
+    await expect(main.locator('.review-values')).toContainText('Basse — intervention à planifier');
+    await expectBusinessCard(main.locator('.review-values'));
+    const edit = main.getByRole('button', { name: 'Modifier le signalement', exact: true });
+    await expectPageAction(page, edit, 'secondary', space);
+    const cancel = main.getByRole('link', { name: 'Annuler', exact: true });
+    await expectPageAction(page, cancel, 'secondary', space);
+    await expect(cancel).toHaveAttribute('href', `${detail}?q=${encodeURIComponent(q)}`);
+    const send = main.getByRole('button', { name: 'Envoyer le signalement', exact: true });
+    await expectPageAction(page, send, 'primary', space);
+    await capture(page, info, 'ux-recapitulatif-signalement');
+    await page.keyboard.press('Enter');
+    const completedBack = main.getByRole('link', { name: 'Retour à la fiche', exact: true });
+    await expect(completedBack.locator('span[aria-hidden="true"]')).toHaveText('←');
+    await expectPageAction(page, completedBack, 'primary', space);
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(
+      (url) => url.pathname === detail && url.searchParams.get('q') === q,
+    );
+
+    const filters = { q: '  mOTEUR  ', priority: 'low', status: 'open' };
+    await page.goto(`/${space}/incidents?${new URLSearchParams(filters)}`);
+    await expect(main.getByRole('combobox', { name: 'Priorité', exact: true })).toHaveValue('low');
+    await expect(main.locator('option[value="low"]')).toHaveText('Basse');
+    await expect(main.locator('[data-priority="low"]')).toHaveText('Basse');
+    const incident = main.getByRole('link', { name: /INC-2026-045/ });
+    await expect(incident).toHaveCSS('text-decoration-line', 'underline');
+    await incident.focus();
+    await page.keyboard.press('Enter');
+    await expect(main.locator('[data-priority="low"]')).toHaveText('Basse');
+    await expectBusinessCard(main.locator('.metadata'));
+    await expectBusinessCard(main.locator('.equipment-summary'));
+    const material = main.getByRole('link', { name: 'Voir le matériel', exact: true });
+    await expectPageAction(page, material, 'secondary', space);
+    await expect(material).toHaveAttribute('href', detail);
+    await expectNoHorizontalOverflow(page);
+    await capture(page, info, 'ux-fiche-signalement-actions');
+    const backToIncidents = main.getByRole('link', {
+      name: 'Retour aux signalements',
+      exact: true,
+    });
+    await expectBackAction(page, backToIncidents, space);
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(
+      (url) =>
+        url.pathname === `/${space}/incidents` &&
+        url.searchParams.get('q') === filters.q &&
+        url.searchParams.get('priority') === 'low' &&
+        url.searchParams.get('status') === 'open',
+    );
+  });
+}
+
+test('L’harmonisation de la programmation conserve les liens, Basse et les critères d’origine', async ({
+  page,
+}, info) => {
+  await page.clock.setFixedTime(new Date('2026-10-31T12:00:00Z'));
+  const main = page.getByRole('main');
+  const filters = { q: '  mOTEUR  ', priority: 'low', status: 'open' };
+  const incident = '/responsable/incidents/INC-2026-045';
+  await page.goto(`${incident}?${new URLSearchParams(filters)}`);
+  const open = main.getByRole('link', { name: 'Programmer une intervention', exact: true });
+  await expectPageAction(page, open, 'primary', 'responsable');
+  await page.keyboard.press('Enter');
+  const back = main.getByRole('link', { name: 'Retour au signalement', exact: true });
+  await expectBackAction(page, back, 'responsable');
+  await page.reload();
+  await expect(back).toHaveAttribute(
+    'href',
+    `${incident}?q=${encodeURIComponent(filters.q)}&priority=low&status=open`,
+  );
+  await expect(main.locator('.origin-summary')).toContainText('Priorité : Basse');
+  await expectBusinessCard(main.locator('.origin-summary'));
+  await main
+    .getByLabel('Agent à affecter (obligatoire)', { exact: true })
+    .selectOption('AG-DEMO-001');
+  await main.getByLabel('Date prévue (obligatoire)', { exact: true }).fill('2026-11-03');
+  const verify = main.getByRole('button', { name: 'Vérifier l’intervention', exact: true });
+  await expectPageAction(page, verify, 'primary', 'responsable');
+  await page.keyboard.press('Enter');
+  await expectBusinessCard(main.locator('.review-values'));
+  await expectPageAction(
+    page,
+    main.getByRole('button', { name: 'Modifier l’intervention', exact: true }),
+    'secondary',
+    'responsable',
+  );
+  await expectPageAction(
+    page,
+    main.getByRole('link', { name: 'Annuler', exact: true }),
+    'secondary',
+    'responsable',
+  );
+  const program = main.getByRole('button', { name: 'Programmer l’intervention', exact: true });
+  await expectPageAction(page, program, 'primary', 'responsable');
+  await expectInterventionsActive(page);
+  await program.focus();
+  await expectNoHorizontalOverflow(page);
+  await capture(page, info, 'ux-programmation-actions');
+  await page.keyboard.press('Enter');
+  await expect(main.getByRole('heading', { level: 1 })).toHaveText('Programmation simulée');
+  const completedBack = main.getByRole('link', { name: 'Retour au signalement', exact: true });
+  await expect(completedBack.locator('span[aria-hidden="true"]')).toHaveText('←');
+  await expectPageAction(page, completedBack, 'primary', 'responsable');
+  await page.keyboard.press('Enter');
+  await expect(page).toHaveURL(
+    (url) =>
+      url.pathname === incident &&
+      url.searchParams.get('priority') === 'low' &&
+      url.searchParams.get('q') === filters.q,
+  );
+});
+
+test('Les actions du détail d’intervention restent des liens et distinguent leur importance', async ({
+  page,
+  context,
+}, info) => {
+  const main = page.getByRole('main');
+  const base = '/responsable/interventions';
+  const query = { q: '  EQ-OUT  ', status: 'planned', assignee: 'AG-DEMO-001' };
+  await page.goto(`${base}/INT-2026-032?${new URLSearchParams(query)}`);
+  await page.reload();
+  const back = main.getByRole('link', { name: 'Retour aux interventions', exact: true });
+  await expectBackAction(page, back, 'responsable');
+  for (const selector of ['.intervention-summary', '.origin-summary', '.equipment-summary']) {
+    await expectBusinessCard(main.locator(selector));
+  }
+  const incident = main.getByRole('link', { name: 'Voir le signalement', exact: true });
+  const material = main.getByRole('link', { name: 'Voir le matériel', exact: true });
+  await expectPageAction(page, material, 'secondary', 'responsable');
+  await expect(material).toHaveAttribute('href', '/responsable/equipements/EQ-OUT-0003');
+  await expectPageAction(page, incident, 'primary', 'responsable');
+  await expect(incident).toHaveAttribute('href', '/responsable/incidents/INC-2026-045');
+  await expectInterventionsActive(page);
+  await expectNoHorizontalOverflow(page);
+  await capture(page, info, 'ux-fiche-intervention-actions');
+  if (page.viewportSize()!.width === 1440) {
+    const popupPromise = context.waitForEvent('page');
+    await incident.click({ modifiers: ['ControlOrMeta'] });
+    const popup = await popupPromise;
+    await expect(popup).toHaveURL('/responsable/incidents/INC-2026-045');
+    await expect(popup.getByRole('main').getByRole('heading', { level: 1 })).toHaveText(
+      'Moteur qui cale à l’accélération',
+    );
+    await popup.close();
+  }
+  await expectBackAction(page, back, 'responsable');
+  await page.keyboard.press('Enter');
+  await expect(main.getByRole('searchbox')).toHaveValue(query.q);
+  await expect(
+    main.getByRole('combobox', { name: 'Statut de l’intervention', exact: true }),
+  ).toHaveValue(query.status);
+  await expect(main.getByRole('combobox', { name: 'Agent affecté', exact: true })).toHaveValue(
+    query.assignee,
+  );
+  await expect(main.locator('tbody tr')).toHaveCount(1);
 });

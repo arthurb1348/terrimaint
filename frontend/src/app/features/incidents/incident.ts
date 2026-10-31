@@ -1,4 +1,4 @@
-export const INCIDENT_PRIORITIES = { low: 'Faible', high: 'Haute', urgent: 'Urgente' } as const;
+export const INCIDENT_PRIORITIES = { low: 'Basse', high: 'Haute', urgent: 'Urgente' } as const;
 export const INCIDENT_STATUSES = {
   open: 'Ouvert',
   'in-progress': 'En cours',

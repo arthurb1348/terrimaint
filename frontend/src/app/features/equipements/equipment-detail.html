@@ -1,16 +1,16 @@
 <section class="feature-page" aria-labelledby="equipment-title">
   <a
-    class="back-link"
+    class="back-link page-action secondary"
     [routerLink]="['..']"
     [queryParams]="{ q: search() || null }"
     (click)="focusContent()"
-    >Retour au matériel</a
+    ><span aria-hidden="true">←</span><span>Retour au matériel</span></a
   >
   <p class="demo-label">Données de démonstration</p>
 
   @if (equipment(); as item) {
     <h1 id="equipment-title">{{ item.name }}</h1>
-    <dl>
+    <dl class="business-card">
       <div>
         <dt>Identifiant</dt>
         <dd>{{ item.id }}</dd>
@@ -21,7 +21,7 @@
       </div>
     </dl>
     <a
-      class="declaration-link"
+      class="declaration-link page-action"
       [routerLink]="['../../incidents/nouveau', item.id]"
       [queryParams]="{ q: search() || null }"
       >Déclarer un incident</a

@@ -3,6 +3,7 @@
   --green: #234e3f;
   --accent: #c3823e;
   --surface: #e4ece8;
+  --card-surface: #f4f8f5;
   --border: #d5dfd9;
   --muted: #53635a;
   --serif: 'Source Serif 4', Georgia, serif;
@@ -47,6 +48,77 @@ summary:focus-visible {
   padding: 10px 0;
   color: var(--green);
   text-underline-offset: 4px;
+}
+
+/* Les actions gardent leur sémantique native ; seule leur présentation est commune. */
+.feature-page .page-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 48px;
+  max-width: 100%;
+  padding: 10px 16px;
+  border: 1px solid var(--green);
+  border-radius: 8px;
+  background: var(--green);
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  scroll-margin-block: 24px calc(112px + env(safe-area-inset-bottom));
+}
+.feature-page .page-action:is(:hover, :focus, :active, :visited) {
+  text-decoration: none;
+}
+.feature-page .page-action:hover {
+  background: #1b4033;
+}
+.feature-page .page-action.secondary {
+  background: white;
+  color: var(--green);
+}
+.feature-page .page-action.secondary:hover {
+  background: var(--surface);
+}
+.feature-page .back-link {
+  justify-content: flex-start;
+  text-align: left;
+  margin-bottom: 16px;
+}
+.back-link span[aria-hidden] {
+  flex: 0 0 auto;
+  font-size: 1.25rem;
+}
+.back-link span:last-child {
+  min-width: 0;
+}
+.feature-page .actions,
+.feature-page .page-shortcuts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.feature-page .page-shortcuts {
+  padding: 0;
+  list-style: none;
+}
+/* La teinte distingue les cartes de la page blanche, sans porter d'état métier. */
+:where(.feature-page) .business-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card-surface);
+}
+.business-card > .page-action {
+  margin-top: 12px;
 }
 
 .eyebrow {

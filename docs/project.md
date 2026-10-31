@@ -22,9 +22,13 @@ sont intégrés par la PR #40 fusionnée, avec priorité à la présentation Res
 partagés avec Agent. La programmation simulée depuis un signalement Responsable de
 l'[issue #41](https://github.com/arthurb1348/terrimaint/issues/41) est intégrée par la
 [PR #49](https://github.com/arthurb1348/terrimaint/pull/49), fusionnée le 31 octobre 2026.
-L'[issue #42](https://github.com/arthurb1348/terrimaint/issues/42) propose maintenant liste,
-filtres et détail d'un jeu fixe d'interventions, **en revue jusqu'à fusion**. Elle constitue
-l'incrément 3/9 du programme frontend ; les simulations n'alimentent pas ce jeu.
+La consultation d'un jeu fixe d'interventions de l'[issue #42](https://github.com/arthurb1348/terrimaint/issues/42)
+est intégrée par la [PR #50](https://github.com/arthurb1348/terrimaint/pull/50), fusionnée le
+31 octobre 2026. Les simulations n'alimentent pas ce jeu. L'[issue #51](https://github.com/arthurb1348/terrimaint/issues/51)
+porte ensuite l'harmonisation UX demandée par Arthur, **en revue jusqu'à fusion** : Basse/Haute/
+Urgente, actions hiérarchisées sans soulignement, retours fléchés avec libellé et cartes légèrement
+teintées. C'est l'incrément **4/10**, après ajout de ce retour utilisateur au programme initial.
+Les images/photos restent pour #43 ; elles ne sont pas incluses dans l'harmonisation.
 Ces parcours restent locaux et explicitement fictifs.
 PostgreSQL ([#38](https://github.com/arthurb1348/terrimaint/issues/38)) est **différé** et ne
 bloque pas ces écrans. La cible Django/DRF/PostgreSQL est conservée ; cette priorité ne
@@ -68,5 +72,5 @@ sont des extensions futures : elles ne sont pas des prérequis au MVP.
 ## Interface
 
 Direction graphique : Inter, Source Serif 4, vert `#234E3F`, accent `#C3823E`,
-surfaces `#E4ECE8` et `#F5F5F5`. Les maquettes validées priment lors de chaque tâche d'interface.
+surfaces `#E4ECE8` et `#F5F5F5`. Les maquettes et les adaptations UX validées par Arthur guident chaque tâche d'interface.
 Accessibilité et lisibilité sur le terrain font partie des critères du parcours.

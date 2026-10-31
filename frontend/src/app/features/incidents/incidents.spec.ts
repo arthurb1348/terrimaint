@@ -61,7 +61,7 @@ describe('Liste locale des signalements', () => {
         `/${space}/incidents/INC-2026-045`,
       );
       expect(rows()[0].textContent).toContain('Débroussailleuse n°3');
-      expect(rows()[0].textContent).toContain('Faible');
+      expect(rows()[0].textContent).toContain('Basse');
       expect(rows()[0].textContent).toContain('Ouvert');
       expect(rows()[0].querySelector('time')?.getAttribute('datetime')).toBe('2026-10-28');
       expect(rows()[0].querySelector('time')?.textContent).toBe('28/10/2026');

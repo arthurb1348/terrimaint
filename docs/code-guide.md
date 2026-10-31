@@ -278,7 +278,7 @@ la longueur brute est contrôlée : les espaces de bord ne sont pas retirés.
 Le test Angular reste utile si cette limite HTML est contournée.
 Ce sont des longueurs JavaScript/HTML en unités UTF-16, à confirmer avec le futur serveur.
 La priorité doit appartenir aux trois valeurs examinées ; aucun choix n'est présélectionné.
-Les valeurs internes `low`, `high`, `urgent` correspondent aux textes **Faible, Haute, Urgente**.
+Les valeurs internes `low`, `high`, `urgent` correspondent aux textes **Basse, Haute, Urgente**.
 Les radios partagent aussi le nom HTML `priority` pour former un vrai groupe au clavier.
 
 Le formulaire utilise `novalidate` pour afficher ses propres messages associés par
@@ -385,7 +385,7 @@ Le shell, les rôles de présentation et la déclaration existante sont conserv�
 
 `incident.ts` définit l'interface `Incident` et les libellés des priorités/statuts.
 Les clés techniques `low/high/urgent` et `open/in-progress/closed` limitent les valeurs
-TypeScript possibles ; elles produisent les textes Faible/Haute/Urgente et Ouvert/En cours/Clôturé.
+TypeScript possibles ; elles produisent les textes Basse/Haute/Urgente et Ouvert/En cours/Clôturé.
 `incidents-demo.ts` contient une seule liste de six objets fixes : référence, intitulé,
 description facultative, `equipmentId`, priorité, statut, date ISO fixe et risque facultatif.
 `readonly` interdit une modification accidentelle dans le code typé ; ce n'est pas une
@@ -480,8 +480,8 @@ La [PR #49](https://github.com/arthurb1348/terrimaint/pull/49), fusionnée le 31
 a intégré ce parcours après la consultation des signalements de #40. Il utilise les mêmes
 objets, sans transformer la simulation de déclaration en création réelle. La [décision](decisions.md) explique l'adaptation des
 références Figma : un formulaire regroupé, un récapitulatif modifiable, puis la confirmation.
-PostgreSQL #38 reste différé ; la consultation de l'issue #42 reste un incrément distinct,
-en revue jusqu'à fusion, sans enregistrement depuis ce formulaire.
+PostgreSQL #38 reste différé ; la consultation #42/PR #50 est désormais intégrée,
+sans enregistrement depuis ce formulaire.
 
 ### Route, contexte et circulation des données
 
@@ -611,10 +611,11 @@ Questions de compréhension :
 2. Pourquoi conserver les filtres dans l'URL mais les champs et l'étape du formulaire en mémoire ?
 3. Pourquoi la date locale, la validation TypeScript et l'attribut HTML `min` ont-ils chacun un rôle ?
 
-## Liste et détail des interventions (issue #42, en revue)
+## Liste et détail des interventions (issue #42, fusionnée)
 
-La programmation #41/PR #49 est intégrée. Cette nouvelle consultation Responsable reste
-**en revue jusqu'à fusion** ; PostgreSQL #38 demeure différé. La liste de consultation
+La programmation #41/PR #49 est intégrée. La consultation Responsable est intégrée par la
+[PR #50](https://github.com/arthurb1348/terrimaint/pull/50), fusionnée le 31 octobre 2026 ;
+PostgreSQL #38 demeure différé. La liste de consultation
 est indépendante des simulations : programmer ne crée aucun objet consultable.
 
 ### Relations et filtres
@@ -706,6 +707,95 @@ Questions de compréhension :
 2. Comment `replaceUrl` et le retour explicite préservent-ils les critères après rechargement ?
 3. Pourquoi la programmation simulée et une date calendaire ne doivent-elles pas devenir,
    respectivement, un enregistrement et un instant UTC ?
+
+## Harmonisation UX (issue #51, en revue)
+
+La consultation #42/PR #50 est intégrée ; cette harmonisation reste **en revue jusqu'à fusion**.
+Le retour utilisateur du 31 octobre ajoute un incrément au programme : **4/10**, avant #43
+(images/photos). PostgreSQL #38 reste différé. Les anciens choix Faible sont conservés dans
+l'historique des décisions ; le vocabulaire actuel devient **Basse / Haute / Urgente**.
+
+### Libellés, actions et cartes communes
+
+`incident.ts` fournit les libellés de consultation et de programmation ;
+`incident-declaration.ts` fournit les choix et explications du formulaire. Seul le texte Basse
+remplace Faible ; le message d'erreur HTML est aussi adapté. La valeur du `FormControl` reste
+`low`, comme les identifiants et paramètres de filtre. Le filtre peut donc toujours recevoir
+`priority=low` depuis une URL déjà conservée. Aucun modèle, statut ou contrat métier ne change.
+
+`src/styles.css` porte les présentations réellement communes, sans composant ou dépendance
+supplémentaire. Les composants gardent leurs dispositions et particularités :
+
+| Classe ou variable | Comportement |
+| --- | --- |
+| `.page-action` | Bouton principal vert, texte blanc, hauteur minimale de 48 px, texte repliable. S'applique à un lien de navigation ou à un bouton natif. |
+| `.page-action.secondary` | Contour vert et fond blanc, teinte de surface au survol : actions Modifier/Annuler, liens Matériel et retours de contexte. |
+| `.back-link` | Flèche décorative et libellé, alignés à gauche. Les retours après simulation restent principaux ; les autres sont secondaires. |
+| `.actions`, `.page-shortcuts` | Actions/raccourcis en ligne quand la place suffit, avec repli. Les navigations du shell ne sont pas modifiées. |
+| `.business-card`, `--card-surface` | Fond vert très léger `#f4f8f5`, bordure existante, rayon 12 px et espace intérieur de 16 px. Les composants conservent leurs bandes de contexte. |
+
+Déclarer, Programmer, Vérifier et Envoyer restent principaux ; Modifier et Annuler restent
+secondaires. Dans le détail d'intervention, Voir le signalement est principal et Voir le
+matériel secondaire. Les liens de noms/références dans les listes gardent leur soulignement.
+Seules les actions présentées en boutons perdent le soulignement dans tous les états ;
+le contour de focus global reste visible. Les boutons de filtre/effacement restent secondaires.
+
+Les retours sont toujours de vrais liens vers leur destination explicite, avec les mêmes
+paramètres. Leur HTML contient `<span aria-hidden="true">←</span>` puis le texte du lien :
+la décoration ne participe pas au nom accessible. Aucune route ni utilisation de l'historique
+ne remplace les retours existants. Aucun retour n'est ajouté sur les accueils/listes racines.
+`scroll-margin-block` dégage les actions de la barre Agent fixe ; les libellés longs se replient.
+
+La classe de carte est posée sur les éléments existants : lignes en mode carte, matériel,
+métadonnées et résumés/récapitulatifs. Aucun second jeu de contenu n'est créé. Les tableaux
+gardent leurs lignes blanches/alternées à partir de 960 px disponibles ; le détail et la
+programmation conservent leurs seuils de conteneur 880/560 px. Les couleurs de priorité et
+statut restent sur les badges textuels. Les prototypes Figma ont été relus sans modification ;
+le retour fléché avec libellé vient d'Arthur et ne constitue pas une nouvelle maquette validée.
+
+### Attendre le bon état du lien Matériel
+
+L'ancien test attendait `q` dans l'URL puis lisait une seule fois `href`. La navigation peut
+actualiser l'URL avant que le template ait rendu le lien avec les derniers caractères.
+Les journaux de l'échec historique à 320 px montrent un ou deux espaces finaux absents du lien.
+Les 20 répétitions avant modification passent : l'échec exact n'est donc pas reproduit.
+L'observation temporaire hors dépôt montre néanmoins vingt fois cette fenêtre à l'instant où
+l'URL change : champ et URL complets, lien précédent, puis convergence exacte sans perte de saisie.
+
+L'assertion utilise maintenant `expect.poll` pour relire le lien jusqu'à obtenir ensemble
+son chemin et `searchParams.get('q')`. Les deux espaces de chaque bord restent attendus.
+Le test conserve clavier, focus, ouverture, retour et `q`, sans délai fixe, `trim`, retry,
+timeout accru ou scénario supprimé. Aucune perte de saisie applicative n'a été établie ;
+la cause rétrospective de l'échec reste limitée par l'absence de reproduction exacte.
+
+### Où modifier et procédure manuelle courte
+
+| Emplacement | Rôle |
+| --- | --- |
+| `src/styles.css` | Palette de carte, hiérarchie des actions, retours et états de soulignement/focus. |
+| Templates `features/equipements`, `incidents`, `interventions` | Classes sur les éléments natifs et flèches décoratives ; destinations/paramètres inchangés. |
+| CSS de ces fonctionnalités | Disposition, champs et repères spécifiques ; les anciens styles de boutons/cartes dupliqués sont retirés. |
+| `features/incidents/incident.ts`, `incident-declaration.ts`, `.html` | Libellés de priorité et message d'aide/erreur ; valeurs techniques conservées. |
+| `features/agent/agent.ts`, `features/responsable/responsable.ts` | Raccourcis de page avec liens stylés ; le seuil Scanner existant reste dans `agent.css`. |
+| `e2e/responsive.pw.ts` | Attente du lien exact et parcours UX dans les deux espaces, survol/focus, retours, cartes et autre onglet. |
+
+1. Dans chacun des deux espaces, ouvrir Matériel, saisir `  tONDeUSE  ` puis ouvrir la fiche
+   au clavier. Vérifier la carte teintée, le retour fléché et Déclarer un incident principal.
+2. Déclarer avec Basse et une description vide ; relire, modifier, annuler ou terminer la
+   simulation. Vérifier les liens secondaires, les boutons principaux et le retour avec `q`.
+3. Ouvrir `/responsable/incidents/INC-2026-045?q=%20moteur%20&priority=low&status=open`,
+   recharger puis programmer : Basse est visible, les filtres restent dans les retours.
+   Depuis une intervention, essayer Voir le signalement et Voir le matériel, dont l'ouverture
+   dans un autre onglet ; leurs URL ne reçoivent pas les filtres d'intervention.
+4. Refaire à 320, 390, 768 et 1440 px : Tab/Maj+Tab/Entrée, survol et focus sans soulignement
+   des boutons, texte ordinaire de liste encore souligné, libellés longs visibles et aucun
+   débordement. Les données locales ne nécessitent pas Django.
+
+Questions de compréhension :
+
+1. Pourquoi Basse peut-il remplacer Faible sans changer `low` ou les URL existantes ?
+2. Pourquoi garder un lien pour naviguer et un bouton pour soumettre, malgré une apparence commune ?
+3. Pourquoi attendre le `href` exact en plus de l'URL, sans retirer les espaces attendus de `q` ?
 
 ## Backend et script de contrôle
 
@@ -980,7 +1070,7 @@ leurs types avant leur exécution, et ESLint analyse aussi ces fichiers et la co
 
 `frontend/e2e/responsive.pw.ts` parcourt désormais 28 URL de référence : les 11 entrées initiales,
 quatre fiches Matériel, quatre déclarations, quatre détails de signalement, trois programmations
-et deux détails d'intervention valides/inconnus. Les deux dernières URL sont proposées par #42.
+et deux détails d'intervention valides/inconnus. Les deux dernières URL sont intégrées par #50.
 Il attend le contenu réellement
 rendu puis mesure le débordement du document, avec un pixel de tolérance pour les arrondis.
 Le menu Agent vérifie séparément que les quatre libellés mobiles tiennent dans leurs boutons
@@ -1050,7 +1140,7 @@ Les **176 tests Vitest dans dix fichiers** vérifient en complément les validat
 réutilisations de composant. Les résultats et limites réels, dont navigateur système local
 distinct du navigateur Playwright standard de CI, figurent dans le bilan et la PR.
 
-L'issue #42 propose **232 scénarios**, soit 28 de plus : deux URL de détail et deux parcours
+La PR #50 fusionnée a intégré **232 scénarios**, soit 28 de plus : deux URL de détail et deux parcours
 (liste/filtres et détail/origines) dans chacun des fuseaux Paris/New York, plus la vérification
 des deux simulations sans ajout à la consultation, aux quatre formats. Les tests Agent
 contrôlent aussi l'absence de nouvelles routes de gestion. Les **199 tests Vitest dans douze
@@ -1060,6 +1150,17 @@ même instance. Captures utiles : `interventions-liste`, `interventions-filtres`
 `intervention-detail-long`, `interventions-aucun-resultat`, `intervention-introuvable`.
 Le rapport HTML de Responsive contient ces pièces jointes pour chaque projet/fuseau ;
 les résultats réels du dernier commit sont indiqués dans la PR.
+
+L'issue #51 propose **248 scénarios** : les 232 intégrés sont conservés, plus 16 parcours UX
+aux quatre formats. Les deux espaces vérifient Basse/low, les retours directs/rechargés, la
+hiérarchie des actions, l'absence de soulignement au repos/survol/focus, le contour visible,
+les cibles de 48 px et les cartes teintées. La programmation et le détail Responsable sont
+aussi contrôlés, dont l'ouverture d'un lien dans un autre onglet à 1440 px. Les captures
+`ux-fiche-materiel-actions`, `ux-fiche-materiel-focus-fenetre`, `ux-declaration-basse`, `ux-recapitulatif-signalement`,
+`ux-fiche-signalement-actions`, `ux-programmation-actions` et `ux-fiche-intervention-actions`
+complètent le rapport. Le parcours Matériel attend maintenant le chemin et `q` décodé du lien
+exact ; il a été répété dix fois par espace à 320 px avant et après correction, sans retirer
+les espaces attendus. Les résultats réels et les limites du diagnostic figurent dans la PR.
 
 La fixture `page` intercepte uniquement `/api/v1/health` et répond `{"status":"ok"}`.
 L'objectif est la mise en page et la navigation : aucun serveur Django ni authentification
