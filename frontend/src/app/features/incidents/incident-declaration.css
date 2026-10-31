@@ -61,7 +61,7 @@ textarea {
   min-width: 0;
   min-height: 44px;
   padding: 8px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: 8px;
   font: inherit;
   color: var(--text);
@@ -72,7 +72,7 @@ textarea {
 }
 input:focus-visible,
 textarea:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
 /* La barre Agent est fixe : le contrôle focalisé doit rester entièrement visible. */

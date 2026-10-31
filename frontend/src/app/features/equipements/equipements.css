@@ -44,7 +44,7 @@ input {
   background: white;
 }
 input:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
 .equipment-list {

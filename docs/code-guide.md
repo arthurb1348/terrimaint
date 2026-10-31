@@ -708,9 +708,9 @@ Questions de compréhension :
 3. Pourquoi la programmation simulée et une date calendaire ne doivent-elles pas devenir,
    respectivement, un enregistrement et un instant UTC ?
 
-## Harmonisation UX (issue #51, en revue)
+## Harmonisation UX (issue #51, fusionnée)
 
-La consultation #42/PR #50 est intégrée ; cette harmonisation reste **en revue jusqu'à fusion**.
+La consultation #42/PR #50 est intégrée ; cette harmonisation est intégrée par la PR #52, fusionnée le 31 octobre 2026.
 Le retour utilisateur du 31 octobre ajoute un incrément au programme : **4/10**, avant #43
 (images/photos). PostgreSQL #38 reste différé. Les anciens choix Faible sont conservés dans
 l'historique des décisions ; le vocabulaire actuel devient **Basse / Haute / Urgente**.
@@ -1151,7 +1151,7 @@ même instance. Captures utiles : `interventions-liste`, `interventions-filtres`
 Le rapport HTML de Responsive contient ces pièces jointes pour chaque projet/fuseau ;
 les résultats réels du dernier commit sont indiqués dans la PR.
 
-L'issue #51 propose **248 scénarios** : les 232 intégrés sont conservés, plus 16 parcours UX
+La PR #52 fusionnée intègre **248 scénarios** : les 232 intégrés sont conservés, plus 16 parcours UX
 aux quatre formats. Les deux espaces vérifient Basse/low, les retours directs/rechargés, la
 hiérarchie des actions, l'absence de soulignement au repos/survol/focus, le contour visible,
 les cibles de 48 px et les cartes teintées. La programmation et le détail Responsable sont
@@ -1181,3 +1181,8 @@ formats, modifier les projets Playwright ; pour changer l'interface, modifier se
 Sources : [configuration CI Playwright](https://playwright.dev/docs/ci-intro),
 [émulation](https://playwright.dev/docs/emulation),
 [serveur de test](https://playwright.dev/docs/test-webserver).
+
+## Contrastes interactifs (issue #53, en revue)
+
+Le [guide de contraste](contrast-accessibility.md) explique les jetons, les mesures du rendu,
+les fichiers à modifier, la procédure manuelle et les limites du contrôle WCAG ciblé.

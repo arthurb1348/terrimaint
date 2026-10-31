@@ -29,7 +29,7 @@ select {
   min-height: 48px;
   max-width: 100%;
   padding: 10px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--control-border);
   border-radius: 8px;
   font: inherit;
   color: var(--text);
@@ -42,7 +42,7 @@ select {
 }
 input:focus-visible,
 select:focus-visible {
-  outline: 3px solid var(--accent);
+  outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
 .help {

@@ -4,7 +4,7 @@
 
 - Date de vérification : 2026-10-31 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `876b8b0a5a9dadff6bff5e0beaea7e1bd1d8cb05` (PR #50 fusionnée), vérifié sur GitHub et par Git distant.
+- Code de référence : `main`, commit `4722b2403b5592e96a0d8d645dea94bd721fb9ee` (PR #52 fusionnée), vérifié sur GitHub et par Git distant.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -32,9 +32,10 @@ L'[issue #41](https://github.com/arthurb1348/terrimaint/issues/41) est intégré
 programmation simulée depuis un signalement Responsable. La consultation d'un jeu fixe
 d'interventions #42 est intégrée par la [PR #50](https://github.com/arthurb1348/terrimaint/pull/50),
 fusionnée le 31 octobre 2026 ; les programmations simulées ne créent aucune entrée.
-L'[issue #51](https://github.com/arthurb1348/terrimaint/issues/51) propose ensuite l'harmonisation
-UX validée par Arthur, **en revue jusqu'à fusion**. C'est l'incrément **4/10**, après ajout de
-ce retour utilisateur au programme initial. Les images/photos restent pour #43.
+L'harmonisation UX #51 est intégrée par la [PR #52](https://github.com/arthurb1348/terrimaint/pull/52),
+fusionnée le 31 octobre 2026 : incrément **4/10**. La correction de contraste
+[#53](https://github.com/arthurb1348/terrimaint/issues/53) reste **en revue jusqu'à fusion**.
+Les images/photos restent pour #43.
 PostgreSQL ([#38](https://github.com/arthurb1348/terrimaint/issues/38)) est **différé** et ne
 bloque pas cet incrément. La cible Django/DRF/PostgreSQL reste prévue ; la démonstration
 locale ne prétend pas fournir persistance, authentification ou permissions métier.
@@ -310,10 +311,10 @@ et programmation ne modifient pas le jeu fixe ni les sources liées. Aucune gest
 API métier, persistance, permission, notification ou dépendance ajoutée ; PostgreSQL #38
 reste différé. Les contrôles et captures du commit proposé avant fusion figurent dans la PR #50.
 
-## Travaux en cours — harmonisation UX
+## Harmonisation UX intégrée
 
-L'[issue #51](https://github.com/arthurb1348/terrimaint/issues/51), sur
-`fix/51-ux-consistency`, reste **en revue jusqu'à fusion**. Elle reprend le retour validé
+L'[issue #51](https://github.com/arthurb1348/terrimaint/issues/51) est intégrée par
+la [PR #52](https://github.com/arthurb1348/terrimaint/pull/52), fusionnée le 31 octobre 2026. Elle reprend le retour validé
 d'Arthur : Basse/Haute/Urgente, valeur `low` inchangée ; actions principales pleines et
 secondaires à contour, sans soulignement ; retours fléchés avec libellé et liens explicites ;
 teinte très légère des cartes et résumés. Les styles communs remplacent les duplications
@@ -323,7 +324,7 @@ sans mutation restent inchangées. Les images/photos restent pour #43.
 
 Les prototypes Figma ont été lus en lecture seule. Le traitement des retours provient de
 la revue utilisateur, sans annoncer une nouvelle maquette Figma validée. Les
-[décisions](decisions.md) et le [guide](code-guide.md#harmonisation-ux-issue-51-en-revue)
+[décisions](decisions.md) et le [guide](code-guide.md#harmonisation-ux-issue-51-fusionnée)
 expliquent les choix, les fichiers à modifier et la procédure manuelle. Les contrôles et
 captures du dernier commit proposé sont rapportés dans la PR ; Arthur garde la validation
 humaine et la fusion.
@@ -345,6 +346,18 @@ sont intégrées par les [PR #16](https://github.com/arthurb1348/terrimaint/pull
 [#13](https://github.com/arthurb1348/terrimaint/pull/13).
 Le suivi vivant des autres travaux reste dans les [issues](https://github.com/arthurb1348/terrimaint/issues)
 et [PR](https://github.com/arthurb1348/terrimaint/pulls), sans recopier une liste vite périmée.
+
+## Travaux en cours — contrastes accessibles
+
+L'[issue #53](https://github.com/arthurb1348/terrimaint/issues/53), branche
+`fix/53-accessible-contrast`, reste **en revue jusqu'à fusion**. Elle sépare focus,
+accent décoratif, bordures de contrôles et bordures de cartes ; le focus blanc sidebar
+est conservé. Les mesures ciblent les styles réellement appliqués dans Chromium,
+les fonds adjacents et les états interactifs, avec seuils sans arrondi.
+Le [rapport et la procédure manuelle](contrast-accessibility.md) donnent les couleurs,
+rapports, portée WCAG et limites ; les résultats d'exécution et la CI du dernier commit
+sont dans la PR. Aucune image métier ajoutée : #43 reste distincte. Arthur garde la
+validation humaine et la fusion.
 
 ## Fonctionnalités prévues et non implémentées
 
@@ -501,7 +514,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   Les captures ont été relues aux quatre formats ; la PR fournit les résultats CI et le rapport
   du dernier commit proposé. Santé HTTP simulée, sans intégration Django/proxy réelle ni appareil
   physique, Windows/macOS, Safari ou lecteur d'écran validé.
-- L'issue #51 conserve **199 tests Vitest dans douze fichiers** et propose **248 scénarios
+- La PR #52 fusionnée conserve **199 tests Vitest dans douze fichiers** et intègre **248 scénarios
   Playwright** (16 nouveaux parcours UX). Lint, tests et build réussissent localement avec
   Node 24.21.0/npm 11.19.0. Le parcours Matériel ciblé réussit 20/20 avant modification puis
   20/20 après synchronisation du lien à 320 px ; les deux scénarios d'observation temporaires
@@ -567,7 +580,7 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire l'harmonisation UX #51, son diagnostic ciblé, ses tests et captures, puis décider sa fusion ; #42/PR #50 sont intégrées.
+1. Relire la correction de contraste #53, ses mesures, tests et captures, puis décider sa fusion ; #51/PR #52 sont intégrées.
 2. Poursuivre par #43 (images/photos), puis les incréments du programme frontend pour décembre 2026 avec des critères validés par Arthur.
 3. Reprendre ultérieurement PostgreSQL #38, le modèle métier et les migrations Django,
    avec validation serveur, envoi et règles d'accès entre collectivités.
@@ -577,7 +590,7 @@ selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humain
 
 La priorité frontend est validée pour préparer l'oral, sans annonce de déploiement métier.
 Aucune de ces protections métier n'est implémentée aujourd'hui. Le workflow responsive et ses
-232 scénarios sont déjà intégrés ; le parcours proposé complète les contrôles sans modifier les jobs `Backend`/`Frontend`
+248 scénarios sont déjà intégrés ; le parcours proposé complète les contrôles sans modifier les jobs `Backend`/`Frontend`
 ni les protections distantes.
 
 ## Règles de mise à jour du bilan
