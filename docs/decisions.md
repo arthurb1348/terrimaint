@@ -1,13 +1,21 @@
 # Décisions techniques et métier
 
-## 2026-10-31 — Contrastes interactifs (issue #53, en revue)
+## 2026-10-31 — Images et photos locales (issue #43, en revue)
+
+Séparer illustrations Matériel, photos fixes de signalements et fichiers choisis en mémoire.
+Conserver un champ natif sans caméra obligatoire, 3 photos de 5 Mio, JPEG/PNG/WebP
+et décodage local. Génération de parcours et révocation des URL protègent les retours
+asynchrones. Le [guide photos](photos-demo.md) documente provenance, adaptations Figma,
+cycle de vie et limites ; #43 reste en revue jusqu’à fusion par Arthur.
+
+## 2026-10-31 — Contrastes interactifs (issue #53, fusionnée)
 
 Depuis main `4722b2403b5592e96a0d8d645dea94bd721fb9ee` intégrant #52, séparer
 `--focus: #A5682D` de l’accent décoratif et `--control-border: #6B7C72` des bordures
 décoratives. Conserver le focus blanc sur le vert de la sidebar et les cartes discrètes.
 Le [rapport de contraste](contrast-accessibility.md) documente les usages, rapports sRGB,
 seuils non arrondis, contrôle des styles rendus, procédure et limites WCAG.
-#53 reste **en revue jusqu’à fusion** ; images dans #43, validation et fusion par Arthur.
+#53 est intégrée par la PR #54, fusionnée le 31 octobre 2026 (`554468d…`). Les images/photos #43 restent en revue jusqu’à fusion.
 
 ## 2026-10-31 — Harmonisation issue de la revue utilisateur (issue #51, fusionnée)
 

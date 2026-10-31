@@ -1,12 +1,13 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { DemoImage } from '../../shared/demo-image/demo-image';
 import { DEMO_EQUIPMENT } from './equipements-demo';
 
 @Component({
   selector: 'app-equipements',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, DemoImage],
   templateUrl: './equipements.html',
   styleUrl: './equipements.css',
 })

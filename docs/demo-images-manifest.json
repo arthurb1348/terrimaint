@@ -1,0 +1,62 @@
+{
+  "blower-thumb.webp": {
+    "bytes": 11114,
+    "sha256": "c5a0c9aa4f5c5b47d2ba5745556d49d42e4e4c084b0495329f9fa65e53ef748c"
+  },
+  "blower.webp": {
+    "bytes": 56564,
+    "sha256": "1237bfac7851ad1edb6a5554d0324168fb1b04cd76b503d20d7aa02cc010d3fb"
+  },
+  "boiler-thumb.webp": {
+    "bytes": 10086,
+    "sha256": "ba0d01e514adb0060e3860c298e8d7f3e89db2ad4f112d456d058af6361cde8a"
+  },
+  "boiler.webp": {
+    "bytes": 57138,
+    "sha256": "7da6b66312fcc99863115f05b0ebae780336bc6c6b6d52be1ed2839267879a38"
+  },
+  "brushcutter-thumb.webp": {
+    "bytes": 9028,
+    "sha256": "165dc23808a1ec6b2c95d4a2198567feb880d6f2d9a1ad0fe21aed11b5be53fb"
+  },
+  "brushcutter.webp": {
+    "bytes": 54048,
+    "sha256": "836635af3061b34980afa0c1040e8aaed4220a584915077eec1314ce2e743a59"
+  },
+  "heating-controls.webp": {
+    "bytes": 44766,
+    "sha256": "afb5075a4c195309dabe1e595eb1dc33e5e80adf3f59f1fb5e56d998a55bf205"
+  },
+  "heating-pipes.webp": {
+    "bytes": 80404,
+    "sha256": "270f0c3333110b8d49379fcc912c38ca34d6391991844535aed2ece1cefc2087"
+  },
+  "hose-joint.webp": {
+    "bytes": 68652,
+    "sha256": "d28ead887a73248d0aba34b4f37a238e46ddf0aa06529069f0a71dc00fa17f44"
+  },
+  "mower-thumb.webp": {
+    "bytes": 11456,
+    "sha256": "e2f3763ac3218072d450258ffc6adc8e18aa99227e7642a409147edab47909c6"
+  },
+  "mower.webp": {
+    "bytes": 64012,
+    "sha256": "bf07ed32d9fcf6ec553d99fbb3c4f5a1f2c0e8b7c7bcc22852a23027e3035127"
+  },
+  "van-thumb.webp": {
+    "bytes": 9334,
+    "sha256": "7218b60018dd3083a4ecd3e9759d6ccfaa914d9f29e16338431ea5bbbc4c0ddb"
+  },
+  "van.webp": {
+    "bytes": 57786,
+    "sha256": "93e846a8ec8e738da6c6e3f800d34a807f4193b9fec967cd4c8d19ced2aa7250"
+  },
+  "washer-thumb.webp": {
+    "bytes": 10500,
+    "sha256": "aaf041ce056c18d86831fc150834d7995ac4964e574a26dffebf22d6fc6bc070"
+  },
+  "washer.webp": {
+    "bytes": 61092,
+    "sha256": "bba8a2a88107dee4c45cd027352576d70cad7a6e3a6d4a25b481b75a8c3ce303"
+  }
+}

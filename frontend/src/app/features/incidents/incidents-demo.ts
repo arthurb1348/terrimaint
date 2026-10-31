@@ -24,6 +24,7 @@ export const DEMO_INCIDENTS: readonly Incident[] = [
   },
   {
     id: 'INC-2026-047',
+    photos: [{ src: '/images/demo/heating-controls.webp', alt: 'Exemple fictif : commandes du chauffage' }, { src: '/images/demo/heating-pipes.webp', alt: 'Exemple fictif : distribution des tuyaux de chauffage' }],
     title:
       'Température irrégulière dans les salles du groupe scolaire malgré le réglage habituel du chauffage',
     description:
@@ -52,6 +53,7 @@ export const DEMO_INCIDENTS: readonly Incident[] = [
   },
   {
     id: 'INC-2026-050',
+    photos: [{ src: '/images/demo/hose-joint.webp', alt: 'Exemple fictif : raccord du flexible et gouttes au sol' }],
     title: 'Fuite au raccord du flexible',
     description:
       'Une fuite est visible au raccord lorsque le nettoyeur est mis sous pression.\nLe sol devient glissant autour de la zone de travail.',

@@ -4,7 +4,7 @@
 
 - Date de vérification : 2026-10-31 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `4722b2403b5592e96a0d8d645dea94bd721fb9ee` (PR #52 fusionnée), vérifié sur GitHub et par Git distant.
+- Code de référence : `main`, commit `554468d731311dc25b34956c75866a8349c672c5` (PR #54 fusionnée), vérifié sur GitHub et par Git distant.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -34,7 +34,7 @@ d'interventions #42 est intégrée par la [PR #50](https://github.com/arthurb134
 fusionnée le 31 octobre 2026 ; les programmations simulées ne créent aucune entrée.
 L'harmonisation UX #51 est intégrée par la [PR #52](https://github.com/arthurb1348/terrimaint/pull/52),
 fusionnée le 31 octobre 2026 : incrément **4/10**. La correction de contraste
-[#53](https://github.com/arthurb1348/terrimaint/issues/53) reste **en revue jusqu'à fusion**.
+[#53](https://github.com/arthurb1348/terrimaint/issues/53) est intégrée par la PR #54 fusionnée. #43 est **en revue jusqu’à fusion**, incrément 5/10.
 Les images/photos restent pour #43.
 PostgreSQL ([#38](https://github.com/arthurb1348/terrimaint/issues/38)) est **différé** et ne
 bloque pas cet incrément. La cible Django/DRF/PostgreSQL reste prévue ; la démonstration
@@ -347,10 +347,10 @@ sont intégrées par les [PR #16](https://github.com/arthurb1348/terrimaint/pull
 Le suivi vivant des autres travaux reste dans les [issues](https://github.com/arthurb1348/terrimaint/issues)
 et [PR](https://github.com/arthurb1348/terrimaint/pulls), sans recopier une liste vite périmée.
 
-## Travaux en cours — contrastes accessibles
+## Contrastes accessibles intégrés
 
 L'[issue #53](https://github.com/arthurb1348/terrimaint/issues/53), branche
-`fix/53-accessible-contrast`, reste **en revue jusqu'à fusion**. Elle sépare focus,
+`fix/53-accessible-contrast`, est intégrée par la PR #54 fusionnée. Elle sépare focus,
 accent décoratif, bordures de contrôles et bordures de cartes ; le focus blanc sidebar
 est conservé. Les mesures ciblent les styles réellement appliqués dans Chromium,
 les fonds adjacents et les états interactifs, avec seuils sans arrondi.
@@ -359,6 +359,14 @@ Le [rapport et la procédure manuelle](contrast-accessibility.md) donnent les co
 rapports, portée WCAG et limites ; les résultats d'exécution et la CI du dernier commit
 sont dans la PR. Aucune image métier ajoutée : #43 reste distincte. Arthur garde la
 validation humaine et la fusion.
+
+## Travaux en cours — images et photos
+
+L’issue #43 est **en revue jusqu’à fusion** sur `feat/43-equipment-photos`.
+Six illustrations locales de matériel, trois photos d’exemple et une sélection facultative
+limitée à 3 photos de 5 Mio sont proposées. Les fichiers restent en mémoire ; la liste
+fixe n’est pas alimentée. Le [guide photos](photos-demo.md) décrit provenance, ressources,
+tests, procédure et limites. La validation humaine et la fusion restent à Arthur.
 
 ## Fonctionnalités prévues et non implémentées
 
@@ -581,7 +589,7 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire la correction de contraste #53, ses mesures, tests et captures, puis décider sa fusion ; #51/PR #52 sont intégrées.
+1. Relire #43 (images/photos), ses tests et captures, puis décider sa fusion ; #53/PR #54 est intégrée.
 2. Poursuivre par #43 (images/photos), puis les incréments du programme frontend pour décembre 2026 avec des critères validés par Arthur.
 3. Reprendre ultérieurement PostgreSQL #38, le modèle métier et les migrations Django,
    avec validation serveur, envoi et règles d'accès entre collectivités.
@@ -591,7 +599,7 @@ selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humain
 
 La priorité frontend est validée pour préparer l'oral, sans annonce de déploiement métier.
 Aucune de ces protections métier n'est implémentée aujourd'hui. Le workflow responsive et ses
-248 scénarios sont déjà intégrés ; le parcours proposé complète les contrôles sans modifier les jobs `Backend`/`Frontend`
+268 scénarios sont déjà intégrés ; le parcours proposé complète les contrôles sans modifier les jobs `Backend`/`Frontend`
 ni les protections distantes.
 
 ## Règles de mise à jour du bilan

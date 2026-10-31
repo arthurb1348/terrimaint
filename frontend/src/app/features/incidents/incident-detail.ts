@@ -2,6 +2,7 @@ import { DatePipe, DOCUMENT } from '@angular/common';
 import { afterNextRender, Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DemoImage } from '../../shared/demo-image/demo-image';
 import { DEMO_EQUIPMENT } from '../equipements/equipements-demo';
 import { INCIDENT_PRIORITIES, INCIDENT_STATUSES } from './incident';
 import { incidentQueryParams, readIncidentFilters } from './incident-filters';
@@ -10,7 +11,7 @@ import { DEMO_INCIDENTS } from './incidents-demo';
 @Component({
   selector: 'app-incident-detail',
   standalone: true,
-  imports: [RouterLink, DatePipe],
+  imports: [RouterLink, DatePipe, DemoImage],
   templateUrl: './incident-detail.html',
   styleUrls: ['./incident-presentation.css', './incident-detail.css'],
 })
