@@ -4,7 +4,7 @@
 
 - Date de vérification : 2026-10-31 (Europe/Paris).
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `554468d731311dc25b34956c75866a8349c672c5` (PR #54 fusionnée), vérifié sur GitHub et par Git distant.
+- Code de référence : `main`, commit `1e87c74d51ad6c642a79f9383f12d2dda12464d2` (PR #55 fusionnée), vérifié sur GitHub et par Git distant.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -34,8 +34,8 @@ d'interventions #42 est intégrée par la [PR #50](https://github.com/arthurb134
 fusionnée le 31 octobre 2026 ; les programmations simulées ne créent aucune entrée.
 L'harmonisation UX #51 est intégrée par la [PR #52](https://github.com/arthurb1348/terrimaint/pull/52),
 fusionnée le 31 octobre 2026 : incrément **4/10**. La correction de contraste
-[#53](https://github.com/arthurb1348/terrimaint/issues/53) est intégrée par la PR #54 fusionnée. #43 est **en revue jusqu’à fusion**, incrément 5/10.
-Les images/photos restent pour #43.
+[#53](https://github.com/arthurb1348/terrimaint/issues/53) est intégrée par la PR #54 fusionnée. #43 est intégrée par la [PR #55](https://github.com/arthurb1348/terrimaint/pull/55), incrément 5/10.
+Le Scanner QR #44 est **en revue jusqu’à fusion**, incrément 6/10.
 PostgreSQL ([#38](https://github.com/arthurb1348/terrimaint/issues/38)) est **différé** et ne
 bloque pas cet incrément. La cible Django/DRF/PostgreSQL reste prévue ; la démonstration
 locale ne prétend pas fournir persistance, authentification ou permissions métier.
@@ -360,13 +360,34 @@ rapports, portée WCAG et limites ; les résultats d'exécution et la CI du dern
 sont dans la PR. Aucune image métier ajoutée : #43 reste distincte. Arthur garde la
 validation humaine et la fusion.
 
-## Travaux en cours — images et photos
+## Images et photos intégrées
 
-L’issue #43 est **en revue jusqu’à fusion** sur `feat/43-equipment-photos`.
+L’issue #43 est intégrée par la [PR #55](https://github.com/arthurb1348/terrimaint/pull/55),
+fusionnée le 31 octobre 2026 au commit `1e87c74d51ad6c642a79f9383f12d2dda12464d2`,
+vérifié par Git distant et l’API GitHub avant création de la branche #44.
 Six illustrations locales de matériel, trois photos d’exemple et une sélection facultative
-limitée à 3 photos de 5 Mio sont proposées. Les fichiers restent en mémoire ; la liste
+limitée à 3 photos de 5 Mio sont intégrées. Les fichiers restent en mémoire ; la liste
 fixe n’est pas alimentée. Le [guide photos](photos-demo.md) décrit provenance, ressources,
-tests, procédure et limites. La validation humaine et la fusion restent à Arthur.
+tests, procédure et limites. Les tests photos et contrastes sont conservés pour #44.
+
+## Travaux en cours — Scanner QR Agent
+
+L’[issue #44](https://github.com/arthurb1348/terrimaint/issues/44), branche
+`feat/44-agent-qr-scanner`, reste **en revue jusqu’à fusion**. La page d’attente est
+remplacée sur cette branche par activation/arrêt/reprise explicites, vrai décodage jsQR
+et saisie permanente. Les références sont résolues dans la source typée unique ; seuls
+les identifiants reconnus ouvrent la fiche Agent. Les résultats tardifs sont invalidés,
+les flux fermés, aucun média ni historique de scans conservé. Les accès #21/PR #29,
+le shell, les photos et les contrastes sont préservés.
+
+Chromium système 151.0.7922.173 ne fournit pas `BarcodeDetector` dans l’environnement
+vérifié. `jsqr@1.4.0`, sans dépendance d’exécution ni script d’installation, est ajouté
+avec lockfile npm ; politique de scripts et CI inchangées. Le
+[guide Scanner](scanner-qr.md) décrit format/casse, sources, ressources, QR locaux,
+HTTPS sur téléphone et procédure de revue. Les tests distinguent décodage réel des
+PNG et capteur/permissions simulés ; aucune caméra physique n’est validée. Les résultats
+locaux et les liens réels Backend/Frontend/Responsive du dernier commit sont dans la PR.
+Les cases de validation humaine restent à Arthur.
 
 ## Fonctionnalités prévues et non implémentées
 
@@ -589,8 +610,8 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire #43 (images/photos), ses tests et captures, puis décider sa fusion ; #53/PR #54 est intégrée.
-2. Poursuivre par #43 (images/photos), puis les incréments du programme frontend pour décembre 2026 avec des critères validés par Arthur.
+1. Relire #44 (Scanner QR), utiliser les QR locaux et effectuer le contrôle caméra physique ; décider de la fusion après revue.
+2. #43/PR #55 et #53/PR #54 sont intégrées ; poursuivre les incréments du programme frontend avec des critères validés par Arthur.
 3. Reprendre ultérieurement PostgreSQL #38, le modèle métier et les migrations Django,
    avec validation serveur, envoi et règles d'accès entre collectivités.
 4. Prévoir la validation des entrées, l'authentification, les autorisations, les tests d'accès

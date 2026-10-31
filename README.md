@@ -124,6 +124,17 @@ arrêter Django puis cliquer sur le bouton pour voir « API indisponible ». Rel
 et vérifier à nouveau. Tester à 375 px et au clavier : contenu sans débordement,
 focus visible et libellé de statut lisible sans dépendre de la couleur.
 
+## Scanner Agent (issue #44 en revue)
+
+Sur la branche de revue, `/agent/scanner` propose une lecture QR après clic et une
+saisie manuelle toujours disponible. Le QR contient seulement une référence connue
+comme `EQ-OUT-0001` ; casse ignorée et espaces de bord retirés. Les
+[QR locaux](frontend/public/qr-demo/index.html) sont servis à `/qr-demo/index.html`.
+Le [guide Scanner](docs/scanner-qr.md) fournit la courte procédure d’Arthur, le vrai
+décodage testé et les limites. Sur téléphone, la caméra exige HTTPS avec certificat
+reconnu ; une adresse LAN HTTP ne remplace pas le `localhost` de l’ordinateur.
+#43/PR #55 est intégrée ; #44 reste en revue jusqu’à fusion.
+
 ## Organisation
 
 | Dossier ou fichier | Rôle |

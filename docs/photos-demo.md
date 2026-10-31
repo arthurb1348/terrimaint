@@ -1,6 +1,9 @@
-# Images et photos de démonstration — #43 en revue
+# Images et photos de démonstration — #43 intégrée par la PR #55
 
 ## Origine et présentation
+
+Intégrée le 31 octobre 2026 au commit `1e87c74d51ad6c642a79f9383f12d2dda12464d2`
+([PR #55](https://github.com/arthurb1348/terrimaint/pull/55)), vérifié avant #44.
 
 Branche issue de `origin/main` vérifié `554468d731311dc25b34956c75866a8349c672c5`,
 qui intègre #52 et #53/PR #54. Les prototypes Figma Agent `188:3` et Responsable

@@ -88,12 +88,13 @@ export const routes: Routes = [
     title: 'Interventions — TerriMaint',
     data: { label: 'Interventions' },
   },
+  {
+    path: 'agent/scanner',
+    loadComponent: () => import('./features/scanner/scanner').then((m) => m.Scanner),
+    title: 'Scanner — TerriMaint',
+    data: { label: 'Scanner' },
+  },
   ...[
-    {
-      path: 'agent/scanner',
-      label: 'Scanner',
-      description: 'Le scan QR et la saisie du code seront disponibles dans un prochain incrément.',
-    },
     {
       path: 'agent/profil',
       label: 'Profil',

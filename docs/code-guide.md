@@ -985,7 +985,6 @@ des lockfiles et de `.nvmrc`, pas des outils installés dans un environnement de
 - [Proxy du serveur de développement](https://angular.dev/tools/cli/serve)
 - [angular-eslint et compatibilité des versions majeures](https://github.com/angular-eslint/angular-eslint)
 
-
 ## Navigation du prototype (intégrée par la PR #16)
 
 `app.routes.ts` associe chaque URL à une page et à un libellé de barre supérieure. Les URL
@@ -1187,7 +1186,30 @@ Sources : [configuration CI Playwright](https://playwright.dev/docs/ci-intro),
 Le [guide de contraste](contrast-accessibility.md) explique les jetons, les mesures du rendu,
 les fichiers à modifier, la procédure manuelle et les limites du contrôle WCAG ciblé.
 
-## Images et photos (issue #43, en revue)
+## Images et photos (issue #43, fusionnée)
 
 Voir le [guide photos](photos-demo.md) pour les sources, la préparation des visuels,
 le cycle de vie des fichiers, les tests et la procédure manuelle.
+
+## Scanner QR et saisie de référence (issue #44, en revue)
+
+Le [guide Scanner](scanner-qr.md) porte le format, les choix vérifiés dans Chromium,
+les scripts de jsQR examinés, le cycle de vie, la revue manuelle et les limites.
+La PR #55/#43 est intégrée au point de départ ; #44 reste en revue jusqu’à fusion.
+
+| Fichier | Rôle / endroit à modifier |
+| --- | --- |
+| `features/scanner/equipment-reference.ts` | Normalise espaces/casse, contrôle format et présence dans `DEMO_EQUIPMENT` sans copie |
+| `features/scanner/qr-decoder.ts` | Importe jsQR à la demande et décode réellement les pixels RGBA |
+| `features/scanner/qr-camera.ts` | Flux, lecteur/canvas, génération, continuations tardives, arrêt et erreurs |
+| `features/scanner/scanner.ts/.html/.css` | Formulaire permanent, messages/focus, navigation unique et états caméra |
+| `app.routes.ts` | Même URL `/agent/scanner`, composant chargé à la demande |
+| `public/qr-demo/` | Planche lisible, deux références connues et une inconnue en PNG/SVG |
+| `../scripts/generate-qr-demo.py` | Véritable encodeur Segno 1.6.6, outil de préparation séparé |
+| `features/scanner/*.spec.ts`, `e2e/scanner.pw.ts` | Validation et ressources simulées ; PNG décodés par le vrai jsQR dans Chromium |
+| `e2e/contrast.pw.ts` | Mesures supplémentaires du champ, des actions et messages Scanner, sans modifier les assertions existantes |
+
+La donnée circule de la saisie ou des pixels vers le même résolveur, puis de l’objet
+reconnu vers la route interne et la fiche existante. Aucune URL brute du QR n’est suivie.
+`stop()` invalide la session en plus de fermer ses pistes : c’est ce qui protège des
+permissions et décodages terminés après le départ. La caméra ne reprend jamais seule.

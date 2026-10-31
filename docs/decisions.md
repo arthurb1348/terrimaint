@@ -1,12 +1,36 @@
 # Décisions techniques et métier
 
-## 2026-10-31 — Images et photos locales (issue #43, en revue)
+## 2026-10-31 — Identification QR Agent (issue #44, en revue)
+
+Le QR contient une référence seule, normalisée par `trim().toUpperCase()` puis
+comparée entièrement aux identifiants de la source typée Matériel existante. Format
+ASCII `EQ-AAA-0000` ; aucun matériel inventé, HTML interprété ou lien externe ouvert.
+Seul un objet reconnu construit la route interne Agent. La saisie reste visible,
+utilisable au clavier sans caméra. Les accès Scanner et leur seuil 1200 px sont conservés.
+
+Après observation de Chromium 151 sans `BarcodeDetector` et lecture des sources
+W3C/MDN/jsQR, retenir `jsqr@1.4.0`, sans dépendance d’exécution ni script d’installation.
+Lockfile npm et politique stricte conservés. Une session caméra démarre sur clic,
+ferme toutes les pistes à l’arrêt/résultat/départ et invalide chaque continuation
+asynchrone par génération. Un flux accordé tardivement est immédiatement fermé.
+Le décodage est séquentiel, borné en pixels, sans stockage d’images ni historique.
+
+Le prototype Agent `188:3` et Scanner `188:17` sont consultés en lecture seule.
+L’issue prime : activation explicite, formulaire toujours visible, fiche directe,
+sans écran de succès ni indicateur Synchronisé. Le [guide](scanner-qr.md) détaille
+sources, scripts examinés, format, QR Segno réutilisables, contexte HTTPS, tests
+simulés et contrôle physique restant à Arthur. #43/PR #55 est intégrée ; #44 reste
+**en revue jusqu’à fusion**. Aucune API métier, permission serveur ou PWA ajoutée.
+
+## 2026-10-31 — Images et photos locales (issue #43, fusionnée)
 
 Séparer illustrations Matériel, photos fixes de signalements et fichiers choisis en mémoire.
 Conserver un champ natif sans caméra obligatoire, 3 photos de 5 Mio, JPEG/PNG/WebP
 et décodage local. Génération de parcours et révocation des URL protègent les retours
 asynchrones. Le [guide photos](photos-demo.md) documente provenance, adaptations Figma,
-cycle de vie et limites ; #43 reste en revue jusqu’à fusion par Arthur.
+cycle de vie et limites ; #43 est intégrée par la [PR #55](https://github.com/arthurb1348/terrimaint/pull/55),
+fusionnée le 31 octobre 2026 au commit `1e87c74d51ad6c642a79f9383f12d2dda12464d2`,
+vérifié dans le dernier `origin/main` avant #44.
 
 ## 2026-10-31 — Contrastes interactifs (issue #53, fusionnée)
 
@@ -15,7 +39,7 @@ Depuis main `4722b2403b5592e96a0d8d645dea94bd721fb9ee` intégrant #52, séparer
 décoratives. Conserver le focus blanc sur le vert de la sidebar et les cartes discrètes.
 Le [rapport de contraste](contrast-accessibility.md) documente les usages, rapports sRGB,
 seuils non arrondis, contrôle des styles rendus, procédure et limites WCAG.
-#53 est intégrée par la PR #54, fusionnée le 31 octobre 2026 (`554468d…`). Les images/photos #43 restent en revue jusqu’à fusion.
+#53 est intégrée par la PR #54, fusionnée le 31 octobre 2026 (`554468d…`). Les images/photos #43 sont intégrées par la PR #55.
 
 ## 2026-10-31 — Harmonisation issue de la revue utilisateur (issue #51, fusionnée)
 
@@ -449,7 +473,6 @@ connectée et synchronisation ne sont pas simulées. Le contrôle de santé HTTP
 l'accueil général et ne prouve ni persistance ni synchronisation. Les icônes originales sont
 exportées depuis les instances du prototype, conservées localement dans `frontend/public/icons/`.
 Aucune dépendance applicative ajoutée.
-
 
 ## 2026-10-16 — Architecture Angular par fonctionnalités (fusionnée)
 
