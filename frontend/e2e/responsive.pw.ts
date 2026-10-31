@@ -34,6 +34,8 @@ const routes = [
   '/responsable/incidents/nouveau/EQ-OUT-0003',
   '/responsable/incidents/nouveau/inconnu',
   '/responsable/interventions',
+  '/responsable/interventions/INT-2026-034',
+  '/responsable/interventions/inconnu',
   '/responsable/interventions/nouvelle/INC-2026-047',
   '/responsable/interventions/nouvelle/INC-2026-049',
   '/responsable/interventions/nouvelle/inconnu',
@@ -1197,4 +1199,278 @@ test('La consultation Agent conserve ses liens sans programmation ni route dédi
   await expect(main.getByRole('heading', { level: 1 })).toContainText('Du terrain');
   await expect(main.getByRole('status')).toContainText('API disponible');
   await expect(main.locator('form')).toHaveCount(0);
+  await expect(page.locator('nav a[href*="/interventions"]')).toHaveCount(0);
+  for (const path of ['/agent/interventions', '/agent/interventions/INT-2026-032']) {
+    await page.goto(path);
+    await expect(page).toHaveURL('/');
+    await expect(main.getByRole('status')).toContainText('API disponible');
+  }
+});
+
+async function expectInterventionsActive(page: Page): Promise<void> {
+  const active = page.locator('nav a[aria-current="page"]');
+  await expect(active).toHaveCount(1);
+  await expect(active).toHaveAttribute('href', '/responsable/interventions');
+  if (page.viewportSize()!.width <= 760) {
+    await page.getByRole('button', { name: 'Ouvrir la navigation', exact: true }).click();
+    await expect(active).toBeVisible();
+    await expect(active).toHaveClass(/active/);
+    await page.getByRole('button', { name: 'Fermer la navigation', exact: true }).click();
+  } else {
+    await expect(active).toBeVisible();
+  }
+}
+
+for (const timezoneId of ['Europe/Paris', 'America/New_York']) {
+  test.describe(`Consultation des interventions — ${timezoneId}`, () => {
+    test.use({ timezoneId });
+    test('La liste combine les critères, les conserve au retour et au rechargement, puis les réinitialise au clavier', async ({
+      page,
+    }, info) => {
+      const base = '/responsable/interventions';
+      const main = page.getByRole('main');
+      const rows = main.locator('tbody tr');
+      const search = main.getByRole('searchbox', {
+        name: 'Rechercher une intervention',
+        exact: true,
+      });
+      const status = main.getByRole('combobox', { name: 'Statut de l’intervention', exact: true });
+      const assignee = main.getByRole('combobox', { name: 'Agent affecté', exact: true });
+      const reset = main.getByRole('button', { name: 'Réinitialiser les filtres', exact: true });
+      const query = '  EQ-OUT  ';
+      await page.goto(base);
+      await expect(rows).toHaveCount(6);
+      await expect(main.getByRole('status')).toHaveText('6 interventions trouvées sur 6.');
+      await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+      await expect(main.locator('.status-counts dd')).toHaveText(['2', '2', '2']);
+      await expect(rows.locator('time')).toHaveText([
+        '03/11/2026',
+        '02/11/2026',
+        '31/10/2026',
+        '30/10/2026',
+        '24/10/2026',
+        '23/10/2026',
+      ]);
+      await expect(main.getByRole('table').getByRole('columnheader')).toHaveCount(5);
+      expect(
+        await main.locator('table').evaluate((element) => getComputedStyle(element).display),
+      ).toBe(page.viewportSize()!.width === 1440 ? 'table' : 'block');
+      await expectInterventionsActive(page);
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'interventions-liste');
+      const longTitle = rows.getByRole('link', { name: /INT-2026-034/ });
+      await longTitle.focus();
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Shift+Tab');
+      await expectFocusedControlVisible(page, longTitle, 'responsable');
+      expect(await longTitle.evaluate((element) => getComputedStyle(element).outlineStyle)).toBe(
+        'solid',
+      );
+      await capture(page, info, 'intervention-titre-long-focus');
+      await main.focus();
+      const historyLength = await page.evaluate(() => history.length);
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, search, 'responsable');
+      await page.keyboard.type(query);
+      await expect(rows).toHaveCount(4);
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, status, 'responsable');
+      await status.selectOption('in-progress');
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, assignee, 'responsable');
+      await assignee.selectOption('AG-DEMO-001');
+      await expect(rows).toHaveCount(1);
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname === base &&
+          url.searchParams.get('q') === query &&
+          url.searchParams.get('status') === 'in-progress' &&
+          url.searchParams.get('assignee') === 'AG-DEMO-001',
+      );
+      expect(await page.evaluate(() => history.length)).toBe(historyLength);
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, reset, 'responsable');
+      await page.keyboard.press('Tab');
+      const open = rows.getByRole('link', { name: /INT-2026-035.*Vérification du plateau/ });
+      await expectFocusedControlVisible(page, open, 'responsable');
+      await capture(page, info, 'interventions-filtres');
+      await page.keyboard.press('Enter');
+      await expect(main.getByRole('heading', { level: 1 })).toHaveText(
+        'Vérification du plateau de coupe',
+      );
+      await expect(main.locator('.instructions')).toHaveText('Non renseignées');
+      await expect(main.locator('time')).toHaveText('30/10/2026');
+      await expectInterventionsActive(page);
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'intervention-detail-sans-consignes');
+      await main.focus();
+      await page.keyboard.press('Tab');
+      const back = main.getByRole('link', { name: 'Retour aux interventions', exact: true });
+      await expectFocusedControlVisible(page, back, 'responsable');
+      await page.keyboard.press('Enter');
+      for (const reload of [false, true]) {
+        if (reload) await page.reload();
+        await expect(search).toHaveValue(query);
+        await expect(status).toHaveValue('in-progress');
+        await expect(assignee).toHaveValue('AG-DEMO-001');
+        await expect(rows).toHaveCount(1);
+      }
+      await status.selectOption('completed');
+      await expect(rows).toHaveCount(0);
+      await expect(main.getByRole('status')).toHaveText('0 intervention trouvée sur 6.');
+      await expect(main).toContainText('Aucune intervention ne correspond');
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'interventions-aucun-resultat');
+      await reset.focus();
+      await page.keyboard.press('Enter');
+      await expectFocusedControlVisible(page, search, 'responsable');
+      await expect(rows).toHaveCount(6);
+      await expect(page).toHaveURL((url) => url.pathname === base && url.search === '');
+      await search.fill('x'.repeat(350));
+      await expect(rows).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
+      await reset.click();
+      await expect(rows).toHaveCount(6);
+    });
+
+    test('Le détail direct conserve les critères et les dates, lie les origines sans filtres et gère l’inconnu', async ({
+      page,
+    }, info) => {
+      const base = '/responsable/interventions';
+      const main = page.getByRole('main');
+      const filters = { q: '  CHAUDIÈRE  ', status: 'in-progress', assignee: 'AG-DEMO-002' };
+      const url = `${base}/INT-2026-034?${new URLSearchParams(filters)}`;
+      await page.goto(url);
+      await expect(main.getByRole('heading', { level: 1 })).toContainText(
+        'Diagnostic du chauffage',
+      );
+      await expect(main.locator('.instructions')).toContainText('Examiner le panneau de commande');
+      await expect(main.locator('.equipment-summary')).toContainText('École des Marronniers');
+      await expect(main.locator('.metadata')).toContainText('Alex Martin');
+      await expect(main.locator('time')).toHaveText('31/10/2026');
+      await expect(main.locator('time')).toHaveAttribute('datetime', '2026-10-31');
+      await expectInterventionsActive(page);
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'intervention-detail-long');
+      await page.reload();
+      await expect(main.locator('time')).toHaveText('31/10/2026');
+      const back = main.getByRole('link', { name: 'Retour aux interventions', exact: true });
+      await expect(back).toHaveAttribute(
+        'href',
+        url.replace('/INT-2026-034', '').replaceAll('+', '%20'),
+      );
+      await expect(main).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, back, 'responsable');
+      await page.keyboard.press('Tab');
+      const incident = main.getByRole('link', { name: 'Voir le signalement', exact: true });
+      await expectFocusedControlVisible(page, incident, 'responsable');
+      await expect(incident).toHaveAttribute('href', '/responsable/incidents/INC-2026-047');
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL('/responsable/incidents/INC-2026-047');
+      await expectIncidentsActive(page, 'responsable');
+      await main.getByRole('link', { name: 'Retour aux signalements', exact: true }).click();
+      await expect(main.getByRole('searchbox')).toHaveValue('');
+      await expect(main.locator('tbody tr')).toHaveCount(6);
+      await page.goto(url);
+      await expect(main).toBeFocused();
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Tab');
+      await page.keyboard.press('Tab');
+      const material = main.getByRole('link', { name: 'Voir le matériel', exact: true });
+      await expectFocusedControlVisible(page, material, 'responsable');
+      await expect(material).toHaveAttribute('href', '/responsable/equipements/EQ-BAT-0011');
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL('/responsable/equipements/EQ-BAT-0011');
+      await expect(page.locator('nav a[aria-current="page"]')).toHaveAttribute(
+        'href',
+        '/responsable/equipements',
+      );
+      await page.goBack();
+      await expect(main.getByRole('heading', { level: 1 })).toContainText(
+        'Diagnostic du chauffage',
+      );
+      await back.click();
+      await expect(main.getByRole('searchbox')).toHaveValue(filters.q);
+      await expect(main.locator('tbody tr')).toHaveCount(1);
+      await page.goto(
+        `${base}/inconnu?${new URLSearchParams({ q: '  tONDEUSE  ', status: 'toString', assignee: 'inconnu' })}`,
+      );
+      await expect(main.getByRole('heading', { level: 1 })).toHaveText('Intervention introuvable');
+      await expect(
+        main.getByRole('link', { name: 'Voir le signalement', exact: true }),
+      ).toHaveCount(0);
+      await expect(main.getByRole('link', { name: 'Voir le matériel', exact: true })).toHaveCount(
+        0,
+      );
+      await expectInterventionsActive(page);
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'intervention-introuvable');
+      await back.click();
+      await expect(main.getByRole('searchbox')).toHaveValue('  tONDEUSE  ');
+      await expect(
+        main.getByRole('combobox', { name: 'Statut de l’intervention', exact: true }),
+      ).toHaveValue('');
+      await expect(main.getByRole('combobox', { name: 'Agent affecté', exact: true })).toHaveValue(
+        '',
+      );
+      await expect(main.locator('tbody tr')).toHaveCount(1);
+      await expect(main.locator('tbody')).toContainText('INT-2026-035');
+      await expect(page).toHaveURL((current) => current.searchParams.size === 1);
+    });
+  });
+}
+
+test('Déclarer et programmer restent des simulations sans ajout au jeu fixe de consultation', async ({
+  page,
+}) => {
+  await page.clock.setFixedTime(new Date('2026-10-31T12:00:00Z'));
+  const main = page.getByRole('main');
+  const base = '/responsable/interventions';
+  const navigate = async (name: string) => {
+    if (page.viewportSize()!.width <= 760) {
+      await page.getByRole('button', { name: 'Ouvrir la navigation', exact: true }).click();
+    }
+    await page.locator('nav').getByRole('link', { name, exact: true }).click();
+  };
+  const requests: string[] = [];
+  page.on('request', (request) => {
+    if (new URL(request.url()).pathname.startsWith('/api/')) requests.push(request.url());
+  });
+  await page.goto(base);
+  await expect(main.locator('tbody tr')).toHaveCount(6);
+  const initial = await main.locator('tbody').innerText();
+  // Rester dans la même application : recharger pourrait masquer une mutation en mémoire.
+  await navigate('Matériel');
+  await main.getByRole('link', { name: /Débroussailleuse n°3/ }).click();
+  await main.getByRole('link', { name: 'Déclarer un incident', exact: true }).click();
+  await main.getByLabel('Intitulé', { exact: true }).fill('Exemple à ne pas ajouter');
+  await main.getByRole('radio', { name: 'Faible — intervention à planifier', exact: true }).check();
+  await main.getByRole('button', { name: 'Vérifier le signalement', exact: true }).click();
+  await main.getByRole('button', { name: 'Envoyer le signalement', exact: true }).click();
+  await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement simulé');
+  await navigate('Interventions');
+  await expect(main.locator('tbody tr')).toHaveCount(6);
+  expect(await main.locator('tbody').innerText()).toBe(initial);
+  await navigate('Incidents');
+  await main.getByRole('link', { name: /INC-2026-045/ }).click();
+  await main.getByRole('link', { name: 'Programmer une intervention', exact: true }).click();
+  await main
+    .getByLabel('Titre de l’intervention (obligatoire)', { exact: true })
+    .fill('Autre exemple à ne pas ajouter');
+  await main
+    .getByLabel('Agent à affecter (obligatoire)', { exact: true })
+    .selectOption('AG-DEMO-002');
+  await main.getByLabel('Date prévue (obligatoire)', { exact: true }).fill('2026-11-03');
+  await main.getByRole('button', { name: 'Vérifier l’intervention', exact: true }).click();
+  await main.getByRole('button', { name: 'Programmer l’intervention', exact: true }).click();
+  await expect(main.getByRole('heading', { level: 1 })).toHaveText('Programmation simulée');
+  await navigate('Interventions');
+  await expect(main.locator('tbody tr')).toHaveCount(6);
+  expect(await main.locator('tbody').innerText()).toBe(initial);
+  expect(requests).toEqual([]);
+  expect(
+    await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length })),
+  ).toEqual({ local: 0, session: 0 });
+  expect(await page.evaluate(() => indexedDB.databases())).toEqual([]);
 });

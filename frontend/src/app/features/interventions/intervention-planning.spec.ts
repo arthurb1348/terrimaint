@@ -7,6 +7,7 @@ import { DEMO_EQUIPMENT } from '../equipements/equipements-demo';
 import { DEMO_INCIDENTS } from '../incidents/incidents-demo';
 import { DEMO_AGENTS } from './agents-demo';
 import { InterventionPlanning } from './intervention-planning';
+import { DEMO_INTERVENTIONS } from './interventions-demo';
 
 describe('Programmation locale d’une intervention', () => {
   const base = '/responsable/interventions/nouvelle';
@@ -199,7 +200,12 @@ describe('Programmation locale d’une intervention', () => {
   );
 
   it('récapitule, modifie puis confirme sans mutation ni données de formulaire dans l’URL', async () => {
-    const sources = JSON.stringify([DEMO_INCIDENTS, DEMO_EQUIPMENT, DEMO_AGENTS]);
+    const sources = JSON.stringify([
+      DEMO_INCIDENTS,
+      DEMO_EQUIPMENT,
+      DEMO_AGENTS,
+      DEMO_INTERVENTIONS,
+    ]);
     const query = { q: '  mOTeur  ', priority: 'low', status: 'open' };
     const url = `${base}/INC-2026-045?${new URLSearchParams(query)}`;
     await harness.navigateByUrl(url, InterventionPlanning);
@@ -234,7 +240,9 @@ describe('Programmation locale d’une intervention', () => {
     expect(content().textContent).toContain('Aucun agent n’a été notifié');
     expect(content().querySelector('form')).toBeNull();
     expect(content().textContent).not.toMatch(/INT-2026|Succès/);
-    expect(JSON.stringify([DEMO_INCIDENTS, DEMO_EQUIPMENT, DEMO_AGENTS])).toBe(sources);
+    expect(JSON.stringify([DEMO_INCIDENTS, DEMO_EQUIPMENT, DEMO_AGENTS, DEMO_INTERVENTIONS])).toBe(
+      sources,
+    );
     const router = TestBed.inject(Router);
     expect(router.parseUrl(router.url).queryParams).toEqual(query);
     await click('Retour au signalement');

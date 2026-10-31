@@ -1,0 +1,52 @@
+import { DatePipe, DOCUMENT } from '@angular/common';
+import { afterNextRender, Component, computed, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DEMO_EQUIPMENT } from '../equipements/equipements-demo';
+import { DEMO_INCIDENTS } from '../incidents/incidents-demo';
+import { DEMO_AGENTS } from './agents-demo';
+import { INTERVENTION_STATUSES } from './intervention';
+import { interventionQueryParams, readInterventionFilters } from './intervention-filters';
+import { DEMO_INTERVENTIONS } from './interventions-demo';
+
+@Component({
+  selector: 'app-intervention-detail',
+  standalone: true,
+  imports: [RouterLink, DatePipe],
+  templateUrl: './intervention-detail.html',
+  styleUrls: ['../incidents/incident-presentation.css', './intervention-detail.css'],
+})
+export class InterventionDetail {
+  private readonly route = inject(ActivatedRoute);
+  private readonly document = inject(DOCUMENT);
+  private readonly params = toSignal(this.route.paramMap, {
+    initialValue: this.route.snapshot.paramMap,
+  });
+  private readonly queryParams = toSignal(this.route.queryParamMap, {
+    initialValue: this.route.snapshot.queryParamMap,
+  });
+  protected readonly intervention = computed(() =>
+    DEMO_INTERVENTIONS.find((item) => item.id === this.params().get('id')),
+  );
+  protected readonly incident = computed(() =>
+    DEMO_INCIDENTS.find((item) => item.id === this.intervention()?.incidentId),
+  );
+  protected readonly equipment = computed(() =>
+    DEMO_EQUIPMENT.find((item) => item.id === this.incident()?.equipmentId),
+  );
+  protected readonly agent = computed(() =>
+    DEMO_AGENTS.find((item) => item.id === this.intervention()?.agentId),
+  );
+  protected readonly instructions = computed(() => {
+    const value = this.intervention()?.instructions;
+    return value?.trim() ? value : 'Non renseignées';
+  });
+  protected readonly query = computed(() =>
+    interventionQueryParams(readInterventionFilters(this.queryParams())),
+  );
+  protected readonly statuses = INTERVENTION_STATUSES;
+
+  constructor() {
+    afterNextRender(() => this.document.getElementById('main-content')?.focus());
+  }
+}

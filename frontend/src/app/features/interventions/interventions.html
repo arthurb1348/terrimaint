@@ -1,0 +1,121 @@
+<section class="feature-page" aria-labelledby="interventions-title">
+  <h1 id="interventions-title">Interventions</h1>
+  <p class="demo-label">Données de démonstration</p>
+  <p>
+    Consultez les interventions fictives. Les programmations simulées n'ajoutent rien à cette liste.
+  </p>
+  <dl class="status-counts" aria-label="Effectifs du jeu de démonstration">
+    @for (item of counts; track item.status) {
+      <div>
+        <dt>{{ item.label }}</dt>
+        <dd>{{ item.count }}</dd>
+      </div>
+    }
+  </dl>
+  <div class="filters" role="search" aria-label="Rechercher et filtrer les interventions">
+    <div class="search-field">
+      <label for="intervention-search">Rechercher une intervention</label>
+      <input
+        #searchInput
+        id="intervention-search"
+        type="search"
+        [value]="filters().q"
+        (input)="updateFilter('q', searchInput.value)"
+        aria-describedby="intervention-search-help"
+      />
+      <p id="intervention-search-help" class="help">
+        Titre, référence, nom ou identifiant du matériel.
+      </p>
+    </div>
+    <div>
+      <label for="intervention-status-filter">Statut de l’intervention</label>
+      <select
+        #statusInput
+        id="intervention-status-filter"
+        (change)="updateFilter('status', statusInput.value)"
+      >
+        <option value="" [selected]="!filters().status">Tous les statuts</option>
+        @for (option of statusOptions; track option[0]) {
+          <option [value]="option[0]" [selected]="filters().status === option[0]">
+            {{ option[1] }}
+          </option>
+        }
+      </select>
+    </div>
+    <div>
+      <label for="intervention-assignee-filter">Agent affecté</label>
+      <select
+        #assigneeInput
+        id="intervention-assignee-filter"
+        (change)="updateFilter('assignee', assigneeInput.value)"
+      >
+        <option value="" [selected]="!filters().assignee">Tous les agents</option>
+        @for (agent of agents; track agent.id) {
+          <option [value]="agent.id" [selected]="filters().assignee === agent.id">
+            {{ agent.name }}
+          </option>
+        }
+      </select>
+    </div>
+    <button type="button" (click)="resetFilters(searchInput)">Réinitialiser les filtres</button>
+  </div>
+  <p role="status">
+    {{ filteredInterventions().length }} intervention{{
+      filteredInterventions().length > 1 ? 's' : ''
+    }}
+    trouvée{{ filteredInterventions().length > 1 ? 's' : '' }} sur {{ total }}.
+  </p>
+  @if (filteredInterventions().length) {
+    <!-- Les rôles préservent la structure accessible quand les lignes deviennent des cartes. -->
+    <table role="table">
+      <caption class="visually-hidden">
+        Interventions de démonstration correspondant aux filtres
+      </caption>
+      <thead role="rowgroup">
+        <tr role="row">
+          <th scope="col" role="columnheader">Intervention</th>
+          <th scope="col" role="columnheader">Matériel</th>
+          <th scope="col" role="columnheader">Agent affecté</th>
+          <th scope="col" role="columnheader">Date prévue</th>
+          <th scope="col" role="columnheader">Statut</th>
+        </tr>
+      </thead>
+      <tbody role="rowgroup">
+        @for (row of filteredInterventions(); track row.intervention.id) {
+          <tr role="row">
+            <th scope="row" role="rowheader">
+              <a [routerLink]="[row.intervention.id]" [queryParams]="query()">
+                <span class="reference">{{ row.intervention.id }}</span>
+                {{ row.intervention.title }}
+              </a>
+            </th>
+            <td role="cell">
+              <span class="cell-label" aria-hidden="true">Matériel</span>
+              {{ row.equipment?.name ?? 'Matériel introuvable' }}
+              <span class="reference">{{ row.equipment?.id }}</span>
+            </td>
+            <td role="cell">
+              <span class="cell-label" aria-hidden="true">Agent affecté</span>
+              {{ row.agent?.name ?? 'Agent introuvable' }}
+            </td>
+            <td role="cell">
+              <span class="cell-label" aria-hidden="true">Date prévue</span>
+              <time [attr.datetime]="row.intervention.plannedOn">{{
+                row.intervention.plannedOn | date: 'dd/MM/yyyy'
+              }}</time>
+            </td>
+            <td role="cell">
+              <span class="cell-label" aria-hidden="true">Statut</span>
+              <span class="badge">{{ statuses[row.intervention.status] }}</span>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <p>
+      Aucune intervention ne correspond à ces critères. Modifiez la recherche ou réinitialisez les
+      filtres.
+    </p>
+  }
+</section>
