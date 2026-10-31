@@ -16,6 +16,8 @@ for (const space of ['agent', 'responsable']) {
       await expect.poll(() => image.evaluate((img) => (img as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
     }
     await main.getByRole('link', { name: 'Tondeuse autoportée', exact: true }).click();
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Tondeuse autoportée');
+    await expect(main.locator('app-demo-image img')).toHaveCount(1);
     await expect(main.locator('app-demo-image img')).toHaveAttribute('alt', /Tondeuse/);
     await main.locator('app-demo-image img').evaluate((img) => img.dispatchEvent(new Event('error')));
     await expect(main).toContainText('Image indisponible');
@@ -23,7 +25,7 @@ for (const space of ['agent', 'responsable']) {
     await main.getByLabel('Intitulé', { exact: true }).fill('Photo de démonstration');
     await main.getByRole('radio', { name: /Basse/ }).check();
     const chooser = main.getByLabel('Choisir des photos', { exact: true });
-    await chooser.setInputFiles([{ name: 'mower.webp', mimeType: 'image/webp', buffer: readFileSync(sample) }, { name: 'casse.png', mimeType: 'image/png', buffer: Buffer.from('pas une image') }]);
+    await chooser.setInputFiles([{ name: 'mower.webp', mimeType: 'image/webp', buffer: readFileSync(sample) }, { name: 'casse.png', mimeType: 'image/png', buffer: Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), Buffer.from('pas une image')]) }]);
     await expect(main.getByRole('status')).toContainText('1 photo(s)');
     await expect(main.locator('#photos-errors')).toContainText('impossible à décoder');
     const preview = main.locator('.photo-gallery img');
@@ -55,6 +57,7 @@ for (const space of ['agent', 'responsable']) {
     await expect(preview).toHaveCount(0);
     for (const [id, count] of [['INC-2026-045', 0], ['INC-2026-050', 1], ['INC-2026-047', 2]] as const) {
       await page.goto(`/${space}/incidents/${id}`);
+      await expect(main.getByRole('heading', { level: 1 })).toBeVisible();
       await expect(main.locator('.photo-gallery img')).toHaveCount(count);
     }
     await info.attach('photos-exemple', { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
