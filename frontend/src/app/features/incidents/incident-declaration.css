@@ -112,7 +112,8 @@ legend {
   color: #9a2a22;
   font-weight: 600;
 }
-[aria-invalid='true'] {
+input[aria-invalid='true'],
+textarea[aria-invalid='true'] {
   border-color: #9a2a22;
 }
 dd {

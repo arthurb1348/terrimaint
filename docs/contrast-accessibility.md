@@ -12,6 +12,8 @@ Les bordures des champs de déclaration, programmation et filtres utilisent
 `--control-border: #6B7C72`. Le bouton Fermer du menu Plus emploie ce même jeton.
 La recherche Matériel garde son contour vert. Cartes, tableaux et menus gardent
 `--border: #D5DFD9` et les cartes gardent `--card-surface: #F4F8F5`.
+La règle d’erreur de déclaration cible explicitement input/textarea pour primer
+sur le sélecteur du champ texte ; une assertion compare bordure et message d’erreur.
 Les focus locaux (dont le bouton de santé) suivent le jeton commun ; la sidebar
 conserve son focus blanc, décalé de 2 px sur le fond vert.
 

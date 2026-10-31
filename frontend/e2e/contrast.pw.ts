@@ -130,6 +130,8 @@ for (const space of ['agent', 'responsable']) {
     const invalid = main.locator('#incident-title');
     await expect(invalid).toBeFocused();
     await expect(invalid).toHaveAttribute('aria-invalid', 'true');
+    const errorColor = await main.locator('#title-error').evaluate((element) => getComputedStyle(element).color);
+    await expect(invalid).toHaveCSS('border-top-color', errorColor);
     await states(page, invalid, info, 'declaration-erreur', true);
     await measure(main.locator('#title-error'), info, 'message-erreur');
     await capture(page, info, 'contraste-declaration-erreur');
