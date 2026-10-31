@@ -354,6 +354,7 @@ L'[issue #53](https://github.com/arthurb1348/terrimaint/issues/53), branche
 accent décoratif, bordures de contrôles et bordures de cartes ; le focus blanc sidebar
 est conservé. Les mesures ciblent les styles réellement appliqués dans Chromium,
 les fonds adjacents et les états interactifs, avec seuils sans arrondi.
+Vingt scénarios ciblés sont proposés en plus des 248 existants, soit 268 au total.
 Le [rapport et la procédure manuelle](contrast-accessibility.md) donnent les couleurs,
 rapports, portée WCAG et limites ; les résultats d'exécution et la CI du dernier commit
 sont dans la PR. Aucune image métier ajoutée : #43 reste distincte. Arthur garde la

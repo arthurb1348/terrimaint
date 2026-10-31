@@ -564,7 +564,7 @@ sidebar comprise. Avec `@container (min-width: 560px)`, agent et date occupent d
 égales ; en dessous, ils restent empilés. Ainsi, à 768 px de fenêtre Responsable, le formulaire
 garde une colonne. `min-width: 0`, `overflow-wrap: anywhere` et `flex-wrap` permettent aux
 textes longs et aux actions de se replier sans déborder. Les champs/boutons ont au moins 48 px
-de haut ; les focus visibles reprennent l'accent de la charte. Le textarea est centré au focus
+de haut ; les focus visibles utilisent le jeton dédié `--focus` (issue #53). Le textarea est centré au focus
 pour dégager tout le contrôle, pas seulement son curseur. Le titre de chaque nouvelle étape
 reçoit le focus ; Modifier revient au titre saisi. Le shell n'est pas refondu et #33 reste distincte.
 
