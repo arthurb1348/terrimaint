@@ -43,6 +43,13 @@ for (const space of ['agent', 'responsable']) {
     await page.keyboard.press('Enter');
     await expect(preview).toHaveCount(0);
     await expect(chooser).toBeFocused();
+    await expect(chooser).toBeInViewport({ ratio: 1 });
+    if (space === 'agent') {
+      const inputBounds = (await chooser.boundingBox())!;
+      const navBounds = (await page.locator('nav').boundingBox())!;
+      expect(inputBounds.y + inputBounds.height + 7).toBeLessThanOrEqual(navBounds.y);
+    }
+    await info.attach('photos-focus-fenetre', { body: await page.screenshot(), contentType: 'image/png' });
     await chooser.setInputFiles([sample, sample, sample, sample]);
     await expect(preview).toHaveCount(3);
     await expect(main.locator('#photos-errors')).toContainText('3 photos maximum');

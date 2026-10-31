@@ -93,6 +93,10 @@ aperçu/récapitulatif/Modifier, suppression clavier/focus, capacité, annulatio
 rechargement, zéro/une/deux photos d’exemple, images locales et repli, dans les deux
 espaces aux formats 320 × 568, 390 × 844, 768 × 1024 et 1440 × 1024.
 Les résultats exacts et les captures du dernier commit sont dans la PR.
+La capture `photos-focus-fenetre` et les assertions de géométrie contrôlent le champ
+focalisé après suppression, dont son dégagement de la navigation Agent fixe.
+Les captures de page entière peuvent déplacer les éléments fixes dans l’image
+assemblée ; elles complètent la capture de fenêtre, sans la remplacer.
 
 Santé HTTP simulée ; pas d’intégration Django/proxy ni validation de téléphone,
 caméra réelle, Safari, Windows/macOS ou lecteur d’écran. La possibilité de prise
