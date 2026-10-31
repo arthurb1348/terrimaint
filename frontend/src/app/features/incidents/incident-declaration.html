@@ -92,6 +92,27 @@
               </p>
             }
           </div>
+          <section aria-labelledby="photos-title">
+            <h2 id="photos-title">Photos (facultatives)</h2>
+            <label for="incident-photos">Choisir des photos</label>
+            <p id="photos-help" class="help">3 photos maximum, 5 Mio par photo. JPEG, PNG ou WebP. Le navigateur peut proposer la prise de vue ou le choix de fichiers. Les photos restent en mémoire, sans envoi.</p>
+            <input #photoInput id="incident-photos" type="file" accept="image/jpeg,image/png,image/webp"
+              multiple aria-describedby="photos-help photos-status photos-errors" (change)="selectPhotos(photoInput)" />
+            <p id="photos-status" role="status">{{ media.busy() ? 'Vérification des photos…' : media.photos().length + ' photo(s) sélectionnée(s).' }}</p>
+            <div id="photos-errors" aria-live="polite">
+              @for (error of media.errors(); track $index) { <p class="error">{{ error }}</p> }
+            </div>
+            <div class="photo-gallery">
+              @for (photo of media.photos(); track photo.id) {
+                <figure>
+                  <img [src]="photo.src" [alt]="photo.alt" width="300" height="225" />
+                  <figcaption>{{ photo.name }}</figcaption>
+                  <button class="page-action secondary" type="button" [id]="'remove-photo-' + photo.id"
+                    [attr.aria-label]="'Supprimer la photo ' + photo.name" (click)="removePhoto(photo.id)">Supprimer la photo</button>
+                </figure>
+              }
+            </div>
+          </section>
           <fieldset [attr.aria-describedby]="invalid('priority') ? 'priority-error' : null">
             <legend>Priorité (obligatoire)</legend>
             @for (priority of priorities; track priority.value) {
@@ -131,7 +152,7 @@
             </p>
           </div>
           <div class="actions">
-            <button class="page-action" type="submit">Vérifier le signalement</button>
+            <button class="page-action" type="submit" [disabled]="media.busy()">Vérifier le signalement</button>
             <a
               class="page-action secondary"
               [routerLink]="['../../../equipements', item.id]"
@@ -160,6 +181,12 @@
             <dd>{{ form.controls.risk.value ? 'Oui' : 'Non' }}</dd>
           </div>
         </dl>
+        <h2>Photos sélectionnées</h2>
+        <div class="photo-gallery">
+          @for (photo of media.photos(); track photo.id) {
+            <figure><img [src]="photo.src" [alt]="photo.alt" width="300" height="225" /><figcaption>{{ photo.name }}</figcaption></figure>
+          } @empty { <p>Aucune photo sélectionnée.</p> }
+        </div>
         <p>Le statut du matériel reste inchangé.</p>
         <p id="simulation-notice" class="demo-notice">
           Démonstration : aucun signalement n'est réellement transmis ou enregistré.
