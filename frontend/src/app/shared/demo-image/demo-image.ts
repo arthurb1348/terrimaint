@@ -10,11 +10,13 @@ export interface DemoImageSource {
   selector: 'app-demo-image',
   template: `
     @if (source(); as media) {
-      @if (failedSource() !== url()) {
-        <img [src]="url()" [alt]="media.alt" width="900" height="675"
-          [attr.loading]="eager() ? 'eager' : 'lazy'" decoding="async" (error)="failedSource.set(url())" />
+      @for (currentUrl of [url()]; track currentUrl) {
+      @if (failedSource() !== currentUrl) {
+        <img [src]="currentUrl" [alt]="media.alt" width="900" height="675"
+          [attr.loading]="eager() ? 'eager' : 'lazy'" decoding="async" (error)="failedSource.set(currentUrl)" />
       } @else {
         <p>Image indisponible — {{ media.alt }}</p>
+      }
       }
     } @else {
       <p>Illustration non disponible</p>

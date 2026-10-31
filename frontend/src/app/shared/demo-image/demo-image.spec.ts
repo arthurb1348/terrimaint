@@ -13,18 +13,23 @@ describe('Illustration locale', () => {
     expect(img.getAttribute('alt')).toBe('Tondeuse fictive');
     expect(img.getAttribute('width')).toBe('900');
     expect(img.getAttribute('height')).toBe('675');
+    fixture.componentRef.setInput('source', { src: '/autre.webp', alt: 'Autre matériel' });
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('img')).not.toBe(img);
   });
   it('remplace une image cassée et retrouve une nouvelle association sans ancien visuel', async () => {
     const fixture = TestBed.createComponent(DemoImage);
     fixture.componentRef.setInput('source', { src: '/ancien.webp', alt: 'Ancien matériel' });
     await fixture.whenStable();
-    fixture.nativeElement.querySelector('img').dispatchEvent(new Event('error'));
+    const previous = fixture.nativeElement.querySelector('img');
+    previous.dispatchEvent(new Event('error'));
     await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('img')).toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Image indisponible — Ancien matériel');
     fixture.componentRef.setInput('source', { src: '/nouveau.webp', alt: 'Nouveau matériel' });
     await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('img').getAttribute('src')).toBe('/nouveau.webp');
+    expect(fixture.nativeElement.querySelector('img')).not.toBe(previous);
     expect(fixture.nativeElement.textContent).not.toContain('Ancien matériel');
   });
   it('prévoit une association absente', async () => {

@@ -36,6 +36,8 @@ Conversion WebP qualité 80, sans déformation, centrée dans un cadre 4:3 : 900
 (44 à 81 ko environ) et six variantes Matériel `-thumb` 300 × 225. Pillow est uniquement un outil
 de préparation déjà disponible, aucune dépendance applicative ajoutée.
 Les listes chargent les petites variantes ; les fiches utilisent les grandes.
+L’élément image est recréé quand son URL change : aucun ancien bitmap ne reste
+affiché pendant le chargement d’un autre matériel, et ses anciens événements sont détachés.
 Dimensions et ratio sont réservés, premier visuel chargé immédiatement, suivants différés et repli textuel en cas d’erreur.
 
 Pour remplacer un visuel, modifier l’association image/alternative dans
