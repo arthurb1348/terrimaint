@@ -34,6 +34,9 @@ const routes = [
   '/responsable/incidents/nouveau/EQ-OUT-0003',
   '/responsable/incidents/nouveau/inconnu',
   '/responsable/interventions',
+  '/responsable/interventions/nouvelle/INC-2026-047',
+  '/responsable/interventions/nouvelle/INC-2026-049',
+  '/responsable/interventions/nouvelle/inconnu',
   '/responsable/agents',
 ];
 
@@ -939,4 +942,259 @@ test('Le lien d’évitement donne accès au contenu au clavier', async ({ page 
   await expect(page.getByRole('link', { name: 'Aller au contenu' })).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.getByRole('main')).toBeFocused();
+});
+
+for (const timezoneId of ['Europe/Paris', 'America/New_York']) {
+  test.describe(`Programmation Responsable — ${timezoneId}`, () => {
+    test.use({ timezoneId });
+    test('La programmation valide, se modifie et revient aux filtres sans enregistrer', async ({
+      page,
+    }, info) => {
+      // À cet instant, Paris est déjà le 31 et New York encore le 30 : ne pas tronquer une date UTC.
+      await page.clock.setFixedTime(new Date('2026-10-30T23:30:00Z'));
+      const today = timezoneId === 'Europe/Paris' ? '2026-10-31' : '2026-10-30';
+      const yesterday = timezoneId === 'Europe/Paris' ? '2026-10-30' : '2026-10-29';
+      const formatted = timezoneId === 'Europe/Paris' ? '31/10/2026' : '30/10/2026';
+      const query = { q: '  EQ-BAT  ', priority: 'high', status: 'in-progress' };
+      const list = '/responsable/incidents';
+      const detail = `${list}/INC-2026-047`;
+      const planning = '/responsable/interventions/nouvelle/INC-2026-047';
+      const main = page.getByRole('main');
+      const title = main.getByRole('textbox', {
+        name: 'Titre de l’intervention (obligatoire)',
+        exact: true,
+      });
+      const instructions = main.getByRole('textbox', {
+        name: 'Consignes (facultatives)',
+        exact: true,
+      });
+      const agent = main.getByRole('combobox', {
+        name: 'Agent à affecter (obligatoire)',
+        exact: true,
+      });
+      const date = main.getByLabel('Date prévue (obligatoire)', { exact: true });
+      const verify = main.getByRole('button', { name: 'Vérifier l’intervention', exact: true });
+      const businessRequests: string[] = [];
+      page.on('request', (request) => {
+        if (new URL(request.url()).pathname.startsWith('/api/'))
+          businessRequests.push(request.url());
+      });
+      await page.goto(`${list}?${new URLSearchParams(query)}`);
+      await expect(main.locator('tbody tr')).toHaveCount(1);
+      const incident = main.getByRole('link', { name: /INC-2026-047/ });
+      await incident.focus();
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL((url) => url.pathname === detail);
+      await expectIncidentsActive(page, 'responsable');
+      await expect(main).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(
+        main.getByRole('link', { name: 'Retour aux signalements', exact: true }),
+      ).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(main.getByRole('link', { name: 'Voir le matériel', exact: true })).toBeFocused();
+      await page.keyboard.press('Tab');
+      const open = main.getByRole('link', { name: 'Programmer une intervention', exact: true });
+      await expectFocusedControlVisible(page, open, 'responsable');
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL(
+        (url) => url.pathname === planning && url.searchParams.get('q') === query.q,
+      );
+      await expect(main.getByRole('heading', { level: 1 })).toHaveText(
+        'Programmer une intervention',
+      );
+      const active = page.locator('nav a[aria-current="page"]');
+      await expect(active).toHaveCount(1);
+      await expect(active).toHaveAttribute('href', '/responsable/interventions');
+      if (page.viewportSize()!.width <= 760) {
+        await page.getByRole('button', { name: 'Ouvrir la navigation', exact: true }).click();
+        await expect(active).toBeVisible();
+        await page.getByRole('button', { name: 'Fermer la navigation', exact: true }).click();
+      }
+      await expect(title).toHaveValue(/Température irrégulière/);
+      await expect(instructions).toHaveValue('');
+      await expect(agent).toHaveValue('');
+      await expect(date).toHaveValue('');
+      await expect(date).toHaveAttribute('min', today);
+      await expect(main.locator('.origin-summary')).toContainText('INC-2026-047');
+      await expect(main.locator('.origin-summary')).toContainText('Haute');
+      await expect(main.locator('.origin-summary')).toContainText('Chaudière du groupe scolaire');
+      await expect(main.locator('.origin-summary')).toContainText('École des Marronniers');
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'intervention-formulaire');
+      await main.focus();
+      await page.keyboard.press('Tab');
+      await expect(
+        main.getByRole('link', { name: 'Retour au signalement', exact: true }),
+      ).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, title, 'responsable');
+      await title.fill('   ');
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, instructions, 'responsable');
+      await page.keyboard.press('Shift+Tab');
+      await expectFocusedControlVisible(page, title, 'responsable');
+      await date.fill(yesterday);
+      await verify.focus();
+      await page.keyboard.press('Enter');
+      await expect(main.locator('.error')).toHaveCount(3);
+      await expectFocusedControlVisible(page, title, 'responsable');
+      await expect(date).toHaveValue(yesterday);
+      await expect(title).toHaveAttribute('aria-describedby', /planning-title-error/);
+      await capture(page, info, 'intervention-erreurs');
+      const enteredTitle = '  Diagnostic du chauffage  ';
+      await title.fill(enteredTitle);
+      await instructions.fill('   \n  ');
+      await instructions.focus();
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, agent, 'responsable');
+      await agent.selectOption('AG-DEMO-002');
+      await date.fill(today);
+      await verify.focus();
+      await page.keyboard.press('Enter');
+      const reviewHeading = main.getByRole('heading', {
+        name: 'Vérifier l’intervention',
+        exact: true,
+      });
+      await expect(reviewHeading).toBeFocused();
+      await expect(main.locator('dd').nth(0)).toHaveText(enteredTitle);
+      await expect(main.locator('dd').nth(1)).toHaveText('Non renseignées');
+      await expect(main.locator('dd').nth(2)).toHaveText('Alex Martin');
+      await expect(main.locator('time')).toHaveText(formatted);
+      await expect(active).toHaveAttribute('href', '/responsable/interventions');
+      await expectNoHorizontalOverflow(page);
+      const program = main.getByRole('button', { name: 'Programmer l’intervention', exact: true });
+      await page.keyboard.press('Tab');
+      await expectFocusedControlVisible(page, program, 'responsable');
+      await expect(program).toHaveAttribute('aria-describedby', 'planning-demo-notice');
+      await expect(main.locator('#planning-demo-notice')).toBeVisible();
+      await page.keyboard.press('Tab');
+      const edit = main.getByRole('button', { name: 'Modifier l’intervention', exact: true });
+      await expectFocusedControlVisible(page, edit, 'responsable');
+      await page.keyboard.press('Enter');
+      await expectFocusedControlVisible(page, title, 'responsable');
+      await expect(title).toHaveValue(enteredTitle);
+      await expect(instructions).toHaveValue('   \n  ');
+      await expect(agent).toHaveValue('AG-DEMO-002');
+      await expect(date).toHaveValue(today);
+      const enteredInstructions = '  Contrôler la chaudière.\nVérifier le panneau de commande.  ';
+      await instructions.fill(enteredInstructions);
+      await verify.click();
+      await expect(main.locator('dd').nth(1)).toHaveText(enteredInstructions);
+      await expect(main.locator('time')).toHaveText(formatted);
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'intervention-recapitulatif');
+      await program.focus();
+      await expectFocusedControlVisible(page, program, 'responsable');
+      await page.keyboard.press('Enter');
+      const completeHeading = main.getByRole('heading', {
+        name: 'Programmation simulée',
+        exact: true,
+      });
+      await expect(completeHeading).toBeFocused();
+      await expect(main).toContainText(
+        'Aucune intervention n’a été réellement enregistrée ou transmise',
+      );
+      await expect(main).toContainText('Aucun agent n’a été notifié');
+      await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+      await expect(active).toHaveAttribute('href', '/responsable/interventions');
+      await expectNoHorizontalOverflow(page);
+      await capture(page, info, 'intervention-confirmation');
+      expect(businessRequests).toEqual([]);
+      expect(
+        await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length })),
+      ).toEqual({ local: 0, session: 0 });
+      expect(await page.evaluate(() => indexedDB.databases())).toEqual([]);
+      expect(Object.fromEntries(new URL(page.url()).searchParams)).toEqual(query);
+      await page.keyboard.press('Tab');
+      const back = main.getByRole('link', { name: 'Retour au signalement', exact: true });
+      await expectFocusedControlVisible(page, back, 'responsable');
+      await page.keyboard.press('Enter');
+      await expect(page).toHaveURL((url) => url.pathname === detail);
+      await expectIncidentsActive(page, 'responsable');
+      await main.getByRole('link', { name: 'Retour aux signalements', exact: true }).click();
+      await expect(main.getByRole('searchbox')).toHaveValue(query.q);
+      await expect(main.getByRole('combobox', { name: 'Priorité', exact: true })).toHaveValue(
+        query.priority,
+      );
+      await expect(
+        main.getByRole('combobox', { name: 'Statut du signalement', exact: true }),
+      ).toHaveValue(query.status);
+      await expect(main.locator('tbody tr')).toHaveCount(1);
+      await page.reload();
+      await expect(main.locator('tbody tr')).toHaveCount(1);
+      await expect(main.getByRole('searchbox')).toHaveValue(query.q);
+    });
+  });
+}
+
+test('La programmation gère accès direct, rechargement, annulation, clôturé et inconnu', async ({
+  page,
+}, info) => {
+  await page.clock.setFixedTime(new Date('2026-10-30T12:00:00Z'));
+  const main = page.getByRole('main');
+  const base = '/responsable/interventions/nouvelle';
+  const filters = new URLSearchParams({ q: '  Moteur  ', priority: 'low', status: 'open' });
+  await page.goto(`${base}/INC-2026-045?${filters}`);
+  await expect(main.locator('.origin-summary')).toContainText('Débroussailleuse n°3');
+  const title = main.getByLabel('Titre de l’intervention (obligatoire)', { exact: true });
+  await title.fill('Saisie à oublier');
+  await main.getByLabel('Consignes (facultatives)', { exact: true }).fill('Consignes à oublier');
+  await main
+    .getByLabel('Agent à affecter (obligatoire)', { exact: true })
+    .selectOption('AG-DEMO-003');
+  await main.getByLabel('Date prévue (obligatoire)', { exact: true }).fill('2026-10-31');
+  await main.getByRole('button', { name: 'Vérifier l’intervention', exact: true }).click();
+  await expect(main.getByRole('heading', { level: 1 })).toHaveText('Vérifier l’intervention');
+  await page.reload();
+  await expect(title).toHaveValue('Moteur qui cale à l’accélération');
+  await expect(main.getByLabel('Consignes (facultatives)', { exact: true })).toHaveValue('');
+  await expect(main.getByLabel('Agent à affecter (obligatoire)', { exact: true })).toHaveValue('');
+  await expect(main.getByLabel('Date prévue (obligatoire)', { exact: true })).toHaveValue('');
+  await main.getByRole('link', { name: 'Annuler', exact: true }).click();
+  await expect(page).toHaveURL((url) => url.pathname === '/responsable/incidents/INC-2026-045');
+  await main.getByRole('link', { name: 'Retour aux signalements', exact: true }).click();
+  await expect(main.getByRole('searchbox')).toHaveValue('  Moteur  ');
+  await expect(main.locator('tbody tr')).toHaveCount(1);
+  await page.goto('/responsable/incidents/INC-2026-049');
+  await expect(main).toContainText('Ce signalement est clôturé');
+  await expect(
+    main.getByRole('link', { name: 'Programmer une intervention', exact: true }),
+  ).toHaveCount(0);
+  await page.goto(`${base}/INC-2026-049`);
+  await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement clôturé');
+  await expect(main.locator('form')).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+  await capture(page, info, 'intervention-signalement-cloture');
+  await main.getByRole('link', { name: 'Retour au signalement', exact: true }).click();
+  await expect(page).toHaveURL('/responsable/incidents/INC-2026-049');
+  await page.goto(`${base}/inconnu?q=OUT&priority=invalide&status=invalide`);
+  await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement introuvable');
+  await expect(main.locator('form')).toHaveCount(0);
+  await expect(main.locator('.origin-summary')).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+  await capture(page, info, 'intervention-signalement-introuvable');
+  await expect(
+    main.getByRole('link', { name: 'Retour aux signalements', exact: true }),
+  ).toHaveAttribute('href', '/responsable/incidents?q=OUT');
+});
+
+test('La consultation Agent conserve ses liens sans programmation ni route dédiée', async ({
+  page,
+}) => {
+  const main = page.getByRole('main');
+  for (const id of ['INC-2026-045', 'INC-2026-047', 'INC-2026-049']) {
+    await page.goto(`/agent/incidents/${id}`);
+    await expect(main.getByRole('link', { name: 'Voir le matériel', exact: true })).toBeVisible();
+    await expect(
+      main.getByRole('link', { name: 'Programmer une intervention', exact: true }),
+    ).toHaveCount(0);
+    await expectIncidentsActive(page, 'agent');
+    await expectNoHorizontalOverflow(page);
+  }
+  await page.goto('/agent/interventions/nouvelle/INC-2026-045');
+  await expect(page).toHaveURL('/');
+  await expect(main.getByRole('heading', { level: 1 })).toContainText('Du terrain');
+  await expect(main.getByRole('status')).toContainText('API disponible');
+  await expect(main.locator('form')).toHaveCount(0);
 });

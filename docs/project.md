@@ -17,9 +17,12 @@ responsive utilisable sur mobile et sur ordinateur ; le rôle ne détermine pas 
 ## Priorité validée pour l'oral de décembre 2026
 
 Arthur privilégie la réalisation rapide des parcours frontend pour préparer son oral de
-décembre 2026. L'[issue #39](https://github.com/arthurb1348/terrimaint/issues/39) porte d'abord
-la liste et le détail des signalements, avec priorité à la présentation Responsable et
-composants partagés avec Agent. La consultation reste locale et explicitement fictive.
+décembre 2026. La liste et le détail des signalements de l'[issue #39](https://github.com/arthurb1348/terrimaint/issues/39)
+sont intégrés par la PR #40 fusionnée, avec priorité à la présentation Responsable et composants
+partagés avec Agent. L'[issue #41](https://github.com/arthurb1348/terrimaint/issues/41) propose
+ensuite la programmation d'une intervention depuis un signalement Responsable, en revue
+jusqu'à fusion. La liste et le détail des interventions restent pour l'incrément suivant.
+Ces parcours restent locaux et explicitement fictifs.
 PostgreSQL ([#38](https://github.com/arthurb1348/terrimaint/issues/38)) est **différé** et ne
 bloque pas ces écrans. La cible Django/DRF/PostgreSQL est conservée ; cette priorité ne
 constitue pas une annonce de parcours métier connecté ou de livraison en production.

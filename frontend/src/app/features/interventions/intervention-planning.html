@@ -1,0 +1,217 @@
+<section class="feature-page" aria-labelledby="planning-heading">
+  @if (step() !== 'complete') {
+    @if (incident(); as item) {
+      <a class="back-link" [routerLink]="['../../../incidents', item.id]" [queryParams]="query()"
+        >Retour au signalement</a
+      >
+    } @else {
+      <a class="back-link" [routerLink]="['../../../incidents']" [queryParams]="query()"
+        >Retour aux signalements</a
+      >
+    }
+  }
+  <p class="demo-label">Données de démonstration</p>
+  @if (!incident()) {
+    <h1 id="planning-heading" tabindex="-1">Signalement introuvable</h1>
+    <p>Aucun signalement de démonstration ne correspond à cet identifiant.</p>
+  } @else if (!equipment()) {
+    <h1 id="planning-heading" tabindex="-1">Matériel introuvable</h1>
+    <p>Le matériel associé à ce signalement est introuvable. La programmation est indisponible.</p>
+  } @else if (incident()!.status === 'closed') {
+    <h1 id="planning-heading" tabindex="-1">Signalement clôturé</h1>
+    <p>
+      Ce signalement est clôturé. Il reste consultable, mais aucune intervention ne peut y être
+      programmée.
+    </p>
+  } @else {
+    <h1 id="planning-heading" tabindex="-1">
+      @switch (step()) {
+        @case ('form') {
+          Programmer une intervention
+        }
+        @case ('review') {
+          Vérifier l’intervention
+        }
+        @case ('complete') {
+          Programmation simulée
+        }
+      }
+    </h1>
+    <p class="demo-notice">
+      Cette programmation est une démonstration. Aucune intervention n’est enregistrée et aucun
+      agent n’est notifié. La saisie est perdue en quittant ou en rechargeant cette page.
+    </p>
+    <section class="origin-summary" aria-labelledby="planning-origin-heading">
+      <h2 id="planning-origin-heading">Signalement d’origine</h2>
+      <p>
+        {{ incident()!.title }}<span class="reference">{{ incident()!.id }}</span>
+      </p>
+      <p>
+        Priorité : <strong>{{ priorities[incident()!.priority] }}</strong>
+      </p>
+      <h2>Matériel concerné</h2>
+      <p>
+        {{ equipment()!.name }}
+        <span class="reference">{{ equipment()!.id }} · {{ equipment()!.location }}</span>
+      </p>
+    </section>
+    @switch (step()) {
+      @case ('form') {
+        <form [formGroup]="form" (ngSubmit)="review()" novalidate>
+          <p class="help">Les champs indiqués « obligatoire » sont à renseigner.</p>
+          <div class="field">
+            <label for="planning-title">Titre de l’intervention (obligatoire)</label>
+            <input
+              id="planning-title"
+              type="text"
+              formControlName="title"
+              required
+              [attr.aria-invalid]="invalid('title')"
+              [attr.aria-describedby]="
+                invalid('title')
+                  ? 'planning-title-help planning-title-error'
+                  : 'planning-title-help'
+              "
+            />
+            <p class="help" id="planning-title-help">
+              {{ titleLimit }} caractères maximum. Certains symboles comptent pour deux.
+            </p>
+            @if (invalid('title')) {
+              <p class="error" id="planning-title-error">
+                Saisissez un titre de 1 à {{ titleLimit }} caractères, pas seulement des espaces.
+              </p>
+            }
+          </div>
+          <div class="field">
+            <label for="planning-instructions">Consignes (facultatives)</label>
+            <textarea
+              #instructions
+              id="planning-instructions"
+              formControlName="instructions"
+              rows="5"
+              (focus)="revealInstructions(instructions)"
+              [attr.aria-invalid]="invalid('instructions')"
+              [attr.aria-describedby]="
+                invalid('instructions')
+                  ? 'planning-instructions-help planning-instructions-error'
+                  : 'planning-instructions-help'
+              "
+            ></textarea>
+            <p class="help" id="planning-instructions-help">
+              Vous pouvez laisser ce champ vide. {{ instructionsLimit }} caractères maximum si
+              renseigné ; certains symboles comptent pour deux.
+            </p>
+            @if (invalid('instructions')) {
+              <p class="error" id="planning-instructions-error">
+                Limitez les consignes à {{ instructionsLimit }} caractères.
+              </p>
+            }
+          </div>
+          <div class="assignment-fields">
+            <div class="field">
+              <label for="planning-agent">Agent à affecter (obligatoire)</label>
+              <select
+                id="planning-agent"
+                formControlName="agentId"
+                required
+                [attr.aria-invalid]="invalid('agentId')"
+                [attr.aria-describedby]="
+                  invalid('agentId')
+                    ? 'planning-agent-help planning-agent-error'
+                    : 'planning-agent-help'
+                "
+              >
+                <option value="">Choisir un agent</option>
+                @for (agent of agents; track agent.id) {
+                  <option [value]="agent.id">{{ agent.name }}</option>
+                }
+              </select>
+              <p class="help" id="planning-agent-help">Agents fictifs pour cette démonstration.</p>
+              @if (invalid('agentId')) {
+                <p class="error" id="planning-agent-error">Choisissez un agent dans la liste.</p>
+              }
+            </div>
+            <div class="field">
+              <label for="planning-date">Date prévue (obligatoire)</label>
+              <input
+                id="planning-date"
+                type="date"
+                formControlName="plannedOn"
+                required
+                [min]="minimumDate"
+                [attr.aria-invalid]="invalid('plannedOn')"
+                [attr.aria-describedby]="
+                  invalid('plannedOn')
+                    ? 'planning-date-help planning-date-error'
+                    : 'planning-date-help'
+                "
+              />
+              <p class="help" id="planning-date-help">
+                Aujourd’hui ou un jour suivant, selon la date locale de votre appareil.
+              </p>
+              @if (invalid('plannedOn')) {
+                <p class="error" id="planning-date-error">
+                  Choisissez une date valide à partir d’aujourd’hui.
+                </p>
+              }
+            </div>
+          </div>
+          <div class="actions">
+            <button type="submit">Vérifier l’intervention</button>
+            <a [routerLink]="['../../../incidents', incident()!.id]" [queryParams]="query()"
+              >Annuler</a
+            >
+          </div>
+        </form>
+      }
+      @case ('review') {
+        <dl class="review-values">
+          <div>
+            <dt>Titre de l’intervention</dt>
+            <dd>{{ form.controls.title.value }}</dd>
+          </div>
+          <div>
+            <dt>Consignes</dt>
+            <dd>{{ instructionsLabel() }}</dd>
+          </div>
+          <div>
+            <dt>Agent à affecter</dt>
+            <dd>{{ agentName() }}</dd>
+          </div>
+          <div>
+            <dt>Date prévue</dt>
+            <dd>
+              <time [attr.datetime]="form.controls.plannedOn.value">{{
+                form.controls.plannedOn.value | date: 'dd/MM/yyyy'
+              }}</time>
+            </dd>
+          </div>
+        </dl>
+        <p id="planning-demo-notice" class="demo-notice">
+          Démonstration : cette action n’enregistre aucune intervention et ne notifie aucun agent.
+        </p>
+        <div class="actions">
+          <button type="button" aria-describedby="planning-demo-notice" (click)="complete()">
+            Programmer l’intervention
+          </button>
+          <button type="button" class="secondary" (click)="edit()">Modifier l’intervention</button>
+          <a [routerLink]="['../../../incidents', incident()!.id]" [queryParams]="query()"
+            >Annuler</a
+          >
+        </div>
+      }
+      @case ('complete') {
+        <p>
+          Aucune intervention n’a été réellement enregistrée ou transmise. Aucun agent n’a été
+          notifié.
+        </p>
+        <a
+          class="return-link"
+          [routerLink]="['../../../incidents', incident()!.id]"
+          [queryParams]="query()"
+          >Retour au signalement</a
+        >
+      }
+    }
+  }
+</section>

@@ -23,14 +23,16 @@
     [class.expanded]="expanded()"
   >
     @for (destination of destinations(); track destination.path) {
-      <!-- Les fiches Matériel et la déclaration gardent leur domaine actif, même avec q. -->
+      <!-- Les fiches et formulaires gardent leur domaine actif, même avec les filtres de retour. -->
       <a
         [class.scanner-link]="destination.path === '/agent/scanner'"
         [routerLink]="destination.path"
         routerLinkActive="active"
         [routerLinkActiveOptions]="{
           exact:
-            !destination.path.endsWith('/equipements') && !destination.path.endsWith('/incidents'),
+            !destination.path.endsWith('/equipements') &&
+            !destination.path.endsWith('/incidents') &&
+            !destination.path.endsWith('/interventions'),
         }"
         ariaCurrentWhenActive="page"
         (click)="closeNavigation()"
