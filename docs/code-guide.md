@@ -10,7 +10,8 @@ L’ordre prévu est #58, photos #57, puis mémoire partagée #59. #47/#48 reste
 - `incidents.css` / `interventions.css` : le `::after` du lien couvre les marges de carte,
   uniquement sous 960 px disponibles. Les autres cellules, positionnées au-dessus,
   gardent la sélection du texte. Aucune action de ligne JavaScript. Le tableau conserve
-  son lien textuel ; les récapitulatifs et cartes de détail ne deviennent pas des liens.
+  son lien textuel ; `single-destination` dans `styles.css` étend aussi le lien des cartes
+  de contexte Matériel/Signalement d’origine. Les résumés sans lien restent statiques.
 - `responsable.ts` : trois raccourcis métier ; le sélecteur du shell change d’espace.
 - Templates métier : aides utiles conservées, limites regroupées dans README et guides.
   La fin de formulaire change seulement `step`, sans HTTP métier, stockage ni mutation.

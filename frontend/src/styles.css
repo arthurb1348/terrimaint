@@ -143,3 +143,28 @@ summary:focus-visible {
 .photo-gallery figcaption { overflow-wrap: anywhere; margin-block: 8px; }
 input[type=file] { display: block; max-width: 100%; min-width: 0; min-height: 48px; border: 1px solid var(--control-border); border-radius: 8px; padding: 8px; font: inherit; color: var(--text); background: white; }
 input[type=file]:focus-visible { outline: 3px solid var(--focus); outline-offset: 4px; }
+
+/* Une carte de contexte avec une seule destination étend ce lien à ses marges.
+   Les informations restent sélectionnables ; les cartes sans lien restent statiques. */
+.business-card.single-destination:has(a) {
+  position: relative;
+}
+.single-destination > a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+}
+.single-destination > :is(h2, p) {
+  position: relative;
+  z-index: 1;
+  width: fit-content;
+  max-width: 100%;
+}
+.single-destination:has(a:hover) {
+  background: var(--surface);
+}
+.single-destination:has(a:focus-visible) {
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
+}

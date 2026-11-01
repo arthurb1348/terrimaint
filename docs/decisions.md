@@ -11,7 +11,8 @@ Dans les listes de signalements/interventions présentées en cartes, le pseudo-
 lien étend la cible aux marges. Le texte des autres cellules reste sélectionnable et ne
 provoque pas de navigation. À 960 px disponibles, les tableaux conservent leur lien textuel.
 Aucun gestionnaire de clic de ligne, contrôle imbriqué ou nouvelle abstraction n’est ajouté.
-Les cartes de détail et récapitulatifs gardent leurs actions indépendantes.
+Les cartes de contexte Matériel/Signalement d’origine étendent aussi leur unique lien.
+Les résumés sans destination, récapitulatifs et actions multiples restent indépendants.
 
 Retirer le raccourci Agent et les explications de développement du dashboard Responsable ;
 conserver le sélecteur d’espace du shell et les trois accès métier. Aucun dashboard calculé,

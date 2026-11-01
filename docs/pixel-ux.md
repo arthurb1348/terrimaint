@@ -19,8 +19,9 @@ Le lien Matériel englobe le contenu de la carte et garde un nom accessible limi
 Sur les cartes de signalements/interventions, `::after` étend le lien aux marges ; les autres
 cellules restent sélectionnables. Leur texte n’ouvre donc pas une fiche au simple clic.
 À 960 px disponibles, le tableau garde ses liens textuels. Aucun clic de ligne JavaScript,
-bouton imbriqué ou rôle simulé. Les résumés sans destination et les actions multiples restent
-indépendants. Les liens transmettent les paramètres existants ; `q` garde ses espaces exacts.
+bouton imbriqué ou rôle simulé. Les cartes de contexte Matériel/Signalement d’origine étendent leur unique lien
+avec `single-destination` dans les styles communs. Les résumés sans destination et les
+actions multiples restent indépendants. Les liens transmettent les paramètres existants ; `q` garde ses espaces exacts.
 
 Le dashboard Responsable garde Matériel, Incidents et Interventions. Changer d’espace reste
 dans le shell. Aucun accès Scanner Responsable. Les écrans métier retirent les explications

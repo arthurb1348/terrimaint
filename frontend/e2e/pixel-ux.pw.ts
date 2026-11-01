@@ -4,6 +4,22 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/api/v1/health', (route) => route.fulfill({ json: { status: 'ok' } }));
 });
 
+async function contextCardLinks(page: Page, expectedCount: number) {
+  await expect(page.locator('main .single-destination')).toHaveCount(expectedCount);
+  const original = page.url();
+  for (const card of await page.locator('main .single-destination').all()) {
+    const link = card.getByRole('link');
+    await expect(link).toHaveCount(1);
+    const href = await link.getAttribute('href');
+    const popupPromise = page.context().waitForEvent('page');
+    await card.click({ position: { x: 6, y: 6 }, modifiers: ['ControlOrMeta'] });
+    const popup = await popupPromise;
+    await expect(popup).toHaveURL(new URL(href!, page.url()).href);
+    await popup.close();
+    expect(page.url()).toBe(original);
+  }
+}
+
 async function focusVisible(page: Page, link: Locator, card: Locator, space: string) {
   await link.focus();
   await page.keyboard.press('Tab');
@@ -60,6 +76,7 @@ for (const space of ['agent', 'responsable']) {
       await page.keyboard.press('Enter');
       await expect(page).toHaveURL(new URL(href!, page.url()).href);
       await page.reload();
+      if (domain === 'incidents') await contextCardLinks(page, 1);
       await main.getByRole('link', { name: domain === 'equipements' ? 'Retour au matériel' : 'Retour aux signalements', exact: true }).click();
       expect(new URL(page.url()).searchParams.get('q')).toBe(q);
       if (domain === 'incidents') {
@@ -91,6 +108,7 @@ test('Interventions : surface en cartes, tableau conservé, filtres et actions i
   await focusVisible(page, link, card, 'responsable');
   await page.keyboard.press('Enter');
   await expect(main.getByRole('heading', { level: 1 })).toContainText(/alimentation/i);
+  await contextCardLinks(page, 2);
   const original = page.url();
   // Le résumé sans destination n'est pas transformé en lien ; les origines restent indépendantes.
   await expect(main.locator('.intervention-summary a')).toHaveCount(0);
