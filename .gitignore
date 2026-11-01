@@ -24,3 +24,9 @@ Thumbs.db
 # Base SQLite locale ; aucun fichier de données ne doit être versionné.
 *.sqlite3
 *.sqlite3-*
+
+# État Firebase local et éventuelles clés : jamais versionner les identifiants.
+.firebase/
+.firebaserc
+*service-account*.json
+firebase-adminsdk-*.json

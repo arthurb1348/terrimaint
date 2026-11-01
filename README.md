@@ -135,6 +135,16 @@ décodage testé et les limites. Sur téléphone, la caméra exige HTTPS avec ce
 reconnu ; une adresse LAN HTTP ne remplace pas le `localhost` de l’ordinateur.
 #43/PR #55 est intégrée ; #44 reste en revue jusqu’à fusion.
 
+## Prévisualiser sur Pixel avec Firebase Hosting
+
+La configuration de l'[issue #61](https://github.com/arthurb1348/terrimaint/issues/61)
+prépare un canal HTTPS `pr-N` par PR interne et la publication de `main` sur `live`,
+après Backend et Frontend. **Activation Firebase/GitHub et première publication
+authentifiée restant à Arthur** ; aucune fusion automatique. Responsive reste indépendant.
+Le [guide Hosting](docs/firebase-hosting.md) précise les variables/secrets, la liaison
+à effectuer depuis la racine sur PC, le lancement d'une PR déjà ouverte (#60), le lien
+Actions et le SHA publié. Aucun backend n'est déployé : API indisponible est attendu.
+
 ## Organisation
 
 | Dossier ou fichier | Rôle |

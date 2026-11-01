@@ -6,20 +6,55 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "PR interne ouverte vers main (vide : branche sélectionnée ; publication live sur main)"
+        required: false
+        type: string
 
 permissions:
   # Les contrôles peuvent lire le code mais ne peuvent ni pousser ni fusionner.
   contents: read
 
 concurrency:
-  # Une nouvelle exécution du même parcours remplace l'ancienne devenue inutile.
-  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
+  # Sérialise aussi les lancements manuels ; ne pas annuler un déploiement en cours.
+  group: ci-${{ github.workflow }}-${{ inputs.pr_number || github.event.pull_request.number || github.ref }}
+  cancel-in-progress: false
 
 jobs:
+  source:
+    name: Choisir la source
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      sha: ${{ steps.target.outputs.sha }}
+      pr_number: ${{ steps.target.outputs.pr_number }}
+      deploy: ${{ steps.target.outputs.deploy }}
+    steps:
+      - name: Récupérer les scripts du workflow
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Résoudre le commit exact à contrôler
+        id: target
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            await require('./.github/scripts/hosting-target.cjs').resolveTarget({ github, context, core });
+      - name: Installer Node LTS
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      - name: Vérifier les protections de publication
+        run: node --test .github/scripts/hosting.test.cjs
+
   backend:
     # Le nom public Backend correspond au contrôle exigé par le ruleset actuel.
     name: Backend
+    needs: source
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -27,6 +62,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ needs.source.outputs.sha }}
       - name: Installer uv
         uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
@@ -42,6 +78,7 @@ jobs:
   frontend:
     # Backend et Frontend sont obligatoires dans le ruleset actif de main.
     name: Frontend
+    needs: source
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     defaults:
@@ -52,6 +89,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          ref: ${{ needs.source.outputs.sha }}
       - name: Installer Node LTS
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
@@ -75,3 +113,18 @@ jobs:
           path: frontend/dist/terrimaint/browser
           retention-days: 7
           if-no-files-found: error
+
+  hosting:
+    name: Firebase Hosting
+    needs: [source, backend, frontend]
+    if: needs.source.outputs.deploy == 'true' && vars.FIREBASE_HOSTING_ENABLED == 'true'
+    permissions:
+      contents: read
+      pull-requests: read
+    uses: ./.github/workflows/firebase-hosting.yml
+    with:
+      source-sha: ${{ needs.source.outputs.sha }}
+      pr-number: ${{ needs.source.outputs.pr_number }}
+      workflow-sha: ${{ github.workflow_sha }}
+    secrets:
+      service-account: ${{ secrets[vars.FIREBASE_SERVICE_ACCOUNT_SECRET] }}
