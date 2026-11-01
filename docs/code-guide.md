@@ -1,5 +1,29 @@
 # Guide des fichiers et configurations
 
+## Ajustements Pixel #58 — en revue jusqu’à fusion
+
+#56/Scanner est intégrée à `main` (`5d1867a17a993f1005c87276665b29004787eab6`).
+L’ordre prévu est #58, photos #57, puis mémoire partagée #59. #47/#48 restent futures.
+
+- `equipements.html/.css` : le lien natif englobe image, titre et textes ; `aria-labelledby`
+  nomme la fiche par le titre sans annoncer toute la carte comme nom de lien.
+- `incidents.css` / `interventions.css` : le `::after` du lien couvre les marges de carte,
+  uniquement sous 960 px disponibles. Les autres cellules, positionnées au-dessus,
+  gardent la sélection du texte. Aucune action de ligne JavaScript. Le tableau conserve
+  son lien textuel ; les récapitulatifs et cartes de détail ne deviennent pas des liens.
+- `responsable.ts` : trois raccourcis métier ; le sélecteur du shell change d’espace.
+- Templates métier : aides utiles conservées, limites regroupées dans README et guides.
+  La fin de formulaire change seulement `step`, sans HTTP métier, stockage ni mutation.
+- `scanner.html/.css/.ts` : bloc d’erreur avant les commandes, titre, texte et bordure ;
+  une seule région `alert` associée au champ. Le statut ne répète plus l’erreur QR.
+- `e2e/pixel-ux.pw.ts`, tests Scanner et assertions existantes : grandes surfaces,
+  Ctrl/Cmd-clic natif, clavier, recherche exacte, filtres/retours et erreurs distinctes.
+  Contrastes, caméra et photos gardent leurs contrôles.
+
+Le [guide de revue Pixel](pixel-ux.md) donne la procédure et les limites. Les jeux restent
+fixes jusqu’à #59 ; aucune persistance, synchronisation ou notification n’est ajoutée.
+Django/DRF/PostgreSQL reste la cible backend. Les décisions datées détaillent les incréments.
+
 Ce guide détaille le code présent et les configurations. La [revue technique](technical-review.md)
 porte la vue d'ensemble, les limites, la cible Django/DRF/PostgreSQL et la préparation CDA.
 Les chemins `src/...` ci-dessous sont relatifs à `frontend/`.
@@ -78,7 +102,7 @@ JSON validé → signal `state` → texte rendu. Quitter l'accueil annule l'abon
 | --- | --- |
 | `core/` | Infrastructure globale : service de santé HTTP et son test. Les futurs services de session ou de synchronisation n'arriveront qu'avec leur besoin réel. |
 | `shared/main-navigation/` | Élément d'interface commun au shell, sans état de rôle ni accès HTTP. `shared` n'importe pas les pages métier. Aucun composant générique supplémentaire n'est anticipé. |
-| `features/agent/`, `features/responsable/` | Pages d'entrée des espaces ; elles pointent vers les mêmes rubriques. Le Responsable dispose aussi d'un lien vers l'espace Agent. |
+| `features/agent/`, `features/responsable/` | Pages d'entrée des espaces ; elles pointent vers les mêmes rubriques. Le changement d’espace reste dans le shell. |
 | `features/equipements/` | Liste locale de démonstration et recherche, partagées par les deux espaces. Le futur accès API restera dans ce domaine. |
 | `features/incidents/`, `features/interventions/` | Consultation et simulations locales, sources typées et filtres d'URL propres à chaque domaine. |
 | `home/` | Accueil existant conservé à son emplacement pour limiter les déplacements ; sa logique API ne change pas. |
@@ -119,7 +143,7 @@ conteneur de déclarations Angular) n'est nécessaire.
 | `src/app/features/equipements/equipment.ts` | L'interface TypeScript `Equipment` décrit un objet affiché : `id`, `name`, `location`, tous des textes (`string`). Elle vérifie les usages à la compilation et ne valide pas un JSON reçu du réseau. |
 | `src/app/features/equipements/equipements-demo.ts` | Source des six équipements fictifs, avec identifiants stables. `readonly` interdit les modifications via ces types, sans figer les objets à l'exécution. |
 | `src/app/features/equipements/equipements.ts` | Lecture de la recherche `q` dans l'URL et calcul de la liste filtrée. Aucune API métier ni stockage persistant. |
-| `src/app/features/equipements/equipements.html` | Titre, mention de démonstration, champ étiqueté, effacement, résultat annoncé et liens vers les fiches. |
+| `src/app/features/equipements/equipements.html` | Titre, champ étiqueté, effacement, résultat annoncé et liens englobant les cartes. |
 | `src/app/features/equipements/equipements.css` | Palette existante, focus du champ, contrôles qui passent à la ligne et cartes : une colonne jusqu'à 760 px, deux au-delà. Les textes longs peuvent revenir à la ligne. |
 | `src/app/features/equipements/equipements.spec.ts` | Tests des comportements visibles via saisie et clic : données initiales, nom/identifiant, casse, espaces, aucun résultat et effacement/focus. |
 | `e2e/responsive.pw.ts` | Ajoute la recherche dans les deux espaces aux quatre formats, avec effacement au clavier, contexte et débordement contrôlés. |
@@ -180,7 +204,7 @@ Les routes `/agent/equipements/:id` et `/responsable/equipements/:id` utilisent 
 dans `/agent/equipements/EQ-OUT-0003`, sa valeur est `EQ-OUT-0003`. Le composant lit ce
 paramètre et cherche l'objet correspondant dans **la même constante `DEMO_EQUIPMENT`** que
 la liste, sans recopier les équipements. Il affiche son nom, son identifiant et son emplacement,
-avec la mention « Données de démonstration » ; aucune information métier supplémentaire.
+et son illustration locale ; les limites des données sont documentées dans le README.
 
 Le flux est : **saisie → URL `q` → liste filtrée → lien contenant `id` et `q` → fiche → lien
 de retour contenant `q` → liste filtrée**. `q` garde le texte de recherche ; `id` identifie
@@ -232,7 +256,7 @@ pixel par pixel à l'écran métier complet n'est revendiquée.
 ### Essai manuel court et compréhension
 
 Avec `npm start` dans `frontend/`, ouvrir chacune des deux URL Matériel. Vérifier les six
-équipements et la mention de démonstration aux largeurs 320, 390, 768 et 1440 px. Saisir
+équipements et les liens natifs des cartes aux largeurs 320, 390, 768 et 1440 px. Saisir
 `  tONDeUSE  `, puis `eq-veh-0042`, puis seulement des espaces et enfin `introuvable`.
 Vérifier respectivement un résultat par nom, un par identifiant, six résultats et le message
 vide. Depuis le champ, utiliser Tab puis Entrée sur « Effacer la recherche » : les six cartes
@@ -295,10 +319,9 @@ ou la valeur exacte dans le cas contraire. Cette méthode ne modifie pas le `For
 le texte d'absence n'est jamais une donnée saisie et une description blanche est retrouvée
 telle quelle avec Modifier. Les retours à la ligne des descriptions renseignées sont conservés.
 **Envoyer le signalement** change seulement l'étape : aucun numéro, appel HTTP ni sauvegarde.
-La mention de démonstration placée près du bouton lui est reliée par `aria-describedby`.
-La confirmation **Signalement simulé** rappelle qu'aucun signalement n'est réellement
-transmis ou enregistré. Seuls les libellés changent, sans renommer les routes ou composants.
-Une mention visible explique dès le départ que la saisie est perdue en quittant ou rechargeant.
+La confirmation **Signalement terminé** garde un retour à la fiche existante, sans lien
+vers un nouvel enregistrement. #58 retire les avertissements répétés ; README et les guides
+expliquent la perte de saisie au départ/rechargement et l’absence d’envoi.
 Le composant est détruit à la sortie. S'il est réutilisé pour un autre `equipmentId`, un
 `effect` remet valeurs, erreurs et étape à zéro ; observer seulement l'initialisation serait
 insuffisant. Le `computed` d'identifiant évite d'effacer le formulaire quand seul `q` change.
@@ -546,16 +569,16 @@ avec erreur et saisies conservées.
 ### Étapes en mémoire et présentation responsive
 
 Le signal `step` vaut `form`, `review` ou `complete`. Vérifier change l'étape, Modifier revient
-aux mêmes contrôles, Programmer affiche **Programmation simulée**. Aucun service d'envoi ou
+aux mêmes contrôles, Programmer affiche **Programmation terminée**. Aucun service d'envoi ou
 de stockage n'est appelé. `form.controls.*.value` n'est pas un signal : les méthodes de libellé
 lisent ces valeurs lors du rendu, sans `computed` qui pourrait garder une ancienne saisie.
 L'effet de réinitialisation dépend de l'identifiant, indépendamment des filtres de retour :
 nouvel identifiant, nouvelles valeurs initiales et nouvelle étape ; seuls les filtres modifiés,
 saisie intacte. Départ et rechargement détruisent aussi cet état en mémoire.
 
-La mention de démonstration est constante ; celle près de **Programmer l'intervention**
-est associée à ce bouton. La confirmation explique l'absence d'enregistrement/transmission
-et de notification, sans inventer de numéro. Les sources et statuts ne changent jamais.
+**Programmer l’intervention** aboutit à **Programmation terminée**, avec retour au signalement
+existant. Aucun numéro ni lien vers une intervention inventée. Depuis #58, les limites
+sont portées par README et les guides ; les sources et statuts ne changent jamais.
 Ces règles locales devront être validées et reprises dans le contrat serveur futur.
 
 `intervention-planning.css` garde le contenu à 768 px maximum et reprend les variables de la
@@ -1117,8 +1140,8 @@ La PR #37 a intégré **144 scénarios** : dans les deux espaces et
 aux quatre formats, le parcours ajouté accepte une description vide puis blanche, vérifie
 Non renseignée dans le récapitulatif et retrouve la valeur exacte avec Modifier le signalement.
 Les boutons Vérifier/Envoyer/Modifier le signalement sont utilisés au clavier et restent
-entièrement visibles ; la mention de démonstration près de l'action finale doit aussi tenir
-dans la fenêtre. Les tests unitaires conservent les refus d'intitulé/priorité et des bornes
+entièrement visibles ; depuis #58, les avertissements de démonstration sont documentés
+dans les guides et le README. Les tests unitaires conservent les refus d'intitulé/priorité et des bornes
 120/121 et 2000/2001 pour les détails renseignés, avec des cas d'absence et de modification.
 La capture `signalement-sans-description` complète celles du parcours existant.
 
@@ -1191,11 +1214,11 @@ les fichiers à modifier, la procédure manuelle et les limites du contrôle WCA
 Voir le [guide photos](photos-demo.md) pour les sources, la préparation des visuels,
 le cycle de vie des fichiers, les tests et la procédure manuelle.
 
-## Scanner QR et saisie de référence (issue #44, en revue)
+## Scanner QR et saisie de référence (issue #44, fusionnée)
 
 Le [guide Scanner](scanner-qr.md) porte le format, les choix vérifiés dans Chromium,
 les scripts de jsQR examinés, le cycle de vie, la revue manuelle et les limites.
-La PR #55/#43 est intégrée au point de départ ; #44 reste en revue jusqu’à fusion.
+Les PR #55/#43 et #56/#44 sont intégrées ; #58 reste en revue jusqu’à fusion.
 
 | Fichier | Rôle / endroit à modifier |
 | --- | --- |

@@ -6,12 +6,10 @@
     (click)="focusContent()"
     ><span aria-hidden="true">←</span><span>Retour au matériel</span></a
   >
-  <p class="demo-label">Données de démonstration</p>
 
   @if (equipment(); as item) {
     <h1 id="equipment-title">{{ item.name }}</h1>
     <app-demo-image [source]="item.image" [eager]="true" />
-    <p class="help">Illustration fictive : ne prouve pas l’état réel du matériel.</p>
     <dl class="business-card">
       <div>
         <dt>Identifiant</dt>
@@ -30,6 +28,6 @@
     >
   } @else {
     <h1 id="equipment-title">Équipement introuvable</h1>
-    <p>Aucun équipement de démonstration ne correspond à cet identifiant.</p>
+    <p>Aucun équipement ne correspond à cet identifiant.</p>
   }
 </section>

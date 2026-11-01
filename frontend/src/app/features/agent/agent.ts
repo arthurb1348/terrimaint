@@ -8,7 +8,6 @@ import { RouterLink } from '@angular/router';
   template: `
     <section class="feature-page" aria-labelledby="agent-title">
       <h1 id="agent-title">Accueil</h1>
-      <p>Les parcours terrain seront développés progressivement dans ces rubriques.</p>
       <ul class="page-shortcuts">
         <li><a class="page-action secondary" routerLink="/agent/equipements">Matériel</a></li>
         <li><a class="page-action secondary" routerLink="/agent/incidents">Incidents</a></li>

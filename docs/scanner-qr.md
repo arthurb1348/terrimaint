@@ -1,4 +1,4 @@
-# Scanner Agent — issue #44 en revue
+# Scanner Agent — issue #44 intégrée par la PR #56
 
 ## Point de départ et choix
 
@@ -6,7 +6,9 @@ Branche dédiée depuis le dernier `origin/main` vérifié le 31 octobre 2026 :
 `1e87c74d51ad6c642a79f9383f12d2dda12464d2`, fusion de la
 [PR #55](https://github.com/arthurb1348/terrimaint/pull/55) pour #43.
 Les branches, modifications et stash de l’environnement initial ont été préservés.
-#44 reste **en revue jusqu’à fusion**, incrément 6/10 ; Arthur décide de la fusion.
+#44 est intégrée par la [PR #56](https://github.com/arthurb1348/terrimaint/pull/56),
+fusionnée le 1er novembre 2026 à `5d1867a17a993f1005c87276665b29004787eab6`.
+#58 reste en revue jusqu’à fusion ; les photos #57 puis la mémoire partagée #59 suivent.
 
 Le prototype [Agent 188:3](https://www.figma.com/design/0DOu4j0TnWj5wOHKkzTTI8/TerriMaint?node-id=188-3)
 et l’écran Scanner `188:17` ont été consultés en lecture seule, avec structure,
@@ -31,6 +33,10 @@ Le résolveur retourne l’objet existant, sans copie ni équipement inventé.
 Seul son `id` construit `['/agent/equipements', id]`. Aucun contenu brut du QR
 n’est rendu comme HTML, évalué, journalisé ou passé à une ouverture d’URL.
 Une erreur rend le focus au champ ; la correction et la reprise restent disponibles.
+Dans #58, le bloc encadré avant les commandes caméra distingue Référence invalide et
+Référence inconnue, conserve `aria-describedby` et une seule région `alert`. Le statut
+caméra ne répète plus l’échec QR. Les limites des jeux locaux restent documentées ici
+et dans le README, sans badge de démonstration dans l’écran Scanner.
 Un verrou empêche plusieurs navigations à partir de reconnaissances répétées ou
 d’une saisie concurrente ; un échec/une annulation de navigation permet de réessayer.
 

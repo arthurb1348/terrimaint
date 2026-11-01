@@ -86,7 +86,7 @@ describe('Programmation locale d’une intervention', () => {
     expect(field('date').getAttribute('min')).toBe('2026-10-30');
     expect(content().querySelectorAll('select option')).toHaveLength(4);
     expect(new Set(DEMO_AGENTS.map((agent) => agent.id)).size).toBe(DEMO_AGENTS.length);
-    expect(content().textContent).toContain('Agents fictifs');
+    expect(content().querySelectorAll('#planning-agent option')).toHaveLength(4);
     expect(content().textContent).not.toMatch(
       /Disponibilité|Prestataire|Immobilis|Type d’incident/,
     );
@@ -224,10 +224,8 @@ describe('Programmation locale d’une intervention', () => {
     expect(document.activeElement).toBe(content().querySelector('h1'));
     const final = content().querySelector('button')!;
     expect(final.textContent).toContain('Programmer l’intervention');
-    expect(final.getAttribute('aria-describedby')).toBe('planning-demo-notice');
-    expect(content().querySelector('#planning-demo-notice')?.textContent).toContain(
-      'ne notifie aucun agent',
-    );
+    expect(final.getAttribute('aria-describedby')).toBeNull();
+    expect(content().querySelector('#planning-demo-notice')).toBeNull();
     await click('Modifier l’intervention');
     expect(field('title').value).toBe('  Diagnostic du moteur  ');
     expect(field('instructions').value).toBe('  Vérifier le filtre.\nTester à chaud.  ');
@@ -237,11 +235,9 @@ describe('Programmation locale d’une intervention', () => {
     await submit();
     expect(content().querySelector('dd')?.textContent).toBe('Contrôle du moteur');
     await click('Programmer l’intervention');
-    expect(heading()).toBe('Programmation simulée');
-    expect(content().textContent).toContain(
-      'Aucune intervention n’a été réellement enregistrée ou transmise',
-    );
-    expect(content().textContent).toContain('Aucun agent n’a été notifié');
+    expect(heading()).toBe('Programmation terminée');
+    expect(content().querySelectorAll('a')).toHaveLength(1);
+    expect(content().textContent).not.toMatch(/notifié|synchronisé/i);
     expect(content().querySelector('form')).toBeNull();
     expect(content().textContent).not.toMatch(/INT-2026|Succès/);
     expect(JSON.stringify([DEMO_INCIDENTS, DEMO_EQUIPMENT, DEMO_AGENTS, DEMO_INTERVENTIONS])).toBe(

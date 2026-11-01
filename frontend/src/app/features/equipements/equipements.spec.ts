@@ -32,9 +32,9 @@ describe('Liste de matériel de démonstration', () => {
     await harness.fixture.whenStable();
   }
 
-  it('affiche six équipements identifiés, leurs emplacements et la mention de démonstration', () => {
+  it('affiche six équipements identifiés, leurs emplacements et des liens de carte', () => {
     expect(element.querySelector('h1')?.textContent).toBe('Matériel');
-    expect(element.textContent).toContain('Données de démonstration');
+    expect(element.textContent).not.toContain('Données de démonstration');
     expect(element.querySelector('label')?.htmlFor).toBe(input.id);
     expect(items()).toHaveLength(6);
     expect(items().map((item) => item.querySelector('.equipment-id')?.textContent)).toEqual([
@@ -48,11 +48,18 @@ describe('Liste de matériel de démonstration', () => {
     for (const item of items()) {
       expect(item.querySelector('h2')?.textContent?.trim()).toBeTruthy();
       expect(item.textContent).toMatch(/Emplacement : \S/);
-      expect(item.querySelector('h2 a')?.getAttribute('href')).toBe(
+      expect(item.querySelector('a')?.getAttribute('href')).toBe(
         `/agent/equipements/${item.querySelector('.equipment-id')?.textContent?.trim()}`,
       );
     }
     expect(items()[2].textContent).toContain('Atelier municipal');
+    for (const item of items()) {
+      const link = item.querySelector('a')!;
+      expect(link.querySelector('app-demo-image')).not.toBeNull();
+      expect(link.querySelectorAll('p')).toHaveLength(2);
+      expect(link.querySelector('a, button')).toBeNull();
+      expect(link.getAttribute('aria-labelledby')).toBe(item.querySelector('h2')!.id);
+    }
   });
 
   it.each([
@@ -75,13 +82,13 @@ describe('Liste de matériel de démonstration', () => {
     },
   );
 
-  it('explique une absence de résultat et conserve la mention de démonstration', async () => {
+  it('explique une absence de résultat et conserve la recherche', async () => {
     await search('introuvable');
     expect(items()).toHaveLength(0);
     expect(element.querySelector('[role="status"]')?.textContent).toContain(
       'Aucun équipement ne correspond à votre recherche',
     );
-    expect(element.textContent).toContain('Données de démonstration');
+    expect(element.textContent).not.toContain('Données de démonstration');
   });
 
   it('ne recherche pas dans l’emplacement', async () => {

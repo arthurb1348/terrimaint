@@ -29,8 +29,11 @@ porte l’harmonisation UX intégrée par la PR #52 : Basse/Haute/
 Urgente, actions hiérarchisées sans soulignement, retours fléchés avec libellé et cartes légèrement
 teintées. C'est l'incrément **4/10**, après ajout de ce retour utilisateur au programme initial.
 Les contrastes #53/PR #54 sont intégrés. Les images/photos #43 sont intégrées par la [PR #55](https://github.com/arthurb1348/terrimaint/pull/55).
-L’identification QR et la saisie manuelle #44, incrément 6/10, restent en revue jusqu’à fusion.
-Ces parcours restent locaux et explicitement fictifs.
+L’identification QR et la saisie manuelle #44 sont intégrées par la PR #56, fusionnée le
+1er novembre 2026 (`5d1867a17a993f1005c87276665b29004787eab6`).
+Les ajustements Pixel #58 sont **en revue jusqu’à fusion**, avant les photos #57 puis
+la mémoire partagée #59 ; #47/#48 gardent leur périmètre futur.
+Ces parcours restent locaux et fictifs ; leurs limites sont documentées dans le README et les guides.
 PostgreSQL ([#38](https://github.com/arthurb1348/terrimaint/issues/38)) est **différé** et ne
 bloque pas ces écrans. La cible Django/DRF/PostgreSQL est conservée ; cette priorité ne
 constitue pas une annonce de parcours métier connecté ou de livraison en production.

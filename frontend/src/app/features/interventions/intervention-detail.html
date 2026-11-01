@@ -5,7 +5,6 @@
     [queryParams]="query()"
     ><span aria-hidden="true">←</span><span>Retour aux interventions</span></a
   >
-  <p class="demo-label">Données de démonstration</p>
   @if (intervention(); as item) {
     <p class="reference">{{ item.id }}</p>
     <h1 id="intervention-detail-title">{{ item.title }}</h1>
@@ -70,11 +69,8 @@
         </section>
       </div>
     </div>
-    <p class="help">
-      Ces statuts sont fictifs. Ils ne changent pas les états du signalement ou du matériel.
-    </p>
   } @else {
     <h1 id="intervention-detail-title">Intervention introuvable</h1>
-    <p>Aucune intervention de démonstration ne correspond à cet identifiant.</p>
+    <p>Aucune intervention ne correspond à cet identifiant.</p>
   }
 </section>

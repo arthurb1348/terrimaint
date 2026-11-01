@@ -1,6 +1,40 @@
 # Décisions techniques et métier
 
-## 2026-10-31 — Identification QR Agent (issue #44, en revue)
+## 2026-11-01 — Ajustements après revue Pixel (issue #58, en revue)
+
+Depuis `main` vérifié à `5d1867a17a993f1005c87276665b29004787eab6` (#56 fusionnée),
+appliquer les décisions d’Arthur avant les photos #57 puis la mémoire partagée #59.
+#58 reste **en revue jusqu’à fusion** ; #47/#48 gardent leur périmètre futur.
+
+La carte Matériel contient un seul vrai lien englobant image et texte, nommé par son titre.
+Dans les listes de signalements/interventions présentées en cartes, le pseudo-élément du
+lien étend la cible aux marges. Le texte des autres cellules reste sélectionnable et ne
+provoque pas de navigation. À 960 px disponibles, les tableaux conservent leur lien textuel.
+Aucun gestionnaire de clic de ligne, contrôle imbriqué ou nouvelle abstraction n’est ajouté.
+Les cartes de détail et récapitulatifs gardent leurs actions indépendantes.
+
+Retirer le raccourci Agent et les explications de développement du dashboard Responsable ;
+conserver le sélecteur d’espace du shell et les trois accès métier. Aucun dashboard calculé,
+Scanner Responsable ni permission nouvelle. Les avertissements répétés de démonstration
+quittent les écrans métier ; libellés, formats, champs facultatifs, erreurs, règles de risque
+et confidentialité utile restent présents. Les fins de parcours sont intitulées
+**Signalement terminé** / **Programmation terminée**, sans numéro, lien inventé, notification
+ni synchronisation. Les jeux restent fixes et les formulaires en mémoire, sans requête métier.
+README et [guide de revue](pixel-ux.md) portent explicitement ces limites.
+
+Les erreurs QR sont regroupées avant les commandes caméra, dans un bloc encadré avec titre,
+message distinct invalide/inconnu et aide de correction/reprise. Une seule région `alert`
+est liée au champ ; le statut caméra ne répète plus l’échec QR. Focus et saisie sont conservés.
+Contrastes issus des jetons existants ; aucune nouvelle couleur porte seule l’information.
+
+Figma Scanner `188:17`, liste/détail signalement `188:10487` / `188:10497`, détail intervention
+`188:11306` consultés en lecture seule, avec captures et contexte. Les décisions d’Arthur
+priment sur synchronisation, notifications, statuts ou actions futurs des prototypes.
+Aucune refonte graphique, dépendance, modification backend ou déploiement ; cible
+Django/DRF/PostgreSQL conservée. Les entrées historiques ci-dessous décrivent leurs incréments ;
+cette décision remplace leurs anciennes mentions de démonstration dans l’interface proposée.
+
+## 2026-10-31 — Identification QR Agent (issue #44, fusionnée)
 
 Le QR contient une référence seule, normalisée par `trim().toUpperCase()` puis
 comparée entièrement aux identifiants de la source typée Matériel existante. Format
@@ -19,8 +53,9 @@ Le prototype Agent `188:3` et Scanner `188:17` sont consultés en lecture seule.
 L’issue prime : activation explicite, formulaire toujours visible, fiche directe,
 sans écran de succès ni indicateur Synchronisé. Le [guide](scanner-qr.md) détaille
 sources, scripts examinés, format, QR Segno réutilisables, contexte HTTPS, tests
-simulés et contrôle physique restant à Arthur. #43/PR #55 est intégrée ; #44 reste
-**en revue jusqu’à fusion**. Aucune API métier, permission serveur ou PWA ajoutée.
+simulés et contrôle physique restant à Arthur. #43/PR #55 est intégrée ; #44 est
+intégrée par la [PR #56](https://github.com/arthurb1348/terrimaint/pull/56), fusionnée le
+1er novembre 2026 au commit `5d1867a17a993f1005c87276665b29004787eab6`. Aucune API métier, permission serveur ou PWA ajoutée.
 
 ## 2026-10-31 — Images et photos locales (issue #43, fusionnée)
 

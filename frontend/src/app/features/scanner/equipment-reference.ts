@@ -15,6 +15,6 @@ export function resolveEquipmentReference(value: string): ReferenceResult {
     ? { equipment }
     : {
         error:
-          'Référence inconnue dans le matériel de démonstration. Vérifiez le code puis réessayez.',
+          'Référence inconnue. Vérifiez le code puis réessayez.',
       };
 }

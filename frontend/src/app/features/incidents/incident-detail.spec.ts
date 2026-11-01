@@ -27,7 +27,7 @@ describe('Détail local du signalement', () => {
         IncidentDetail,
       );
       expect(content().querySelector('h1')?.textContent).toBe('Moteur qui cale à l’accélération');
-      expect(content().textContent).toContain('Données de démonstration');
+      expect(content().textContent).not.toContain('Données de démonstration');
       expect(content().textContent).toContain('INC-2026-045');
       expect(content().querySelector('.description')?.textContent).toBe(
         'Le moteur cale lors de l’accélération et devient difficile à redémarrer.',

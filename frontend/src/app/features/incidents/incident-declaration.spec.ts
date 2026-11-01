@@ -69,9 +69,9 @@ describe('Déclaration locale d’incident', () => {
     it(`ouvre directement le formulaire partagé dans ${space}, avec le matériel identifié et aucune priorité préchoisie`, async () => {
       await harness.navigateByUrl(`${base}/EQ-OUT-0003`, IncidentDeclaration);
       expect(heading()).toBe('Déclarer un incident');
-      expect(content().textContent).toContain('Données de démonstration');
-      expect(content().textContent).toContain("Cette simulation n'enregistre et n'envoie rien");
-      expect(content().textContent).toContain('perdue en quittant cette page ou en la rechargeant');
+      expect(content().textContent).not.toContain('Données de démonstration');
+      expect(content().textContent).not.toContain("Cette simulation n'enregistre et n'envoie rien");
+      expect(content().textContent).not.toContain('perdue en quittant cette page ou en la rechargeant');
       expect(content().querySelector('.equipment-summary')?.textContent).toContain(
         'Débroussailleuse n°3',
       );
@@ -125,10 +125,8 @@ describe('Déclaration locale d’incident', () => {
       expect(content().querySelector('dd')?.textContent).toBe('Le moteur cale à chaud');
       expect(content().textContent).toContain('Urgente — danger immédiat');
       await click('Envoyer le signalement');
-      expect(heading()).toBe('Signalement simulé');
-      expect(content().textContent).toContain(
-        "aucun signalement n'est réellement transmis ou enregistré",
-      );
+      expect(heading()).toBe('Signalement terminé');
+      expect(content().querySelectorAll('a')).toHaveLength(2);
       expect(content().querySelector('form')).toBeNull();
       expect(JSON.stringify(DEMO_EQUIPMENT)).toBe(sourceBefore);
       expect(TestBed.inject(Router).url).toBe(`${base}/EQ-OUT-0003?q=OUT`);

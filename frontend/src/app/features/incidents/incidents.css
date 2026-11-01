@@ -135,3 +135,29 @@ td {
     display: none;
   }
 }
+
+/* Étendre le vrai lien seulement dans la présentation en cartes. Les textes des
+   autres cellules restent sélectionnables ; aucun clic JavaScript sur la ligne. */
+@container (max-width: 959.98px) {
+  .linked-row {
+    position: relative;
+  }
+  .linked-row th a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+  }
+  .linked-row td {
+    position: relative;
+    width: fit-content;
+    max-width: 100%;
+  }
+  .linked-row:has(a:hover) {
+    background: var(--surface);
+  }
+  .linked-row:has(a:focus-visible) {
+    outline: 3px solid var(--focus);
+    outline-offset: 4px;
+  }
+}

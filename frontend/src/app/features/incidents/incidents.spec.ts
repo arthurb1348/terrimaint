@@ -53,7 +53,7 @@ describe('Liste locale des signalements', () => {
     async (space) => {
       await harness.navigateByUrl(`/${space}/incidents`, Incidents);
       expect(rows()).toHaveLength(6);
-      expect(content().textContent).toContain('Données de démonstration');
+      expect(content().textContent).not.toContain('Données de démonstration');
       expect(content().querySelector('[role="status"]')?.textContent?.trim()).toBe(
         '6 signalements trouvés.',
       );

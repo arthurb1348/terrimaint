@@ -95,10 +95,8 @@ export class Scanner {
     const result = resolveEquipmentReference(value);
     if ('error' in result) {
       this.referenceError.set(result.error);
-      if (!manual)
-        this.message.set(
-          'QR code lu, matériel non identifié. Reprenez la caméra ou saisissez la référence.',
-        );
+      // Une seule région annonce l’erreur ; le statut caméra ne la répète pas.
+      if (!manual) this.message.set('');
       this.referenceInput().nativeElement.focus();
       return;
     }

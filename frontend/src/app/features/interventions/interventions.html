@@ -1,10 +1,6 @@
 <section class="feature-page" aria-labelledby="interventions-title">
   <h1 id="interventions-title">Interventions</h1>
-  <p class="demo-label">Données de démonstration</p>
-  <p>
-    Consultez les interventions fictives. Les programmations simulées n'ajoutent rien à cette liste.
-  </p>
-  <dl class="status-counts" aria-label="Effectifs du jeu de démonstration">
+  <dl class="status-counts" aria-label="Effectifs des interventions">
     @for (item of counts; track item.status) {
       <div>
         <dt>{{ item.label }}</dt>
@@ -71,7 +67,7 @@
     <!-- Les rôles préservent la structure accessible quand les lignes deviennent des cartes. -->
     <table role="table">
       <caption class="visually-hidden">
-        Interventions de démonstration correspondant aux filtres
+        Interventions correspondant aux filtres
       </caption>
       <thead role="rowgroup">
         <tr role="row">
@@ -84,7 +80,7 @@
       </thead>
       <tbody role="rowgroup">
         @for (row of filteredInterventions(); track row.intervention.id) {
-          <tr role="row" class="business-card">
+          <tr role="row" class="business-card linked-row">
             <th scope="row" role="rowheader">
               <a [routerLink]="[row.intervention.id]" [queryParams]="query()">
                 <span class="reference">{{ row.intervention.id }}</span>

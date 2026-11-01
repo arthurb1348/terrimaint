@@ -199,6 +199,6 @@ test('Contrastes rendus : Scanner, saisie et erreur', async ({ page }, info) => 
   await input.fill('EQ-OUT-9999'); await input.press('Enter');
   await expect(input).toBeFocused();
   await states(page, input, info, 'scanner-reference-erreur', true);
-  await measure(main.getByRole('alert'), info, 'scanner-erreur');
+  await measure(main.getByRole('alert'), info, 'scanner-erreur', true);
   await capture(page, info, 'scanner-contrastes');
 });

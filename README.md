@@ -124,16 +124,33 @@ arrêter Django puis cliquer sur le bouton pour voir « API indisponible ». Rel
 et vérifier à nouveau. Tester à 375 px et au clavier : contenu sans débordement,
 focus visible et libellé de statut lisible sans dépendre de la couleur.
 
-## Scanner Agent (issue #44 en revue)
+## Scanner Agent (issue #44 intégrée)
 
-Sur la branche de revue, `/agent/scanner` propose une lecture QR après clic et une
+`/agent/scanner` propose une lecture QR après clic et une
 saisie manuelle toujours disponible. Le QR contient seulement une référence connue
 comme `EQ-OUT-0001` ; casse ignorée et espaces de bord retirés. Les
 [QR locaux](frontend/public/qr-demo/index.html) sont servis à `/qr-demo/index.html`.
 Le [guide Scanner](docs/scanner-qr.md) fournit la courte procédure d’Arthur, le vrai
 décodage testé et les limites. Sur téléphone, la caméra exige HTTPS avec certificat
 reconnu ; une adresse LAN HTTP ne remplace pas le `localhost` de l’ordinateur.
-#43/PR #55 est intégrée ; #44 reste en revue jusqu’à fusion.
+#43/PR #55 et #44/PR #56 sont intégrées.
+
+## Limites des parcours métier et revue Pixel
+
+Les données Matériel, signalements, interventions et agents viennent de jeux fixes locaux.
+Les formulaires ne font aucun envoi, enregistrement ou notification ; terminer ne crée pas
+une fiche consultable et ne modifie pas les listes. Les saisies et photos choisies restent
+en mémoire et disparaissent au départ ou au rechargement. Aucun stockage distant,
+authentification, permission serveur ni synchronisation n’est fourni. Les deux espaces
+restent publics ; le contrôle réel de santé Django reste sur l’accueil général.
+Ces limites sont documentées ici plutôt que répétées dans chaque écran métier.
+
+Les ajustements Pixel [#58](https://github.com/arthurb1348/terrimaint/issues/58) restent
+**en revue jusqu’à fusion** : cartes avec liens natifs, accueil Responsable simplifié,
+messages métier et erreurs QR identifiables. Le [guide de revue](docs/pixel-ux.md) précise
+les choix, tests et la procédure Pixel. Viennent ensuite les photos #57 puis la mémoire
+partagée #59 ; Django/DRF/PostgreSQL reste la cible backend. Aucun déploiement Firebase
+ni changement de dépendance n’appartient à #58. #47 et #48 gardent leur périmètre futur.
 
 ## Organisation
 

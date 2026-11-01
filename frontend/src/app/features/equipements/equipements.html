@@ -1,7 +1,5 @@
 <section class="feature-page" aria-labelledby="equipements-title">
   <h1 id="equipements-title">Matériel</h1>
-  <p class="demo-label">Données de démonstration</p>
-  <p>Six équipements fictifs pour découvrir la liste et leurs fiches. Illustrations fictives, sans indication de leur état réel.</p>
 
   <label for="equipment-search">Rechercher par nom ou identifiant</label>
   <div class="search-controls">
@@ -34,14 +32,13 @@
     <ul class="equipment-list" aria-label="Équipements">
       @for (equipment of filteredEquipment(); track equipment.id) {
         <li class="business-card">
-          <app-demo-image [source]="equipment.image" [thumbnail]="true" [eager]="$first" />
-          <h2>
-            <a [routerLink]="[equipment.id]" [queryParams]="{ q: search() || null }">{{
-              equipment.name
-            }}</a>
-          </h2>
-          <p class="equipment-id">{{ equipment.id }}</p>
-          <p>Emplacement : {{ equipment.location }}</p>
+          <a class="equipment-card-link" [routerLink]="[equipment.id]"
+            [queryParams]="{ q: search() || null }" [attr.aria-labelledby]="'name-' + equipment.id">
+            <app-demo-image [source]="equipment.image" [thumbnail]="true" [eager]="$first" />
+            <h2 [id]="'name-' + equipment.id">{{ equipment.name }}</h2>
+            <p class="equipment-id">{{ equipment.id }}</p>
+            <p>Emplacement : {{ equipment.location }}</p>
+          </a>
         </li>
       }
     </ul>

@@ -34,7 +34,7 @@ describe('Détail local des interventions', () => {
     expect(content().querySelector('h1')?.textContent).toBe(
       'Diagnostic et remise en état du système d’alimentation',
     );
-    expect(content().textContent).toContain('Données de démonstration');
+    expect(content().textContent).not.toContain('Données de démonstration');
     expect(content().textContent).toContain('INT-2026-032');
     expect(content().querySelector('.metadata')?.textContent).toContain('Planifiée');
     expect(content().querySelector('.metadata')?.textContent).toContain('Camille Durand');

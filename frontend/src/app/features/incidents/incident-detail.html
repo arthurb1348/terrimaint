@@ -6,7 +6,6 @@
     (click)="focusContent()"
     ><span aria-hidden="true">←</span><span>Retour aux signalements</span></a
   >
-  <p class="demo-label">Données de démonstration</p>
   @if (incident(); as item) {
     <p class="reference">{{ item.id }}</p>
     <h1 id="incident-detail-title">{{ item.title }}</h1>
@@ -33,8 +32,7 @@
       </div>
     </dl>
     <section aria-labelledby="example-photos-title">
-      <h2 id="example-photos-title">Photos d’exemple</h2>
-      <p>Images fictives pour la démonstration, sans preuve de l’état réel.</p>
+      <h2 id="example-photos-title">Photos</h2>
       <div class="photo-gallery">
         @for (photo of item.photos ?? []; track photo.src) {
           <app-demo-image [source]="photo" [eager]="$first" />
@@ -78,9 +76,8 @@
         le statut du matériel.
       </p>
     }
-    <p class="help">Ces signalements fictifs servent uniquement à la démonstration.</p>
   } @else {
     <h1 id="incident-detail-title">Signalement introuvable</h1>
-    <p>Aucun signalement de démonstration ne correspond à cet identifiant.</p>
+    <p>Aucun signalement ne correspond à cet identifiant.</p>
   }
 </section>

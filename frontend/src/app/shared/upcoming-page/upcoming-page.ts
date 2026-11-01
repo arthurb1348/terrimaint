@@ -6,10 +6,8 @@ import { ActivatedRoute } from '@angular/router';
   standalone: true,
   template: `
     <section class="feature-page" aria-labelledby="upcoming-title">
-      <p class="eyebrow">À venir</p>
       <h1 id="upcoming-title">{{ data['label'] }}</h1>
-      <p>{{ data['description'] }}</p>
-      <p>Cette rubrique ne propose pas encore de fonctionnalité métier.</p>
+      <p>Cette rubrique n’est pas encore disponible.</p>
     </section>
   `,
 })
