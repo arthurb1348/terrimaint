@@ -1,9 +1,10 @@
 # Guide des fichiers et configurations
 
-## Ajustements Pixel #58 — en revue jusqu’à fusion
+## Ajustements Pixel #58 — intégrés par #60
 
 #56/Scanner est intégrée à `main` (`5d1867a17a993f1005c87276665b29004787eab6`).
-L’ordre prévu est #58, photos #57, puis mémoire partagée #59. #47/#48 restent futures.
+#58 est intégrée au commit `73889125a5683af04d7360423d53e16802e73be7`.
+#57 photos est en revue, puis #59 mémoire partagée, #45 GPS, #46 audio, #47 dashboard, #48 stabilisation.
 
 - `equipements.html/.css` : le lien natif englobe image, titre et textes ; `aria-labelledby`
   nomme la fiche par le titre sans annoncer toute la carte comme nom de lien.
@@ -1215,11 +1216,36 @@ les fichiers à modifier, la procédure manuelle et les limites du contrôle WCA
 Voir le [guide photos](photos-demo.md) pour les sources, la préparation des visuels,
 le cycle de vie des fichiers, les tests et la procédure manuelle.
 
+## Prise de vue et préparation bornée (issue #57, en revue)
+
+Le [guide photos](photos-demo.md) est la référence pour limites, mesures, ressources et revue Pixel.
+
+| Fichier | Rôle / endroit à modifier |
+| --- | --- |
+| `features/incidents/photo-preparation.ts` | `PHOTO_LIMITS`, lecture bornée des en-têtes, décodage orienté, canvas sans agrandissement, réencodage JPEG et contrôle réel de sortie |
+| `features/incidents/incident-photos.ts` | Instance du parcours, file séquentielle, places disponibles, annulation et URL préparées |
+| `features/incidents/incident-declaration.html/.ts/.css` | Deux boutons natifs, statut/erreurs, soumission bloquée pendant préparation, conservation au récapitulatif/Modifier et focus après suppression |
+| `photo-preparation.spec.ts`, `incident-photos.spec.ts`, `incident-declaration-photos.spec.ts` | Doublures des codecs pour erreurs/ressources et risques asynchrones ; ne prouvent pas les pixels produits |
+| `e2e/photo-preparation.pw.ts`, `e2e/photos.pw.ts` | Vraies images et codecs, EXIF 1–8 contrôlé par les pixels, > 5 Mio, proportions, retour Modifier et sélection vide simulée |
+| `e2e/contrast.pw.ts` | Contrôles existants conservés et deux actions photo mesurées dans leurs différents états |
+
+Le fichier original n’entre jamais dans les aperçus : seule l’URL du Blob préparé y entre,
+puis le récapitulatif réutilise cette même URL. `clear()` invalide les continuations et
+révoque les URL acceptées. Il garde la file pour attendre le nettoyage des API non
+interrompables ; les nouveaux fichiers ne provoquent pas un second gros décodage dans
+la même instance. `remove(id)` retire seulement cet identifiant ; aucune continuation
+ne réapplique une ancienne copie de la liste. Les fichiers non traités sont libérés au départ.
+
+Le JPEG préparé perd l’alpha (fond blanc), et son nom visible reste celui choisi par Arthur.
+Le contrôle réel du poids commande les nouvelles tentatives ; le paramètre qualité ne
+constitue pas une borne. Les dimensions se contrôlent avant décodage et après réencodage.
+Aucun service partagé, backend métier, stockage ou mutation de liste ajouté pour #59.
+
 ## Scanner QR et saisie de référence (issue #44, fusionnée)
 
 Le [guide Scanner](scanner-qr.md) porte le format, les choix vérifiés dans Chromium,
 les scripts de jsQR examinés, le cycle de vie, la revue manuelle et les limites.
-Les PR #55/#43 et #56/#44 sont intégrées ; #58 reste en revue jusqu’à fusion.
+Les PR #55/#43 et #56/#44 sont intégrées ; #58 est intégrée par #60.
 
 | Fichier | Rôle / endroit à modifier |
 | --- | --- |

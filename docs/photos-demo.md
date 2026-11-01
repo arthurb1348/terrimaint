@@ -47,91 +47,162 @@ Pour remplacer un visuel, modifier l’association image/alternative dans
 `equipements-demo.ts`, ou les `photos` dans `incidents-demo.ts`, puis remplacer
 l’asset local. Ne pas dupliquer nom, référence ou emplacement des équipements.
 
-## Cycle de vie des fichiers sélectionnés
+## Prise de vue et préparation — #57 en revue
 
-Une instance `IncidentPhotos` appartient au composant de déclaration. Elle contient
-uniquement les aperçus sélectionnés, pas les illustrations Matériel ni les photos
-fixes des exemples. Aucune sélection n’alimente `DEMO_INCIDENTS`.
-Le champ natif `file` accepte JPEG/PNG/WebP et plusieurs fichiers, sans `capture`
-qui pourrait forcer la caméra : le choix de fichiers reste disponible, la prise de
-vue dépend du navigateur et de son sélecteur système. Aucun capteur n’est demandé.
+La branche `feat/57-prepare-report-photos` part de `origin/main`
+`73889125a5683af04d7360423d53e16802e73be7`, vérifié avec Git distant et GitHub :
+#58/PR #60 fusionnée le 1er novembre 2026 ; Hosting #61/PR #62 est aussi intégré.
+#43 reste intégrée ; la préparation #57 reste **en revue jusqu’à fusion**.
+Ordre : #58 intégrée → #57 en revue → #59 mémoire partagée → #45 GPS → #46 audio
+→ #47 dashboard → #48 stabilisation. Django/DRF/PostgreSQL reste la cible backend.
 
-Chaque sélection conserve l’ordre des fichiers et les sélections sont sérialisées.
-Le type MIME annoncé, la signature binaire correspondante, la taille (≤ 5 × 1024 × 1024 octets), la capacité de trois
-photos et le décodage réel par le navigateur sont contrôlés. Les fichiers invalides
-produisent un message nommé ; les fichiers précédemment acceptés et les autres
-saisies restent intacts. Le champ est vidé pour permettre une nouvelle sélection du
-même fichier. L’extension et `accept` seuls ne valident pas une image.
+Deux boutons natifs du formulaire partagé Agent/Responsable ouvrent deux `input file` :
+**Prendre une photo** (`capture="environment"`, une image) et **Choisir dans la galerie**
+(sélection multiple, sans `capture`). Le navigateur décide de la proposition effective :
+ni caméra arrière garantie, ni lecteur caméra personnalisé, ni nouvelle bibliothèque.
+Annuler un sélecteur produit une sélection vide et ne modifie ni saisie, ni photos, ni erreurs.
+Le champ est vidé après sélection pour pouvoir reprendre le même fichier.
 
-Une URL d’objet temporaire est créée seulement après les premiers contrôles.
-Les URL en attente sont suivies, comme les aperçus acceptés. Une génération de
-parcours invalide les résultats asynchrones lors d’une remise à zéro. Une ancienne
-promesse ne peut ni ajouter une image dans le nouveau matériel ni modifier ses
-messages ou son état d’attente. La suppression retire une photo par identifiant
-stable ; un autre décodage ne peut pas la restaurer.
+### Limites choisies avant implémentation
 
-Supprimer, terminer la simulation, changer de matériel ou détruire le composant
-révoque les URL inutiles. Annuler/quitter détruit le parcours ; recharger recrée
-un état vide. Modifier conserve les mêmes aperçus et URL entre formulaire et
-récapitulatif. Une modification de `q` seule ne change pas le matériel.
-Aucun contenu/URL de fichier dans l’URL de navigation, localStorage, sessionStorage,
-IndexedDB, journaux applicatifs ou requête métier. Le décodage est local au navigateur.
-La sélection n’est jamais un téléversement et ces contrôles ne sont pas une validation
-serveur. API, persistance, authentification, PostgreSQL et compression des fichiers
-utilisateur restent hors périmètre.
+Toutes les constantes sont dans `features/incidents/photo-preparation.ts` (`PHOTO_LIMITS`).
+Les octets utilisent les puissances de 1024 ; les mégapixels sont décimaux.
 
-## Accessibilité et vérifications
+| Contrôle | Limite | Pourquoi |
+| --- | --- | --- |
+| Photos conservées | 3, facultatives | Même capacité métier ; fichiers valides acceptés dans les places disponibles |
+| Entrée compressée | 24 Mio = 25 165 824 octets, fichier non vide | Accepter une photo dépassant 5 Mio sans entrées illimitées |
+| Dimensions d’entrée | 8 192 px par axe et 24 000 000 pixels | Accepte 4 032 × 3 024 et 6 000 × 4 000 ; borne le décodage avant allocation |
+| Lecture d’en-tête | Au plus 256 Kio = 262 144 octets | Pas de lecture intégrale préalable ; en-tête absent/trop éloigné refusé |
+| Formats d’entrée | MIME et contenu JPEG (SOF0/1/2), PNG, WebP statique | Signature, dimensions puis décodage réel ; WebP animé refusé |
+| Côté long préparé | 1 920 px au maximum, sans agrandissement | Conserver des détails ; proportions à l’arrondi d’un pixel |
+| Réencodage | JPEG, qualités 0,86 → 0,78 → 0,70 | Format largement décodable ; fond blanc explicite pour la transparence |
+| Repli si nécessaire | Côté long 1 600 px, mêmes trois qualités | Au plus six essais ; pas de réduction indéfinie pour obtenir un fichier accepté |
+| Sortie contrôlée | 1,5 Mio = 1 572 864 octets au maximum | Taille réellement mesurée, MIME/signature, dimensions et nouveau décodage contrôlés |
 
-Les images locales portent une alternative liée à leur sujet. Les fichiers choisis
-ont une alternative et une légende avec leur nom. Les suppressions sont des boutons
-natifs nommés ; le focus rejoint le suivant, le précédent ou le champ de sélection
-lorsque la galerie devient vide. Le nombre accepté et la vérification sont annoncés
-par un statut ; les erreurs par une zone vive. La soumission attend la fin du décodage.
-Les jetons de contraste de #54 et le focus blanc sidebar sont conservés.
-La grille du formulaire impose une colonne `minmax(0, 1fr)` : le sélecteur de fichiers
-natif ne doit pas élargir le contenu par sa largeur intrinsèque à 320 px.
+24 mégapixels représentent jusqu’à environ **96 Mo de pixels RGBA** pour un seul bitmap,
+auxquels le navigateur peut ajouter ses propres copies/buffers. Ce n’est pas une mesure de
+pic mémoire ni une garantie contre tout épuisement de mémoire. Le mode Pixel très haute
+résolution (par exemple 50 MP) est volontairement refusé ; utiliser la résolution normale.
+Les en-têtes complexes au-delà de 256 Kio sont aussi refusés même si un autre logiciel
+peut les ouvrir. Les contrôles locaux ne remplacent jamais la validation serveur future.
 
-Tests unitaires : nombre, taille à la limite et au-delà, type annoncé, sélection
-mixte et décodage refusé, sélections concurrentes, suppression, résultats tardifs,
-révocation des URL. Tests navigateur : vrai décodage WebP, contenu PNG invalide,
-aperçu/récapitulatif/Modifier, suppression clavier/focus, capacité, annulation,
-rechargement, zéro/une/deux photos d’exemple, images locales et repli, dans les deux
-espaces aux formats 320 × 568, 390 × 844, 768 × 1024 et 1440 × 1024.
-Les résultats exacts et les captures du dernier commit sont dans la PR.
-La capture `photos-focus-fenetre` et les assertions de géométrie contrôlent le champ
-focalisé après suppression, dont son dégagement de la navigation Agent fixe.
-Les captures de page entière peuvent déplacer les éléments fixes dans l’image
-assemblée ; elles complètent la capture de fenêtre, sans la remplacer.
+### Circulation et ressources
 
-Santé HTTP simulée ; pas d’intégration Django/proxy ni validation de téléphone,
-caméra réelle, Safari, Windows/macOS ou lecteur d’écran. La possibilité de prise
-de vue depuis le sélecteur dépend du navigateur ; elle reste à vérifier sur appareil.
-Aucune conformité WCAG complète ni fidélité pixel par pixel à Figma revendiquée.
+1. `selectPhotos` récupère les fichiers natifs et vide le champ, sans toucher au formulaire.
+2. `IncidentPhotos.add` met les sélections en file, puis prépare **un fichier à la fois**.
+   Type/taille, en-tête/dimensions/pixels sont contrôlés avant `createImageBitmap`.
+3. `preparePhoto` décode avec `imageOrientation: 'from-image'`. EXIF, rotations et miroirs
+   sont appliqués par le navigateur ; aucune seconde rotation manuelle. Les dimensions
+   décodées doivent correspondre à l’en-tête, éventuellement transposées.
+4. Un canvas réduit sans agrandir, garde le ratio et compose l’alpha sur blanc. Le bitmap
+   original est fermé avant le réencodage. Chaque `toBlob` produit un candidat JPEG :
+   qualité ne signifie pas poids garanti. Le candidat accepté est relu et redécodé ;
+   tout résultat incorrect ou impossible produit une erreur nommée, sans effacer les autres.
+5. Une URL d’objet est créée **uniquement pour le Blob préparé**. L’aperçu et le récapitulatif
+   lisent la même URL ; Modifier conserve les mêmes photos, identifiants et saisies.
 
-## Procédure manuelle et oral
+Le nom affiché reste celui de l’original pour reconnaître sa sélection ; le contenu est
+bien un JPEG préparé, même si ce nom finit par `.png` ou `.webp`. Aucun export ou envoi
+n’est créé. Réencoder peut augmenter le poids d’une petite image déjà bien compressée :
+la borne de sortie est garantie pour les photos acceptées, pas un gain sur tous les fichiers.
 
-1. Dans Agent puis Responsable, chercher un équipement, regarder vignette et fiche,
-   recharger et vérifier le retour avec recherche intacte. Tester une image indisponible
-   via les outils navigateur : les informations et la déclaration restent utilisables.
-2. Déclarer avec titre et Basse, sans description ni photo. Revenir puis choisir une
-   image JPEG/PNG/WebP, un fichier invalide et un fichier de plus de 5 Mio. Vérifier les
-   messages, les autres valeurs et les aperçus déjà acceptés. Essayer quatre photos.
-3. Vérifier le récapitulatif, Modifier, supprimer au clavier et observer le focus.
-   Annuler/recharger/changer de matériel : aucune ancienne photo ne doit revenir.
-4. Consulter INC-2026-045 (sans photo), 050 (une), 047 (deux). Refaire aux quatre
-   largeurs, avec Tab/Maj+Tab/Entrée : pas de débordement, focus visible, images cadrées.
-   Sur téléphone, vérifier séparément le choix fichier et l’éventuelle prise de vue.
+`AbortController` invalide le parcours à terminer/changer de matériel/quitter/détruire.
+Les lectures `FileReader` sont interrompues ; les résultats tardifs des API non interrompables
+(`createImageBitmap`, `toBlob`) sont ignorés et leurs ressources fermées. La même instance
+garde sa file après remise à zéro : un nouveau matériel attend le nettoyage de l’ancien
+décodage. Les références aux fichiers non commencés sont retirées immédiatement ; celles
+aux fichiers traités quittent la file au fur et à mesure. Aucune URL d’original n’est créée.
+Les canvas sont remis à zéro et les bitmaps fermés dans des `finally`, y compris les erreurs.
 
-Workflow : issue et consignes → état Git/prérequis vérifiés → branche dédiée →
-Figma en lecture seule et assets → code/tests → contrôles → documentation →
-PR en brouillon → CI du dernier commit. Arthur garde validation et fusion.
-Les données passent des sources typées aux composants, et les fichiers du sélecteur
-à l’instance mémoire de la déclaration. Le composant d’image commun ne porte que
-le rendu et le repli ; les règles des photos restent dans le parcours.
+La suppression retire par identifiant stable et révoque l’URL préparée ; une autre préparation
+ne reconstruit jamais une ancienne liste. Le focus rejoint suppression suivante/précédente,
+ou le bouton galerie, centré après rendu pour dégager la navigation mobile. Une sélection
+rapprochée attend la précédente et recontrôle les places disponibles ; une sélection mixte
+garde les fichiers valides. Une modification de `q` seule ne réinitialise pas le matériel.
 
-À relire : `incident-photos.ts` (ressources et asynchronisme), `incident-declaration`
-(liaison au parcours/focus), `demo-image` (réservation/repli), sources typées et tests.
+Le statut annonce **Préparation des photos…**, puis le nombre accepté ; les erreurs sont
+associées aux actions et annoncées dans la zone vive. Les boutons sont accessibles au
+clavier avec focus visible. La soumission est désactivée et `review()` garde aussi une
+protection logique pendant le traitement et hors de l’étape formulaire : pas de double
+validation ni de récapitulatif incomplet.
 
-1. Pourquoi `accept` et une extension `.png` ne garantissent-ils pas le décodage ?
-2. Pourquoi révoquer les URL ne suffit-il pas à ignorer un ancien résultat asynchrone ?
-3. Pourquoi les photos choisies n’apparaissent-elles jamais dans la liste fixe ?
+Les photos restent uniquement dans l’instance du parcours. Aucune modification des listes,
+aucun téléversement, stockage persistant, Firebase Storage, backend métier, authentification,
+GPS, audio ou abstraction pour #59. Les illustrations Matériel, QR, recherches et retours
+restent indépendants. Quitter/recharger remet un parcours vide.
+
+### Mesures reproductibles et limites
+
+Mesures du 1er novembre 2026, Chromium **153.0.8010.0** local, via le vrai canvas/codec du
+navigateur et le formulaire ; `e2e/photo-preparation.pw.ts` reproduit les images synthétiques.
+Le WebP est l’illustration existante `public/images/demo/mower.webp` ; aucune photo personnelle.
+
+| Image d’essai | Original (octets et dimensions) | Préparée JPEG (octets et dimensions) |
+| --- | --- | --- |
+| JPEG à quatre quadrants, EXIF 1 | 1 259 ; 120 × 80 | 1 164 ; 120 × 80 |
+| Même JPEG, EXIF 6 | 1 259 ; 120 × 80 stockés | 1 189 ; 80 × 120 orientés |
+| Petit PNG à quatre quadrants | 664 ; 160 × 80 | 984 ; 160 × 80 |
+| Illustration WebP tondeuse | 64 012 ; 900 × 675 | 111 962 ; 900 × 675 |
+| JPEG synthétique à quatre quadrants | 79 813 ; 4 000 × 3 000 | 19 252 ; 1 920 × 1 440 |
+| PNG bruit déterministe, réellement > 5 Mio | 6 606 776 ; 1 600 × 1 200 | 1 407 683 ; 1 600 × 1 200 |
+
+Les huit orientations EXIF sont contrôlées par dimensions **et pixels de quatre quadrants**,
+miroirs inclus. Le dernier essai a pris environ **987 ms**, du remplissage automatique du
+sélecteur au contrôle de sortie (automation incluse, un échantillon). Ce n’est ni un benchmark
+CPU, ni un temps de capteur Pixel, ni un pic mémoire mesuré. Les petits fichiers peuvent
+grossir comme le montrent les deux lignes PNG/WebP. Les aplats et le bruit ne prouvent pas
+la lisibilité d’une fissure réelle ; qualité/détails et performances physiques restent à Arthur.
+Les mesures par format/espace sont attachées au rapport Responsive ; les codecs/versions
+peuvent donner des poids légèrement différents. Les seuils sont des choix de cette PR,
+à réviser après la revue terrain, pas une validation Pixel déjà obtenue.
+
+### Vérifications
+
+- **Unitaires avec doublures** : en-têtes, limites avant décodage, fichier > 5 Mio, erreur
+  de lecture, décodage refusé, sortie nulle/mauvais format/mauvaises dimensions/illisible,
+  dépassement réel du poids, nombre borné de tentatives et fermeture des ressources.
+  Sélections mixtes/rapprochées, suppression pendant traitement, annulation, résultats tardifs
+  d’entrée/sortie/réencodage, changement de matériel et double validation bloquée sont testés.
+- **Navigateur avec vraies images** : JPEG/PNG/WebP, EXIF 1–8, pixels/proportions/dimensions,
+  pas d’agrandissement, réduction 4 000 → 1 920, PNG bruit > 5 Mio, en-tête démesuré refusé
+  et PNG tronqué refusé par le véritable décodeur. Aperçu/récapitulatif/Modifier, capacité,
+  suppression/focus, rechargement/départ et sélection mixte restent couverts dans les deux
+  espaces aux quatre formats : 320 × 568, 390 × 844, 768 × 1024, 1440 × 1024.
+- **Sélecteurs** : Playwright vérifie l’ouverture des deux entrées et simule une sélection
+  vide ; il ne valide pas l’interface système Android, les permissions ou la caméra physique.
+- Santé HTTP simulée ; aucune intégration métier Django ni conformité WCAG globale annoncée.
+  Les contrôles de contraste existants sont conservés et étendus aux deux actions.
+
+Commandes : `npm run lint`, `npm test`, `npm run build`, `npm run test:responsive`.
+Les résultats réels et liens CI/Hosting du dernier commit figurent dans la PR.
+Le Chromium Playwright 156 attendu est absent localement : téléchargement renvoyant un
+HTML de 195 octets, erreur ZIP « End of central directory record signature not found ».
+Les essais locaux utilisent Chromium 153 via une configuration temporaire **hors dépôt**,
+sans changer workflows, dépendances applicatives, délais, retries ou assertions.
+
+### Procédure courte sur Pixel et oral
+
+Utiliser le lien HTTPS du résumé **Firebase Hosting de cette exécution**, comparer son
+`/deployment.json` au SHA de la PR. Dans Agent puis Responsable :
+
+1. Saisir un intitulé et une priorité. Prendre une photo : vérifier proposition de la caméra
+   arrière, orientation portrait/paysage, détail d’un défaut et aperçu. Noter Pixel/Android,
+   navigateur/version, durée ressentie et qualité ; `capture` reste une indication.
+2. Choisir dans la galerie, puis annuler chacun des deux sélecteurs : saisies/photos intactes.
+   Ajouter une photo > 5 Mio mais ≤ 24 Mio/24 MP ; vérifier préparation puis détail visible.
+   Une photo trop grande ou illisible doit laisser les autres et les champs en place.
+3. Essayer quatre photos et une sélection mixte. Supprimer pendant une préparation ;
+   aucun ancien aperçu ne doit revenir. Vérifier focus/clavier et actions dégagées du menu.
+4. Vérifier le signalement, contrôler les mêmes photos, puis Modifier : tout est conservé.
+5. Annuler/quitter vers un autre matériel pendant une préparation, revenir et recharger :
+   aucun résultat tardif ni ancienne photo. Les listes restent fixes jusqu’à #59.
+
+À modifier : limites et réencodage dans `photo-preparation.ts`, file/URL dans
+`incident-photos.ts`, boutons/focus dans `incident-declaration.*`. Pour l’oral, suivre
+**fichier original → contrôles → décodage orienté → réduction/réencodage → Blob contrôlé
+→ URL d’aperçu → même URL au récapitulatif**, puis révocation au départ.
+
+1. Pourquoi vérifier les dimensions avant le décodage et encore après ?
+2. Pourquoi le réglage de qualité ne suffit-il pas à garantir 1,5 Mio ?
+3. Comment l’annulation et la file empêchent-elles une ancienne photo de revenir ?

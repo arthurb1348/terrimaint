@@ -1,47 +1,67 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { IncidentPhotos } from './incident-photos';
+import { PreparedPhoto } from './photo-preparation';
 
+// Ici la préparation est doublée : ces tests prouvent l'état du parcours et les
+// ressources, pas le codec. Les vraies images sont couvertes dans Playwright.
 describe('Photos en mémoire du parcours', () => {
   let count = 0;
+  const prepared = (): PreparedPhoto => ({
+    blob: new Blob(['préparée'], { type: 'image/jpeg' }),
+    width: 100,
+    height: 75,
+  });
+  const file = (name = 'photo.png') => new File(['original'], name, { type: 'image/png' });
   beforeEach(() => {
     count = 0;
-    vi.stubGlobal('URL', { createObjectURL: vi.fn(() => `blob:test-${++count}`), revokeObjectURL: vi.fn() });
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn(() => `blob:test-${++count}`),
+      revokeObjectURL: vi.fn(),
+    });
   });
   afterEach(() => vi.unstubAllGlobals());
-  const file = (name = 'photo.png', type = 'image/png', size = 12) => {
-    const bytes = new Uint8Array(size);
-    bytes.set([137, 80, 78, 71, 13, 10, 26, 10]);
-    return new File([bytes], name, { type });
-  };
 
   it('garde les fichiers acceptés et les autres valides d’une sélection mixte', async () => {
-    const photos = new IncidentPhotos(async (url) => { if (url === 'blob:test-2') throw new Error(); });
+    const prepare = vi.fn(async (f: File) => {
+      if (f.name === 'casse.png' || f.name === 'texte.txt')
+        throw new Error('image impossible à décoder');
+      return prepared();
+    });
+    const photos = new IncidentPhotos(prepare);
     await photos.add([file('a.png')]);
-    await photos.add([file('texte.txt', 'text/plain'), file('casse.png'), file('b.png')]);
+    await photos.add([file('texte.txt'), file('casse.png'), file('b.png')]);
     expect(photos.photos().map((p) => p.name)).toEqual(['a.png', 'b.png']);
     expect(photos.errors()).toHaveLength(2);
-    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test-2');
+    expect(URL.createObjectURL).toHaveBeenCalledWith(
+      expect.objectContaining({ type: 'image/jpeg' }),
+    );
+    photos.clear();
   });
-  it('borne à trois photos et refuse strictement plus de 5 Mio', async () => {
-    const decode = vi.fn(async () => {});
-    const photos = new IncidentPhotos(decode);
-    await photos.add([file('grand.png', 'image/png', 5 * 1024 * 1024 + 1)]);
-    expect(decode).not.toHaveBeenCalled();
-    await photos.add([file('limite.png', 'image/png', 5 * 1024 * 1024), file(), file(), file()]);
+  it('borne à trois photos ; la préparation décide des limites de fichiers', async () => {
+    const prepare = vi.fn(async () => prepared());
+    const photos = new IncidentPhotos(prepare);
+    await photos.add([file(), file(), file(), file()]);
     expect(photos.photos()).toHaveLength(3);
+    expect(prepare).toHaveBeenCalledTimes(3);
     expect(photos.errors()[0]).toContain('3 photos maximum');
+    photos.clear();
   });
-  it('sérialise les sélections pour ne pas dépasser la capacité', async () => {
-    const photos = new IncidentPhotos(async () => {});
+  it('sérialise les sélections rapprochées pour ne pas dépasser la capacité', async () => {
+    const photos = new IncidentPhotos(async () => prepared());
     await Promise.all([photos.add([file(), file()]), photos.add([file(), file()])]);
     expect(photos.photos()).toHaveLength(3);
     expect(photos.busy()).toBe(false);
+    photos.clear();
   });
-  it('ne restaure pas une photo supprimée quand une autre termine son décodage', async () => {
+  it('ne restaure pas une photo supprimée quand une autre termine sa préparation', async () => {
     let finish!: () => void;
     let calls = 0;
     const photos = new IncidentPhotos(async () => {
-      if (++calls === 2) await new Promise<void>((resolve) => { finish = resolve; });
+      if (++calls === 2)
+        await new Promise<void>((resolve) => {
+          finish = resolve;
+        });
+      return prepared();
     });
     await photos.add([file('premiere.png')]);
     const id = photos.photos()[0].id;
@@ -54,46 +74,60 @@ describe('Photos en mémoire du parcours', () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledTimes(1);
     photos.clear();
   });
-  it('permet au nouveau contexte de choisir avant la fin d’un ancien décodage', async () => {
+  it('accepte le nouveau contexte mais attend le nettoyage du décodage ancien', async () => {
     let finish!: () => void;
-    let calls = 0;
-    const photos = new IncidentPhotos(async () => {
-      if (++calls === 1) await new Promise<void>((resolve) => { finish = resolve; });
+    const prepare = vi.fn(async () => {
+      if (prepare.mock.calls.length === 1)
+        await new Promise<void>((resolve) => {
+          finish = resolve;
+        });
+      return prepared();
     });
-    const previous = photos.add([file('ancien.png')]);
+    const photos = new IncidentPhotos(prepare);
+    const previous = photos.add([file('ancien.png'), file('ancien-en-attente.png')]);
     await vi.waitFor(() => expect(finish).toBeTypeOf('function'));
     photos.clear();
-    await photos.add([file('nouveau.png')]);
+    const next = photos.add([file('nouveau.png')]);
+    expect(photos.busy()).toBe(true);
+    expect(prepare).toHaveBeenCalledTimes(1);
     finish();
-    await previous;
+    await Promise.all([previous, next]);
+    expect(prepare).toHaveBeenCalledTimes(2);
     expect(photos.photos().map((photo) => photo.name)).toEqual(['nouveau.png']);
     expect(photos.errors()).toEqual([]);
     expect(photos.busy()).toBe(false);
     photos.clear();
   });
-  it('ignore les résultats tardifs et libère immédiatement les URL en attente au changement de contexte', async () => {
-    let finish!: () => void;
-    const photos = new IncidentPhotos(() => new Promise<void>((resolve) => { finish = resolve; }));
+  it('ignore résultats et erreurs tardifs après annulation/destruction', async () => {
+    let fail!: (reason: Error) => void;
+    const photos = new IncidentPhotos(
+      () =>
+        new Promise<PreparedPhoto>((_, reject) => {
+          fail = reject;
+        }),
+    );
     const operation = photos.add([file('ancien.png')]);
-    await vi.waitFor(() => expect(finish).toBeTypeOf('function'));
+    await vi.waitFor(() => expect(fail).toBeTypeOf('function'));
     photos.clear();
-    expect(URL.revokeObjectURL).toHaveBeenCalledTimes(1);
-    finish();
+    fail(new Error('erreur tardive'));
     await operation;
     expect(photos.photos()).toEqual([]);
     expect(photos.errors()).toEqual([]);
     expect(photos.busy()).toBe(false);
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
   });
-  it('refuse un contenu dont la signature ne correspond pas au type annoncé', async () => {
-    const decode = vi.fn(async () => {});
-    const photos = new IncidentPhotos(decode);
-    await photos.add([new File(['GIF89a'], 'faux.png', { type: 'image/png' })]);
-    expect(decode).not.toHaveBeenCalled();
-    expect(photos.photos()).toHaveLength(0);
-    expect(photos.errors()[0]).toContain('format annoncé');
+  it('une sélection annulée ne change ni photos, ni erreurs, ni attente', async () => {
+    const photos = new IncidentPhotos(async () => prepared());
+    await photos.add([file()]);
+    photos.errors.set(['message précédent']);
+    await photos.add([]);
+    expect(photos.photos()).toHaveLength(1);
+    expect(photos.errors()).toEqual(['message précédent']);
+    expect(photos.busy()).toBe(false);
+    photos.clear();
   });
-  it('révoque toutes les URL acceptées à la destruction et ne les révoque pas deux fois', async () => {
-    const photos = new IncidentPhotos(async () => {});
+  it('révoque toutes les URL acceptées à la destruction sans double révocation', async () => {
+    const photos = new IncidentPhotos(async () => prepared());
     await photos.add([file(), file()]);
     photos.remove(photos.photos()[0].id);
     photos.clear();

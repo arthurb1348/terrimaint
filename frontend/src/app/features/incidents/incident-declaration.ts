@@ -167,8 +167,15 @@ export class IncidentDeclaration {
   }
 
   private focusAfterRender(selector: string): void {
-    afterNextRender(() => this.host.nativeElement.querySelector<HTMLElement>(selector)?.focus(), {
-      injector: this.injector,
-    });
+    afterNextRender(
+      () => {
+        const control = this.host.nativeElement.querySelector<HTMLElement>(selector);
+        control?.focus();
+        control?.scrollIntoView?.({ block: 'center' });
+      },
+      {
+        injector: this.injector,
+      },
+    );
   }
 }

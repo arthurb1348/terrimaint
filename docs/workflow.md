@@ -159,3 +159,8 @@ présenter à l'oral. Une CI verte complète cette relecture.
 - [Rulesets GitHub](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/creating-rulesets-for-a-repository)
 - [Relecture des PR et limite d'auto-approbation](https://docs.github.com/en/pull-requests/how-tos/review-pull-requests/reviewing-proposed-changes-in-a-pull-request)
 - [uv dans GitHub Actions](https://docs.astral.sh/uv/guides/integration/github/)
+
+Pour la revue photos #57, utiliser [la procédure Pixel et les mesures](photos-demo.md) :
+caméra/galerie natives et performances physiques restent à Arthur. Lire CI et Responsive
+sur le dernier commit, puis le résumé Firebase Hosting **de cette exécution** ; comparer
+le SHA à `/deployment.json`. Ne pas déduire le succès de la présence d’une configuration.

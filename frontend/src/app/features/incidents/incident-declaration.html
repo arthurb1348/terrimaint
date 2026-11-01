@@ -88,21 +88,75 @@
           </div>
           <section aria-labelledby="photos-title">
             <h2 id="photos-title">Photos (facultatives)</h2>
-            <label for="incident-photos">Choisir des photos</label>
-            <p id="photos-help" class="help">3 photos maximum, 5 Mio par photo. JPEG, PNG ou WebP. Le navigateur peut proposer la prise de vue ou le choix de fichiers. Les photos choisies restent sur cet appareil pendant la saisie.</p>
-            <input #photoInput id="incident-photos" type="file" accept="image/jpeg,image/png,image/webp"
-              multiple aria-describedby="photos-help photos-status photos-errors" (change)="selectPhotos(photoInput)" />
-            <p id="photos-status" role="status">{{ media.busy() ? 'Vérification des photos…' : media.photos().length + ' photo(s) sélectionnée(s).' }}</p>
+            <p id="photos-help" class="help">
+              3 photos maximum. JPEG, PNG ou WebP : 24 Mio et 24 mégapixels maximum par image.
+              Préparation sur cet appareil.
+            </p>
+            <div class="photo-actions">
+              <button
+                id="take-photo"
+                class="page-action secondary"
+                type="button"
+                aria-describedby="photos-help capture-help photos-status photos-errors"
+                (click)="cameraInput.click()"
+              >
+                Prendre une photo
+              </button>
+              <button
+                id="incident-photos"
+                class="page-action secondary"
+                type="button"
+                aria-describedby="photos-help photos-status photos-errors"
+                (click)="photoInput.click()"
+              >
+                Choisir dans la galerie
+              </button>
+            </div>
+            <p id="capture-help" class="help">La prise de vue proposée dépend du navigateur.</p>
+            <input
+              #cameraInput
+              id="camera-file"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              capture="environment"
+              hidden
+              (change)="selectPhotos(cameraInput)"
+            />
+            <input
+              #photoInput
+              id="gallery-file"
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              hidden
+              (change)="selectPhotos(photoInput)"
+            />
+            <p id="photos-status" role="status">
+              {{
+                media.busy()
+                  ? 'Préparation des photos…'
+                  : media.photos().length + ' photo(s) sélectionnée(s).'
+              }}
+            </p>
             <div id="photos-errors" aria-live="polite">
-              @for (error of media.errors(); track $index) { <p class="error">{{ error }}</p> }
+              @for (error of media.errors(); track $index) {
+                <p class="error">{{ error }}</p>
+              }
             </div>
             <div class="photo-gallery">
               @for (photo of media.photos(); track photo.id) {
                 <figure>
                   <img [src]="photo.src" [alt]="photo.alt" width="300" height="225" />
                   <figcaption>{{ photo.name }}</figcaption>
-                  <button class="page-action secondary" type="button" [id]="'remove-photo-' + photo.id"
-                    [attr.aria-label]="'Supprimer la photo ' + photo.name" (click)="removePhoto(photo.id)">Supprimer la photo</button>
+                  <button
+                    class="page-action secondary"
+                    type="button"
+                    [id]="'remove-photo-' + photo.id"
+                    [attr.aria-label]="'Supprimer la photo ' + photo.name"
+                    (click)="removePhoto(photo.id)"
+                  >
+                    Supprimer la photo
+                  </button>
                 </figure>
               }
             </div>
@@ -146,7 +200,9 @@
             </p>
           </div>
           <div class="actions">
-            <button class="page-action" type="submit" [disabled]="media.busy()">Vérifier le signalement</button>
+            <button class="page-action" type="submit" [disabled]="media.busy()">
+              Vérifier le signalement
+            </button>
             <a
               class="page-action secondary"
               [routerLink]="['../../../equipements', item.id]"
@@ -178,16 +234,17 @@
         <h2>Photos sélectionnées</h2>
         <div class="photo-gallery">
           @for (photo of media.photos(); track photo.id) {
-            <figure><img [src]="photo.src" [alt]="photo.alt" width="300" height="225" /><figcaption>{{ photo.name }}</figcaption></figure>
-          } @empty { <p>Aucune photo sélectionnée.</p> }
+            <figure>
+              <img [src]="photo.src" [alt]="photo.alt" width="300" height="225" />
+              <figcaption>{{ photo.name }}</figcaption>
+            </figure>
+          } @empty {
+            <p>Aucune photo sélectionnée.</p>
+          }
         </div>
         <p>Le statut du matériel reste inchangé.</p>
         <div class="actions">
-          <button
-            class="page-action"
-            type="button"
-            (click)="complete()"
-          >
+          <button class="page-action" type="button" (click)="complete()">
             Envoyer le signalement
           </button>
           <button type="button" class="secondary page-action" (click)="edit()">
@@ -212,9 +269,6 @@
     }
   } @else {
     <h1 id="incident-title-heading" tabindex="-1">Équipement introuvable</h1>
-    <p>
-      Aucun équipement ne correspond à cet identifiant. La déclaration est
-      indisponible.
-    </p>
+    <p>Aucun équipement ne correspond à cet identifiant. La déclaration est indisponible.</p>
   }
 </section>

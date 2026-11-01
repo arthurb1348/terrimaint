@@ -1,6 +1,9 @@
-# Revue Pixel — issue #58 en revue jusqu’à fusion
+# Revue Pixel — issue #58 intégrée par #60
 
 ## Périmètre et ordre
+
+#58 est intégrée par la PR #60 fusionnée le 1er novembre 2026 (`73889125a5683af04d7360423d53e16802e73be7`).
+#57 est en revue ; la procédure photos détaillée est dans [le guide](photos-demo.md).
 
 La PR Scanner #56 est intégrée à `main` au commit
 `5d1867a17a993f1005c87276665b29004787eab6`, vérifié sur GitHub et par Git distant.
@@ -33,8 +36,9 @@ Les données sont **locales et fictives**. Déclaration et programmation changen
 l’étape du composant ; les libellés de fin n’attestent ni envoi, ni création, ni notification.
 Les listes restent fixes jusqu’à #59. Aucun nouvel identifiant, lien vers une création,
 stockage distant ou synchronisation. Quitter/recharger perd saisie et photos choisies.
-Les photos conservent le comportement #55 : 3 fichiers de 5 Mio, JPEG/PNG/WebP, sans
-redimensionnement ni nouvelle capture. Les routes restent publiques sans permissions serveur.
+À la fusion de #60, les photos conservaient le comportement #55 : 3 fichiers de 5 Mio.
+La PR #57 en revue remplace cette limite par une préparation bornée et deux entrées natives ;
+voir [les mesures et la revue Pixel photos](photos-demo.md). Les routes restent publiques sans permissions serveur.
 Le contrôle HTTP réel Django reste sur l’accueil général, indépendant des parcours locaux.
 
 Le bloc Scanner, juste au-dessus du champ d’identification, distingue référence invalide et inconnue avec texte et bordure.
@@ -85,3 +89,6 @@ aucun déploiement n’est réalisé par #58. Sans cette URL, tester la saisie e
 1. Pourquoi un vrai lien permet-il nouvel onglet et clavier sans gestionnaire de clic de carte ?
 2. Où sont conservés `q` et les filtres, et pourquoi les listes ne changent-elles pas après un formulaire ?
 3. Pourquoi le bloc d’erreur garde-t-il `aria-describedby` et une seule région d’annonce ?
+
+La procédure photos #57 complète la revue ci-dessus ; Hosting existant reste utilisé sans
+changement de configuration. Comparer le SHA du résumé de cette exécution et `/deployment.json`.
