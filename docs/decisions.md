@@ -36,6 +36,26 @@ Django/DRF/PostgreSQL conservée. Les entrées historiques ci-dessous décrivent
 cette décision remplace leurs anciennes mentions de démonstration dans l’interface proposée.
 
 ## 2026-10-31 — Identification QR Agent (issue #44, fusionnée)
+## 2026-11-01 — Hosting statique et previews de PR (issue #61, en revue)
+
+Conserver le projet Firebase TerriMaint existant et Spark, sans App Hosting ni backend.
+La configuration racine ne publie que le build Angular. CI réutilise ses contrôles
+Backend/Frontend et son artifact, puis un runner séparé reçoit les identifiants pour
+un canal `pr-N` ou `live`. Le head exact de PR est construit et annoncé ; Responsive
+conserve son contrôle séparé du checkout de fusion. Pas de `pull_request_target`,
+pas de preview privilégiée de fork, pas de commentaire nécessitant des droits d'écriture.
+Sérialiser les envois sans annulation et relire la source courante évite les retours
+à un ancien commit. Expiration à sept jours, revalidation du cache et manifeste public
+pour la revue sur Pixel. La CLI directe désactive la synchronisation des domaines Firebase Auth. Le manifeste
+et le résumé portent un libellé avec le vrai SHA ; live le porte aussi dans le message
+de release. Cela couvre aussi une PR déjà ouverte sélectionnée depuis main.
+
+L'ID public n'étant pas disponible, une variable est exigée ; Arthur réalise lui-même
+la liaison officielle sur PC après revue. La configuration reste **en revue et non
+activée par cette tâche** ; seul un succès authentifié établira la publication.
+Le [guide](firebase-hosting.md) détaille les choix, permissions, activation et preuves.
+
+## 2026-10-31 — Identification QR Agent (issue #44, en revue)
 
 Le QR contient une référence seule, normalisée par `trim().toUpperCase()` puis
 comparée entièrement aux identifiants de la source typée Matériel existante. Format

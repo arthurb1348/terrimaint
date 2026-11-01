@@ -40,7 +40,7 @@ relit, demande des explications et prend la décision d'intégration.
 | Exécuter les tests et signaler les échecs | Agent dans son environnement, GitHub Actions sur la PR |
 | Proposer les mises à jour de dépendances | Dependabot |
 | Relire le comportement et le diff, décider la fusion | Arthur |
-| Décider un déploiement | Arthur, une fois un workflow de déploiement défini |
+| Activer les publications Hosting puis valider le site | Arthur ; après activation, CI publie les PR internes et main selon le [guide](firebase-hosting.md) |
 
 ## Cycle qualité et sécurité
 
@@ -110,6 +110,16 @@ Pour une PR de documentation, expliquer la provenance des faits, la structure et
 de mettre à jour les documents ; indiquer si la circulation de données n'est pas concernée.
 La checklist humaine reste ouverte tant qu'Arthur n'a pas validé les critères et compris
 la modification. Une CI verte ne remplit pas ces cases à sa place.
+
+## Revue et publication Hosting (issue #61)
+
+Le [guide Hosting](firebase-hosting.md) décrit l'activation PC par Arthur, le projet
+TerriMaint/Spark, les variables/secrets et la preuve authentifiée à recueillir.
+Après activation, un succès Backend/Frontend autorise une preview, pas la fusion :
+Responsive et validation humaine restent à examiner. Le résumé CI contient le lien
+et le SHA ; le même canal est actualisé à chaque nouveau commit courant validé.
+CI lancé depuis `main` avec `pr_number` permet de revoir une PR déjà ouverte sans
+modifier sa branche. La configuration en revue ne prouve pas un déploiement réussi.
 
 ## Réglage Codex
 

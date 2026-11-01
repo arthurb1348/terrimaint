@@ -60,3 +60,12 @@ réessayer. Vérifier aussi l'affichage mobile (375 px) et la navigation au clav
 
 Les explications des sources, tests et JSON sont dans [le guide pédagogique](../docs/code-guide.md).
 Les instructions communes sont dans [le README racine](../README.md).
+
+## Revue HTTPS sur Pixel
+
+Le build `dist/terrimaint/browser` peut être publié par la configuration Hosting
+préparée pour #61. Voir le [guide Firebase](../docs/firebase-hosting.md) : activation
+personnelle sur PC, lancement d'une PR déjà ouverte, lien et SHA dans Actions.
+Les commandes de liaison se lancent à la **racine du monorepo**, pas dans ce dossier.
+Sans Django, le site statique affiche API indisponible ; aucune publication authentifiée
+n'a encore été validée pour cette automatisation.

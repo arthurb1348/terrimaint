@@ -152,6 +152,16 @@ les choix, tests et la procédure Pixel. Viennent ensuite les photos #57 puis la
 partagée #59 ; Django/DRF/PostgreSQL reste la cible backend. Aucun déploiement Firebase
 ni changement de dépendance n’appartient à #58. #47 et #48 gardent leur périmètre futur.
 
+## Prévisualiser sur Pixel avec Firebase Hosting
+
+La configuration de l'[issue #61](https://github.com/arthurb1348/terrimaint/issues/61)
+prépare un canal HTTPS `pr-N` par PR interne et la publication de `main` sur `live`,
+après Backend et Frontend. **Activation Firebase/GitHub et première publication
+authentifiée restant à Arthur** ; aucune fusion automatique. Responsive reste indépendant.
+Le [guide Hosting](docs/firebase-hosting.md) précise les variables/secrets, la liaison
+à effectuer depuis la racine sur PC, le lancement d'une PR déjà ouverte (#60), le lien
+Actions et le SHA publié. Aucun backend n'est déployé : API indisponible est attendu.
+
 ## Organisation
 
 | Dossier ou fichier | Rôle |

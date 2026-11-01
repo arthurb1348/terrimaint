@@ -2,7 +2,8 @@
 
 ## Référence et usage
 
-- Date de vérification : 2026-11-01 (Europe/Paris).
+
+- Date de vérification ciblée : 2026-11-01 (Europe/Paris), préparation Hosting #61 et revue Pixel #58. Les autres preuves conservent leur date.
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
 - Code de référence : `main`, commit `5d1867a17a993f1005c87276665b29004787eab6` (PR #56 fusionnée), vérifié sur GitHub et par Git distant.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
@@ -595,9 +596,16 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   modification du ruleset ; les jobs `Backend` et `Frontend` restent obligatoires.
 - Dependabot propose des PR hebdomadaires pour uv et GitHub Actions ; aucune entrée npm
   n'est configurée et aucune fusion automatique n'est prévue par le workflow.
-- **CD non présente** : aucun workflow de déploiement.
+- **CD en cours — #61** : configuration Hosting et workflow réutilisable préparés en PR,
+  après Backend/Frontend, avec URL `pr-N`, provenance SHA et publication de main sur live.
+  Responsive reste indépendant ; aucune suite coûteuse dupliquée. Le [guide](firebase-hosting.md)
+  décrit l'activation PC et le lancement d'une PR déjà ouverte, dont #60 (restée intacte).
+  Aucun ID Firebase disponible ici ; aucune clé, IAM ou secret créé/modifié. Aucun
+  déploiement authentifié exécuté ni preuve Pixel fournie par cette tâche.
+  Build réel, tests de sécurité ciblés, actionlint et émulateur Hosting réussis ; ces
+  vérifications ne prouvent pas que la publication distante fonctionne après liaison.
 - Le [ruleset versionné](../.github/rulesets/main.json) prévoit `Backend` et `Frontend`.
-  Lecture distante au 2026-10-23 : [ruleset 24590632](https://github.com/arthurb1348/terrimaint/rules/24590632)
+  Lecture distante revérifiée le 2026-11-01 : [ruleset 24590632](https://github.com/arthurb1348/terrimaint/rules/24590632)
   actif sur `main`, PR et discussions résolues exigées, **Backend et Frontend obligatoires**,
   branche actualisée, historique linéaire, force pushes et suppression bloqués, aucun bypass.
   Zéro approbation tierce obligatoire ; la relecture par Arthur reste nécessaire.
@@ -606,6 +614,14 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 - Les résultats de CI sont attachés à chaque commit/PR : une configuration présente ne
   prouve pas une exécution réussie. Les résultats de la PR #19 sont liés ci-dessus ;
   chaque nouveau commit demande sa propre vérification.
+
+## Travaux en cours — prévisualisations Hosting #61
+
+Branche dédiée depuis `5d1867a…` ; aucun changement UX de #58/PR #60 inclus.
+Après intégration, l'automatisation restera désactivée tant qu'Arthur n'aura pas lié
+le bon projet TerriMaint/Spark, renseigné les variables et activé la publication.
+Le résultat opérationnel demandera une preuve réelle : run réussi, URL HTTPS et SHA
+comparé au head, puis actualisation du même canal lors d'un nouveau commit.
 
 ## État de la documentation
 

@@ -89,7 +89,9 @@ le README ; les mécanismes des simulations sont détaillés dans le guide du co
 Le [workflow CI](../.github/workflows/ci.yml) se déclenche sur les PR, les push sur `main`
 et manuellement. Deux jobs indépendants installent les dépendances verrouillées :
 `Backend` lance le contrôle Python ; `Frontend` lance lint, tests et build, puis conserve
-le build sept jours. Aucun workflow de déploiement n'est présent.
+le build sept jours. L'issue #61 prépare un [workflow Hosting](firebase-hosting.md)
+qui réutilise cet artifact après ces contrôles, dans un runner distinct, sans backend.
+L'activation personnelle et la première publication authentifiée restent à Arthur.
 
 Une issue précise le besoin ; une branche isole le changement ; la PR rend le diff et les
 preuves vérifiables avant intégration. Au 16 octobre 2026, le ruleset distant exige une PR,

@@ -1237,3 +1237,25 @@ La donnée circule de la saisie ou des pixels vers le même résolveur, puis de 
 reconnu vers la route interne et la fiche existante. Aucune URL brute du QR n’est suivie.
 `stop()` invalide la session en plus de fermer ses pistes : c’est ce qui protège des
 permissions et décodages terminés après le départ. La caméra ne reprend jamais seule.
+
+## Publication Hosting préparée (issue #61)
+
+Le [guide de publication](firebase-hosting.md) porte la procédure PC, les conditions
+exactes de CI et les limites. Aucun backend ni réponse santé positive ne sont ajoutés.
+
+| Fichier / clé | Rôle |
+| --- | --- |
+| `firebase.json` → `hosting.public` | Seul répertoire publié : `frontend/dist/terrimaint/browser` |
+| `hosting.ignore` | Exclut fichiers cachés, configuration et éventuels node_modules |
+| `hosting.headers` | `Cache-Control: no-cache` pour revalidation, utile après un nouveau commit sur Pixel |
+| `hosting.rewrites` | Les fichiers statiques existants sont servis d'abord ; les autres chemins servent `/index.html` pour Angular |
+| `.github/workflows/ci.yml` | Résout le SHA, conserve Backend/Frontend, puis appelle la publication si activée |
+| `.github/workflows/firebase-hosting.yml` | Runner distinct ; artifact du même run, verrou de canal, dernier état GitHub, publication |
+| `.github/scripts/hosting-target.cjs` | Choix par numéro de PR, conditions dépôt/base/état et refus d'une source périmée |
+| `.github/scripts/deploy-hosting.cjs` | Valide cible/configuration/compte, écrit la provenance, nomme le release live et détruit le fichier d'identifiants |
+| `.github/scripts/hosting.test.cjs` | Refus importants et cycle de publication avec une CLI factice, sans Firebase authentifié |
+
+Pour changer la durée de preview, adapter `--expires` dans `deploymentArgs`, les tests
+et le guide. Pour changer le répertoire publié, adapter ensemble configuration, garde
+du script, chemin artifact et documentation. Pour changer le projet, vérifier l'ID et le
+compte associé avant de modifier les variables GitHub ; ne jamais changer vers CDA par défaut.
