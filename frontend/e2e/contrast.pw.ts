@@ -126,6 +126,7 @@ for (const space of ['agent', 'responsable']) {
       await expect(field).toHaveValue('');
       await states(page, field, info, 'declaration-champ-vide', true);
     }
+    for (const action of await main.locator('.photo-actions button').all()) await states(page, action, info, 'photo-action');
     await main.getByRole('button', { name: 'Vérifier le signalement', exact: true }).click();
     const invalid = main.locator('#incident-title');
     await expect(invalid).toBeFocused();

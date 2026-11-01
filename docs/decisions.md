@@ -1,10 +1,37 @@
 # Décisions techniques et métier
 
-## 2026-11-01 — Ajustements après revue Pixel (issue #58, en revue)
+## 2026-11-01 — Photos de terrain bornées (issue #57, en revue)
+
+Préalable vérifié : #60 fusionnée, dernier `origin/main` à `73889125a5683af04d7360423d53e16802e73be7`.
+Branche dédiée `feat/57-prepare-report-photos`, états locaux précédents préservés par nouveau clone.
+Deux entrées natives : capture arrière demandée par `capture="environment"` (comportement
+selon navigateur), galerie multiple sans capture. Pas de lecteur caméra ni de dépendance.
+
+Choix initiaux : 3 photos facultatives, 24 Mio/24 MP/8 192 px par axe, en-tête ≤ 256 Kio
+lu avant décodage, JPEG/PNG/WebP statique vérifié et réellement décodé. Préparer un JPEG
+orienté sans agrandir, côté long ≤ 1 920 px, qualités 0,86/0,78/0,70 ; repli ≤ 1 600 px,
+six essais maximum, puis refus clair. Sortie ≤ 1,5 Mio **mesurée**, dimensions et contenu
+relus/redécodés. Ratio conservé à l’arrondi, transparence sur blanc. Voir [le tableau
+complet et les mesures](photos-demo.md) ; ces choix restent à évaluer sur Pixel physique.
+
+File séquentielle conservée après remise à zéro, annulation des lectures et invalidation
+des continuations non interrompables ; fermeture des bitmaps, remise à zéro des canvas,
+révocation des seules URL préparées et retrait des références aux fichiers inutiles.
+Supprimer ne permet pas à une autre préparation de réintroduire l’image. Récapitulatif
+et Modifier gardent la même URL ; changement de matériel/départ détruit le parcours.
+
+Les mesures montrent un gain pour le gros PNG bruité, mais une augmentation pour les
+petits PNG/WebP déjà compressés. Aucun gain universel ni benchmark Pixel annoncé.
+Les tests navigateur utilisent de vraies images et vérifient les pixels EXIF ; les tests
+unitaires avec doublures couvrent les erreurs, le poids et les résultats tardifs.
+Les listes restent fixes jusqu’à #59. Ni téléversement, stockage, Firebase Storage,
+authentification, GPS, audio ni abstraction anticipée. Django/DRF/PostgreSQL reste la cible.
+
+## 2026-11-01 — Ajustements après revue Pixel (issue #58, intégrée par #60)
 
 Depuis `main` vérifié à `5d1867a17a993f1005c87276665b29004787eab6` (#56 fusionnée),
 appliquer les décisions d’Arthur avant les photos #57 puis la mémoire partagée #59.
-#58 reste **en revue jusqu’à fusion** ; #47/#48 gardent leur périmètre futur.
+#58 est intégrée par #60 (`7388912…`) ; #57 est en revue, #47/#48 gardent leur périmètre futur.
 
 La carte Matériel contient un seul vrai lien englobant image et texte, nommé par son titre.
 Dans les listes de signalements/interventions présentées en cartes, le pseudo-élément du
@@ -36,7 +63,7 @@ Django/DRF/PostgreSQL conservée. Les entrées historiques ci-dessous décrivent
 cette décision remplace leurs anciennes mentions de démonstration dans l’interface proposée.
 
 ## 2026-10-31 — Identification QR Agent (issue #44, fusionnée)
-## 2026-11-01 — Hosting statique et previews de PR (issue #61, en revue)
+## 2026-11-01 — Hosting statique et previews de PR (issue #61, intégrée par #62)
 
 Conserver le projet Firebase TerriMaint existant et Spark, sans App Hosting ni backend.
 La configuration racine ne publie que le build Angular. CI réutilise ses contrôles
@@ -50,9 +77,9 @@ pour la revue sur Pixel. La CLI directe désactive la synchronisation des domain
 et le résumé portent un libellé avec le vrai SHA ; live le porte aussi dans le message
 de release. Cela couvre aussi une PR déjà ouverte sélectionnée depuis main.
 
-L'ID public n'étant pas disponible, une variable est exigée ; Arthur réalise lui-même
-la liaison officielle sur PC après revue. La configuration reste **en revue et non
-activée par cette tâche** ; seul un succès authentifié établira la publication.
+La configuration a été intégrée par #62 (`797ebc2…`) ; Arthur a depuis activé Hosting.
+L’ID reste fourni par variable, aucune configuration Firebase nouvelle dans #57.
+Chaque PR doit néanmoins consulter son succès réel, son URL et son SHA publié.
 Le [guide](firebase-hosting.md) détaille les choix, permissions, activation et preuves.
 
 ## 2026-10-31 — Identification QR Agent (issue #44, en revue)

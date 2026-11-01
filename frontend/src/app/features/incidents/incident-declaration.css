@@ -131,3 +131,14 @@ form > section {
 input[type='file'] {
   width: 100%;
 }
+
+.photo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-block: 12px;
+}
+.photo-actions button {
+  max-width: 100%;
+  white-space: normal;
+}

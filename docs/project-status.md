@@ -3,9 +3,9 @@
 ## Référence et usage
 
 
-- Date de vérification ciblée : 2026-11-01 (Europe/Paris), préparation Hosting #61 et revue Pixel #58. Les autres preuves conservent leur date.
+- Date de vérification ciblée : 2026-11-01 (Europe/Paris), fusion #58/#60 et #61/#62, préparation photos #57. Les autres preuves conservent leur date.
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
-- Code de référence : `main`, commit `5d1867a17a993f1005c87276665b29004787eab6` (PR #56 fusionnée), vérifié sur GitHub et par Git distant.
+- Code de référence : `main`, commit `73889125a5683af04d7360423d53e16802e73be7` (PR #60 fusionnée, #62 également intégrée), vérifié sur GitHub et par Git distant.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
   les PR non fusionnées ne font pas partie des fonctionnalités implémentées.
 
@@ -37,7 +37,7 @@ L'harmonisation UX #51 est intégrée par la [PR #52](https://github.com/arthurb
 fusionnée le 31 octobre 2026 : incrément **4/10**. La correction de contraste
 [#53](https://github.com/arthurb1348/terrimaint/issues/53) est intégrée par la PR #54 fusionnée. #43 est intégrée par la [PR #55](https://github.com/arthurb1348/terrimaint/pull/55), incrément 5/10.
 Le Scanner QR #44 est intégré par la PR #56 fusionnée. Les ajustements Pixel #58 sont
-**en revue jusqu’à fusion**, avant les photos #57 puis la mémoire partagée #59.
+intégrés par #60 ; #57 photos est en revue avant #59 mémoire partagée, #45 GPS, #46 audio, #47 dashboard et #48 stabilisation.
 PostgreSQL ([#38](https://github.com/arthurb1348/terrimaint/issues/38)) est **différé** et ne
 bloque pas cet incrément. La cible Django/DRF/PostgreSQL reste prévue ; la démonstration
 locale ne prétend pas fournir persistance, authentification ou permissions métier.
@@ -390,19 +390,33 @@ PNG et capteur/permissions simulés ; aucune caméra physique n’est validée. 
 locaux et les liens réels Backend/Frontend/Responsive du dernier commit sont dans la PR.
 Les cases de validation humaine restent à Arthur.
 
-## Travaux en cours — Revue Pixel #58
+## Revue Pixel #58 intégrée par #60
 
-Branche `fix/58-pixel-ux` depuis le dernier `origin/main` vérifié. #58 reste **en revue
-jusqu’à fusion** : liens de grandes cartes, dashboard Responsable sans raccourci Agent,
+PR #60 fusionnée le 1er novembre 2026 à `7388912…` : liens de grandes cartes, dashboard Responsable sans raccourci Agent,
 retrait des avertissements techniques répétés et erreurs Scanner encadrées. Le sélecteur
 du shell, les filtres/retours, le menu Plus, le seuil Scanner et la santé réelle sur l’accueil
 sont conservés. Aucun dashboard calculé ni permission nouvelle.
 
 Les formulaires ne créent toujours aucun objet dans les listes fixes. Aucun envoi,
 notification, stockage distant ou synchronisation. Les sections historiques ci-dessus
-conservent les textes d’origine ; la décision #58 propose de déplacer les limites de
+conservent les textes d’origine ; la décision #58 déplace les limites de
 l’interface vers le README et les guides. Voir [la procédure Pixel](pixel-ux.md) et les
 preuves du dernier commit dans la PR. Les validations humaines restent à Arthur.
+
+## Travaux en cours — Photos #57
+
+Branche `feat/57-prepare-report-photos`, depuis `7388912…`, après vérification distante de
+la fusion #60. Deux actions natives dans les deux espaces ; trois photos facultatives,
+préparation séquentielle bornée, version préparée dans aperçu/récapitulatif/Modifier.
+Entrée ≤ 24 Mio/24 MP/8 192 px par axe ; sortie JPEG ≤ 1 920 px et 1,5 Mio mesurée,
+avec refus préservant saisies et fichiers valides. Annulation, résultats tardifs, suppression,
+ressources, focus et double validation couverts. Le [guide photos](photos-demo.md) donne
+les constantes, mesures réellement obtenues et leurs limites. Revue Pixel et fusion à Arthur.
+
+#57 reste **en revue jusqu’à fusion** ; aucune liste enrichie, persistance ou backend métier.
+#59 mémoire partagée reste prévu, puis #45 GPS → #46 audio → #47 dashboard → #48 stabilisation.
+Aucune configuration Hosting, permission, secret ou dépendance modifiée par #57.
+Les résultats CI/Responsive et URL Hosting du commit proposé sont à lire dans la PR.
 
 ## Fonctionnalités prévues et non implémentées
 
@@ -574,7 +588,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   la variante locale utilise Chromium système 151.0.7922.173, sans modifier le dépôt ou la CI.
 - La PR #56 fusionnée intègre **268 tests Vitest dans 19 fichiers** et **328 scénarios
   Playwright** : Scanner, ressources caméra et vrai décodage des PNG avec capteur simulé.
-  #58 conserve ces garanties et propose **360 scénarios**, dont 32 nouveaux pour les
+  #58 intégrée conserve ces garanties avec **360 scénarios**, dont 32 nouveaux pour les
   surfaces de cartes, sélection du texte et erreurs QR. Les preuves du dernier commit
   proposé sont dans sa PR ; les cases humaines restent à Arthur.
 - Aucun test de persistance ou de parcours métier complet présent.
@@ -615,13 +629,13 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   prouve pas une exécution réussie. Les résultats de la PR #19 sont liés ci-dessus ;
   chaque nouveau commit demande sa propre vérification.
 
-## Travaux en cours — prévisualisations Hosting #61
+## Prévisualisations Hosting #61 intégrées par #62
 
-Branche dédiée depuis `5d1867a…` ; aucun changement UX de #58/PR #60 inclus.
-Après intégration, l'automatisation restera désactivée tant qu'Arthur n'aura pas lié
-le bon projet TerriMaint/Spark, renseigné les variables et activé la publication.
-Le résultat opérationnel demandera une preuve réelle : run réussi, URL HTTPS et SHA
-comparé au head, puis actualisation du même canal lors d'un nouveau commit.
+La PR #62 est fusionnée au commit `797ebc2…`, présent dans la base de #57.
+Hosting est activé par Arthur ; il héberge uniquement le frontend. Pour chaque revue,
+consulter CI et son job Firebase Hosting, puis comparer URL, SHA du résumé et `/deployment.json`.
+Le [guide](firebase-hosting.md) garde la procédure initiale ; #57 ne reconfigure rien.
+Backend/Frontend conditionnent la publication ; Responsive reste indépendant et requis pour la revue.
 
 ## État de la documentation
 
@@ -646,8 +660,8 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire et tester sur Pixel #58, **en revue jusqu’à fusion** ; #56 est intégrée.
-2. Réaliser ensuite les photos #57 puis la mémoire partagée #59. #47 et #48 ne sont pas clôturées.
+1. #58/#60 est intégrée ; relire/tester les photos #57 **en revue jusqu’à fusion**.
+2. Ensuite #59 mémoire partagée → #45 GPS → #46 audio → #47 dashboard → #48 stabilisation.
 3. Reprendre ultérieurement PostgreSQL #38, le modèle métier et les migrations Django,
    avec validation serveur, envoi et règles d'accès entre collectivités.
 4. Prévoir la validation des entrées, l'authentification, les autorisations, les tests d'accès
@@ -656,7 +670,7 @@ selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humain
 
 La priorité frontend est validée pour préparer l'oral, sans annonce de déploiement métier.
 Aucune de ces protections métier n'est implémentée aujourd'hui. Le workflow responsive et ses
-328 scénarios sont déjà intégrés par #56 ; #58 propose 360 scénarios et complète les contrôles sans modifier les jobs `Backend`/`Frontend`
+360 scénarios sont intégrés par #60 ; #57 propose 376 scénarios et complète les contrôles sans modifier les jobs `Backend`/`Frontend`
 ni les protections distantes.
 
 ## Règles de mise à jour du bilan

@@ -145,19 +145,26 @@ authentification, permission serveur ni synchronisation n’est fourni. Les deux
 restent publics ; le contrôle réel de santé Django reste sur l’accueil général.
 Ces limites sont documentées ici plutôt que répétées dans chaque écran métier.
 
-Les ajustements Pixel [#58](https://github.com/arthurb1348/terrimaint/issues/58) restent
-**en revue jusqu’à fusion** : cartes avec liens natifs, accueil Responsable simplifié,
-messages métier et erreurs QR identifiables. Le [guide de revue](docs/pixel-ux.md) précise
-les choix, tests et la procédure Pixel. Viennent ensuite les photos #57 puis la mémoire
-partagée #59 ; Django/DRF/PostgreSQL reste la cible backend. Aucun déploiement Firebase
-ni changement de dépendance n’appartient à #58. #47 et #48 gardent leur périmètre futur.
+Les ajustements Pixel [#58](https://github.com/arthurb1348/terrimaint/issues/58) sont
+**intégrés par la PR #60**, fusionnée le 1er novembre 2026 (`7388912…`) : cartes avec
+liens natifs, accueil Responsable simplifié, messages métier et erreurs QR identifiables.
+Le [guide de revue](docs/pixel-ux.md) précise les choix et la procédure Pixel.
+
+Les photos **#57 sont en revue** : deux actions Prendre une photo / Choisir dans la galerie,
+préparation locale séquentielle, 3 photos facultatives, entrées JPEG/PNG/WebP jusqu’à
+24 Mio / 24 MP / 8 192 px par axe, JPEG préparés jusqu’à 1 920 px et 1,5 Mio réellement
+contrôlés. Aperçu, récapitulatif et Modifier partagent la version préparée ; aucun envoi
+ni enrichissement des listes. Le [guide photos](docs/photos-demo.md) détaille les bornes,
+mesures et limites ; caméra/galerie natives et qualité sur Pixel restent à Arthur.
+Suite prévue : #59 mémoire partagée → #45 GPS → #46 audio → #47 dashboard → #48 stabilisation.
+Django/DRF/PostgreSQL reste la cible backend ; aucune nouvelle configuration Firebase.
 
 ## Prévisualiser sur Pixel avec Firebase Hosting
 
 La configuration de l'[issue #61](https://github.com/arthurb1348/terrimaint/issues/61)
-prépare un canal HTTPS `pr-N` par PR interne et la publication de `main` sur `live`,
-après Backend et Frontend. **Activation Firebase/GitHub et première publication
-authentifiée restant à Arthur** ; aucune fusion automatique. Responsive reste indépendant.
+est intégrée par la PR #62 : un canal HTTPS `pr-N` par PR interne et la publication de `main` sur `live`,
+après Backend et Frontend. Hosting est déjà activé par Arthur ; aucune fusion automatique. Chaque revue doit
+consulter le résultat réel du job et comparer le SHA publié dans `/deployment.json`. Responsive reste indépendant.
 Le [guide Hosting](docs/firebase-hosting.md) précise les variables/secrets, la liaison
 à effectuer depuis la racine sur PC, le lancement d'une PR déjà ouverte (#60), le lien
 Actions et le SHA publié. Aucun backend n'est déployé : API indisponible est attendu.

@@ -24,7 +24,10 @@ for (const space of ['agent', 'responsable']) {
     await main.getByRole('link', { name: 'Déclarer un incident', exact: true }).click();
     await main.getByLabel('Intitulé', { exact: true }).fill('Photo de démonstration');
     await main.getByRole('radio', { name: /Basse/ }).check();
-    const chooser = main.getByLabel('Choisir des photos', { exact: true });
+    const chooser = main.locator('#gallery-file');
+    const galleryButton = main.getByRole('button', { name: 'Choisir dans la galerie', exact: true });
+    await expect(main.locator('#camera-file')).toHaveAttribute('capture', 'environment');
+    await expect(chooser).not.toHaveAttribute('capture');
     await chooser.setInputFiles([{ name: 'mower.webp', mimeType: 'image/webp', buffer: readFileSync(sample) }, { name: 'casse.png', mimeType: 'image/png', buffer: Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), Buffer.from('pas une image')]) }]);
     await expect(main.getByRole('status')).toContainText('1 photo(s)');
     await expect(main.locator('#photos-errors')).toContainText('impossible à décoder');
@@ -42,10 +45,10 @@ for (const space of ['agent', 'responsable']) {
     await main.getByRole('button', { name: /Supprimer la photo mower/ }).focus();
     await page.keyboard.press('Enter');
     await expect(preview).toHaveCount(0);
-    await expect(chooser).toBeFocused();
-    await expect(chooser).toBeInViewport({ ratio: 1 });
+    await expect(galleryButton).toBeFocused();
+    await expect(galleryButton).toBeInViewport({ ratio: 1 });
     if (space === 'agent') {
-      const inputBounds = (await chooser.boundingBox())!;
+      const inputBounds = (await galleryButton.boundingBox())!;
       const navBounds = (await page.locator('nav').boundingBox())!;
       expect(inputBounds.y + inputBounds.height + 7).toBeLessThanOrEqual(navBounds.y);
     }
