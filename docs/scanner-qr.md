@@ -98,9 +98,11 @@ réseau Wi-Fi n’est généralement pas un contexte sécurisé pour la caméra.
 Servir le frontend de la branche de revue par une URL **HTTPS avec certificat valide,
 reconnu par le téléphone**, via un hébergement de test ou un reverse proxy HTTPS
 configuré et autorisé par Arthur. Le réseau doit permettre d’atteindre cette URL ;
-le serveur doit servir le shell aussi pour `/agent/scanner`. Si l’accueil est testé,
-router `/api/**` vers Django sur la même origine. Aucune ouverture CORS n’est nécessaire.
-Ce dépôt ne fournit pas de déploiement ni de tunnel automatiquement publié.
+le serveur doit servir le shell aussi pour `/agent/scanner`. Pour une intégration avec Django, il faudrait
+router `/api/**` vers lui sur la même origine ; cela ne fait pas partie de l'hébergement
+statique prévu ici. Le [guide Firebase Hosting](firebase-hosting.md) prépare les URL
+HTTPS de PR pour Pixel, après activation personnelle par Arthur. Sans backend,
+l'accueil affiche normalement **API indisponible**. Aucun tunnel n'est publié.
 Ne pas ignorer les alertes TLS, désactiver les protections, modifier des flags navigateur
 ou considérer une adresse LAN HTTP comme sécurisée. Sans HTTPS prêt, tester la saisie
 manuelle et reporter l’essai caméra physique.
