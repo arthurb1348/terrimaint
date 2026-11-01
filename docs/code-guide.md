@@ -122,8 +122,8 @@ un guard ou une permission : l'authentification et les contrôles serveur seront
 
 Les liens restent visibles sur mobile, avec retour à la ligne et cibles d'au moins 44 px.
 Le lien « Aller au contenu » cible l'unique `main`, focalisable avec `tabindex="-1"`.
-La palette et les polices locales existantes sont conservées. La liste Matériel utilise
-des données fictives identifiées ; les autres pages métier restent des espaces réservés.
+La palette et les polices locales existantes sont conservées. Les domaines Matériel, signalements et interventions utilisent
+des jeux fixes ; Profil et Agents restent indisponibles.
 
 Lancer `npm run lint`, `npm test`, `npm run build` dans `frontend/`.
 Dans un navigateur à 375 px et sur desktop : suivre les six liens, vérifier la page active,

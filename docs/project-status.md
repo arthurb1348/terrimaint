@@ -443,7 +443,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 - Backend : **12 cas pytest-django** dans [test_health.py](../backend/tests/test_health.py)
   et [test_settings.py](../backend/tests/test_settings.py) : contrat santé JSON, méthodes,
   routes absentes, hôtes et configuration de la clé secrète. Aucun accès DB métier.
-- Frontend intégré : **199 cas Vitest dans 12 fichiers** :
+- Frontend intégré : **268 cas Vitest dans 19 fichiers** :
   [routage et navigation](../frontend/src/app/app.spec.ts),
   [service HTTP](../frontend/src/app/core/api-health.spec.ts),
   [accueil](../frontend/src/app/home/home.spec.ts),
@@ -458,7 +458,8 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   [détail des interventions](../frontend/src/app/features/interventions/intervention-detail.spec.ts).
   Ils couvrent l'attente, le succès, les JSON invalides, les erreurs HTTP/réseau,
   la relance, l'annulation, le délai de cinq secondes et les routes inconnues.
-  HTTP simulé ; aucun serveur réel requis.
+  Les sept autres fichiers couvrent images, photos en mémoire, résolveur QR, caméra
+  et décodeur. HTTP simulé ; aucun serveur réel requis.
 - La navigation intégrée inclut URL directes et historiques, contexte partagé,
   ouverture/fermeture des menus, focus et absence de synchronisation fictive.
 - Intégré par la [PR #19](https://github.com/arthurb1348/terrimaint/pull/19) :
@@ -472,7 +473,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   a été consultée : [CI réussie](https://github.com/arthurb1348/terrimaint/actions/runs/39932815516)
   et [Responsive réussi](https://github.com/arthurb1348/terrimaint/actions/runs/39932815661).
 - La [PR #20 fusionnée](https://github.com/arthurb1348/terrimaint/pull/20) ajoute
-  **12 cas Vitest** pour Matériel (inclus dans les 199 ci-dessus) et deux parcours Playwright
+  **12 cas Vitest** pour Matériel (inclus dans les 268 ci-dessus) et deux parcours Playwright
   dans quatre formats (soit **64 scénarios intégrés**). Les scénarios
   Matériel contrôlent la recherche dans les deux espaces, le résultat vide, l'effacement au
   clavier, le focus, le contexte et le débordement après saisie/effacement.
@@ -570,6 +571,11 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   Les captures et la CI du dernier commit figurent dans la PR. La commande
   responsive standard locale s'arrête avant tout parcours faute de navigateur Playwright ;
   la variante locale utilise Chromium système 151.0.7922.173, sans modifier le dépôt ou la CI.
+- La PR #56 fusionnée intègre **268 tests Vitest dans 19 fichiers** et **328 scénarios
+  Playwright** : Scanner, ressources caméra et vrai décodage des PNG avec capteur simulé.
+  #58 conserve ces garanties et propose **360 scénarios**, dont 32 nouveaux pour les
+  surfaces de cartes, sélection du texte et erreurs QR. Les preuves du dernier commit
+  proposé sont dans sa PR ; les cases humaines restent à Arthur.
 - Aucun test de persistance ou de parcours métier complet présent.
 - Commandes : `uv run --locked python scripts/check.py` à la racine ;
   `npm run lint`, `npm test`, `npm run build`, `npm run test:responsive` dans `frontend/`.
@@ -634,7 +640,7 @@ selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humain
 
 La priorité frontend est validée pour préparer l'oral, sans annonce de déploiement métier.
 Aucune de ces protections métier n'est implémentée aujourd'hui. Le workflow responsive et ses
-268 scénarios sont déjà intégrés ; le parcours proposé complète les contrôles sans modifier les jobs `Backend`/`Frontend`
+328 scénarios sont déjà intégrés par #56 ; #58 propose 360 scénarios et complète les contrôles sans modifier les jobs `Backend`/`Frontend`
 ni les protections distantes.
 
 ## Règles de mise à jour du bilan
