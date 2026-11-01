@@ -28,6 +28,8 @@ for (const space of ['agent', 'responsable']) {
     const galleryButton = main.getByRole('button', { name: 'Choisir dans la galerie', exact: true });
     await expect(main.locator('#camera-file')).toHaveAttribute('capture', 'environment');
     await expect(chooser).not.toHaveAttribute('capture');
+    await expect(chooser).toBeHidden();
+    await expect(main.locator('#camera-file')).toBeHidden();
     await chooser.setInputFiles([{ name: 'mower.webp', mimeType: 'image/webp', buffer: readFileSync(sample) }, { name: 'casse.png', mimeType: 'image/png', buffer: Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), Buffer.from('pas une image')]) }]);
     await expect(main.getByRole('status')).toContainText('1 photo(s)');
     await expect(main.locator('#photos-errors')).toContainText('impossible à décoder');

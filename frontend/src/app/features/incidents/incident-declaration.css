@@ -142,3 +142,8 @@ input[type='file'] {
   max-width: 100%;
   white-space: normal;
 }
+/* Le style global des input est prioritaire sur la feuille native [hidden].
+   Seuls les deux boutons métier doivent être visibles et dans le parcours clavier. */
+input[type='file'][hidden] {
+  display: none;
+}
