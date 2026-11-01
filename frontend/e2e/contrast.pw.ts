@@ -187,3 +187,18 @@ test('Contrastes rendus : bouton de santé', async ({ page }, info) => {
   await expect(page.getByRole('status')).toContainText('API disponible');
   await states(page, page.getByRole('button', { name: /Vérifier à nouveau/ }), info, 'sante');
 });
+
+test('Contrastes rendus : Scanner, saisie et erreur', async ({ page }, info) => {
+  await page.goto('/agent/scanner');
+  const main = page.getByRole('main');
+  const input = main.getByLabel('Référence du matériel', { exact: true });
+  await states(page, input, info, 'scanner-reference', true);
+  for (const action of await main.locator('.page-action').all()) await states(page, action, info, 'scanner-action');
+  await measure(main.getByRole('status'), info, 'scanner-message');
+  await measure(main.locator('.privacy'), info, 'scanner-confidentialite');
+  await input.fill('EQ-OUT-9999'); await input.press('Enter');
+  await expect(input).toBeFocused();
+  await states(page, input, info, 'scanner-reference-erreur', true);
+  await measure(main.getByRole('alert'), info, 'scanner-erreur');
+  await capture(page, info, 'scanner-contrastes');
+});

@@ -1,0 +1,59 @@
+<section class="feature-page" aria-labelledby="scanner-title">
+  <a class="page-action secondary back-link" routerLink="/agent"
+    ><span aria-hidden="true">←</span><span>Retour à l’accueil Agent</span></a
+  >
+  <h1 id="scanner-title">Scanner</h1>
+  <p class="eyebrow">Données de démonstration</p>
+  <h2>Scanner un QR code</h2>
+  <p>Cadrez le QR code du matériel pour ouvrir sa fiche.</p>
+  <video
+    #preview
+    muted
+    playsinline
+    aria-label="Aperçu de la caméra"
+    [hidden]="state() !== 'scanning'"
+  ></video>
+  <p role="status" aria-live="polite" aria-atomic="true">{{ message() }}</p>
+  <div class="actions">
+    <button
+      type="button"
+      class="page-action"
+      (click)="state() === 'starting' || state() === 'scanning' ? stop() : start()"
+    >
+      {{
+        state() === 'starting'
+          ? 'Annuler la demande caméra'
+          : state() === 'scanning'
+            ? 'Arrêter la caméra'
+            : state() === 'idle'
+              ? 'Démarrer la caméra'
+              : 'Reprendre la caméra'
+      }}
+    </button>
+  </div>
+  <p class="privacy">Aucune image, vidéo ou liste de scans n’est conservée.</p>
+  <form
+    class="business-card"
+    (submit)="$event.preventDefault(); identify(reference.value)"
+    novalidate
+  >
+    <h2>Saisir une référence</h2>
+    <label for="equipment-reference">Référence du matériel</label>
+    <p id="reference-help">
+      Exemple : EQ-OUT-0001. Majuscules ou minuscules acceptées ; espaces de début et de fin
+      ignorés.
+    </p>
+    <input
+      #reference
+      id="equipment-reference"
+      type="text"
+      autocomplete="off"
+      autocapitalize="characters"
+      spellcheck="false"
+      aria-describedby="reference-help reference-error"
+      [attr.aria-invalid]="referenceError() ? 'true' : null"
+    />
+    <p id="reference-error" role="alert" aria-atomic="true">{{ referenceError() }}</p>
+    <button type="submit" class="page-action">Ouvrir la fiche matériel</button>
+  </form>
+</section>

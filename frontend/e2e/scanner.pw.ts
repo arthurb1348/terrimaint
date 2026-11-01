@@ -1,0 +1,212 @@
+import { expect, test, type Page } from '@playwright/test';
+
+// Permissions et capteur simulés. Le PNG et le décodeur jsQR sont réels.
+async function installCamera(page: Page, mode = 'image', reference = 'EQ-OUT-0001') {
+  await page.addInitScript(
+    ({ mode, reference }) => {
+      const state = { requests: 0, stops: 0, release: () => undefined as void };
+      Object.assign(window, { cameraTest: state });
+      Object.defineProperty(navigator.mediaDevices, 'getUserMedia', {
+        configurable: true,
+        value: async () => {
+          state.requests++;
+          if (['denied', 'absent', 'busy'].includes(mode))
+            throw new DOMException(
+              'simulated',
+              mode === 'denied'
+                ? 'NotAllowedError'
+                : mode === 'busy'
+                  ? 'NotReadableError'
+                  : 'NotFoundError',
+            );
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 300;
+          const context = canvas.getContext('2d')!;
+          context.fillStyle = 'white';
+          context.fillRect(0, 0, 300, 300);
+          if (mode === 'image') {
+            const image = new Image();
+            image.src = `/qr-demo/${reference}.png`;
+            await image.decode();
+            context.drawImage(image, 0, 0, 300, 300);
+          }
+          const stream = canvas.captureStream(5);
+          stream.getTracks().forEach((track) => {
+            const stop = track.stop.bind(track);
+            track.stop = () => {
+              state.stops++;
+              stop();
+            };
+          });
+          if (mode === 'late')
+            await new Promise<void>((resolve) => {
+              state.release = resolve;
+            });
+          return stream;
+        },
+      });
+    },
+    { mode, reference },
+  );
+}
+async function stats(page: Page) {
+  return page.evaluate(() => {
+    const state = (window as unknown as { cameraTest: { requests: number; stops: number } })
+      .cameraTest;
+    return { requests: state.requests, stops: state.stops };
+  });
+}
+async function noOverflow(page: Page) {
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth - innerWidth),
+  ).toBeLessThanOrEqual(1);
+}
+
+test('Saisie clavier, erreur annoncée, focus visible et fiche Agent', async ({ page }, info) => {
+  await installCamera(page, 'denied');
+  await page.goto('/agent/scanner');
+  const input = page.getByLabel('Référence du matériel', { exact: true });
+  expect((await stats(page)).requests).toBe(0);
+  await input.focus();
+  await page.keyboard.type('EQ-OUT-9999');
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('alert')).toContainText('inconnue');
+  await expect(input).toBeFocused();
+  await expect(input).toHaveAttribute('aria-invalid', 'true');
+  const focus = await input.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { width: style.outlineWidth, style: style.outlineStyle };
+  });
+  expect(focus).toEqual({ width: '3px', style: 'solid' });
+  await input.scrollIntoViewIfNeeded();
+  await noOverflow(page);
+  await info.attach('scanner-focus', { body: await page.screenshot(), contentType: 'image/png' });
+  for (const value of [
+    'https://example.org/EQ-OUT-0001',
+    '<img src=x onerror=alert(1)>',
+    'EQ-OUT-1',
+  ]) {
+    await input.fill(value);
+    await input.press('Enter');
+    await expect(page.getByRole('alert')).toContainText('invalide');
+    await expect(page).toHaveURL(/\/agent\/scanner$/);
+    await noOverflow(page);
+  }
+  await input.fill('  eq-veh-0042  ');
+  await input.press('Enter');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fourgon de voirie');
+  await page.getByRole('link', { name: 'Déclarer un incident', exact: true }).click();
+  await expect(page.getByLabel('Intitulé', { exact: true })).toBeVisible();
+  expect((await stats(page)).requests).toBe(0);
+});
+for (const [reference, title] of [
+  ['EQ-OUT-0001', 'Tondeuse autoportée'],
+  ['EQ-VEH-0042', 'Fourgon de voirie'],
+  ['EQ-OUT-9999', ''],
+] as const) {
+  test(`Décodage réel PNG ${reference}, flux caméra simulé`, async ({ page }, info) => {
+    await installCamera(page, 'image', reference);
+    await page.goto('/agent/scanner');
+    let navigations = 0;
+    page.on('framenavigated', () => {
+      if (page.url().includes('/equipements/')) navigations++;
+    });
+    expect((await stats(page)).requests).toBe(0);
+    await page.getByRole('button', { name: 'Démarrer la caméra', exact: true }).click();
+    if (title) {
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText(title);
+      await expect(page).toHaveURL(new RegExp(`/agent/equipements/${reference}$`));
+      expect(navigations).toBe(1);
+    } else {
+      await expect(page.getByRole('alert')).toContainText('inconnue');
+      await expect(
+        page.getByRole('button', { name: 'Reprendre la caméra', exact: true }),
+      ).toBeVisible();
+      await expect(page.getByLabel('Référence du matériel', { exact: true })).toBeFocused();
+      expect(navigations).toBe(0);
+    }
+    expect((await stats(page)).stops).toBe(1);
+    await info.attach(`decode-${reference}`, {
+      body: await page.screenshot({ fullPage: true }),
+      contentType: 'image/png',
+    });
+    await noOverflow(page);
+  });
+}
+for (const mode of ['denied', 'absent', 'busy']) {
+  test(`Caméra ${mode} simulée : secours manuel`, async ({ page }) => {
+    await installCamera(page, mode);
+    await page.goto('/agent/scanner');
+    await page.getByRole('button', { name: 'Démarrer la caméra', exact: true }).click();
+    await expect(page.getByRole('status')).toContainText(
+      mode === 'denied' ? 'refusé' : mode === 'busy' ? 'occupée' : 'Aucune caméra',
+    );
+    await page.getByLabel('Référence du matériel', { exact: true }).fill('EQ-OUT-0001');
+    await page.getByRole('button', { name: 'Ouvrir la fiche matériel', exact: true }).click();
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Tondeuse autoportée');
+  });
+}
+test('Arrêt, reprise et nettoyage au départ (flux simulé sans QR)', async ({ page }) => {
+  await installCamera(page, 'blank');
+  await page.goto('/agent/scanner');
+  await page.getByRole('button', { name: 'Démarrer la caméra', exact: true }).click();
+  const stop = page.getByRole('button', { name: 'Arrêter la caméra', exact: true });
+  await expect(stop).toBeFocused();
+  await page.keyboard.press('Enter');
+  expect((await stats(page)).stops).toBe(1);
+  await expect(
+    page.getByRole('button', { name: 'Reprendre la caméra', exact: true }),
+  ).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(stop).toBeVisible();
+  await page.getByRole('link', { name: 'Retour à l’accueil Agent', exact: true }).click();
+  expect((await stats(page)).requests).toBe(2);
+  expect((await stats(page)).stops).toBe(2);
+  expect(
+    await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length })),
+  ).toEqual({ local: 0, session: 0 });
+});
+for (const action of ['cancel', 'leave', 'manual']) {
+  test(`Permission tardive après ${action} : aucun flux survivant`, async ({ page }) => {
+    await installCamera(page, 'late');
+    await page.goto('/agent/scanner');
+    await page.getByRole('button', { name: 'Démarrer la caméra', exact: true }).click();
+    await expect(
+      page.getByRole('button', { name: 'Annuler la demande caméra', exact: true }),
+    ).toBeVisible();
+    if (action === 'cancel')
+      await page.getByRole('button', { name: 'Annuler la demande caméra', exact: true }).click();
+    else if (action === 'leave')
+      await page.getByRole('link', { name: 'Retour à l’accueil Agent', exact: true }).click();
+    else {
+      await page.getByLabel('Référence du matériel', { exact: true }).fill('EQ-VEH-0042');
+      await page.getByRole('button', { name: 'Ouvrir la fiche matériel', exact: true }).click();
+      await expect(page.getByRole('heading', { level: 1 })).toHaveText('Fourgon de voirie');
+    }
+    await page.evaluate(() =>
+      (window as unknown as { cameraTest: { release: () => void } }).cameraTest.release(),
+    );
+    await expect.poll(async () => (await stats(page)).stops).toBe(1);
+    await expect(page).toHaveURL(
+      action === 'cancel'
+        ? /\/agent\/scanner$/
+        : action === 'leave'
+          ? /\/agent$/
+          : /\/agent\/equipements\/EQ-VEH-0042$/,
+    );
+  });
+}
+
+test('Contexte non sécurisé simulé : aucune permission, saisie disponible', async ({ page }) => {
+  await installCamera(page, 'denied');
+  await page.addInitScript(() =>
+    Object.defineProperty(window, 'isSecureContext', { value: false }),
+  );
+  await page.goto('/agent/scanner');
+  await page.getByRole('button', { name: 'Démarrer la caméra', exact: true }).click();
+  await expect(page.getByRole('status')).toContainText('HTTPS');
+  expect((await stats(page)).requests).toBe(0);
+  await page.getByLabel('Référence du matériel', { exact: true }).fill('EQ-OUT-0001');
+  await page.getByRole('button', { name: 'Ouvrir la fiche matériel', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Tondeuse autoportée');
+});

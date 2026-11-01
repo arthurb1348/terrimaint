@@ -861,7 +861,9 @@ test('Les accès Scanner suivent la présentation et la route reste accessible',
   await page.goto('/agent/scanner');
   await expect(page).toHaveURL(/\/agent\/scanner$/);
   await expect(main.getByRole('heading', { name: 'Scanner', exact: true })).toBeVisible();
-  await expect(main).toContainText('prochain incrément');
+  await expect(main.getByRole('button', { name: 'Démarrer la caméra', exact: true })).toBeVisible();
+  await expect(main.getByLabel('Référence du matériel', { exact: true })).toBeVisible();
+  await expect(main.getByRole('button', { name: 'Ouvrir la fiche matériel', exact: true })).toBeVisible();
   // Matériel reste le premier accès après Accueil ; Tab ignore Scanner sur grand écran.
   await navigation.getByRole('link', { name: 'Accueil', exact: true }).focus();
   await page.keyboard.press('Tab');
