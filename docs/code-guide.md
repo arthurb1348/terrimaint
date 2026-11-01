@@ -14,7 +14,7 @@ L’ordre prévu est #58, photos #57, puis mémoire partagée #59. #47/#48 reste
 - `responsable.ts` : trois raccourcis métier ; le sélecteur du shell change d’espace.
 - Templates métier : aides utiles conservées, limites regroupées dans README et guides.
   La fin de formulaire change seulement `step`, sans HTTP métier, stockage ni mutation.
-- `scanner.html/.css/.ts` : bloc d’erreur avant les commandes, titre, texte et bordure ;
+- `scanner.html/.css/.ts` : bloc d’erreur au-dessus du champ, titre, texte et bordure ;
   une seule région `alert` associée au champ. Le statut ne répète plus l’erreur QR.
 - `e2e/pixel-ux.pw.ts`, tests Scanner et assertions existantes : grandes surfaces,
   Ctrl/Cmd-clic natif, clavier, recherche exacte, filtres/retours et erreurs distinctes.

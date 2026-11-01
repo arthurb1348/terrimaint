@@ -227,13 +227,23 @@ test('Erreurs distinctes près du scan, association et correction sans navigatio
     await expect(error).toContainText('reprenez la caméra');
     await expect(input).toBeFocused();
     await expect(input).toHaveAttribute('aria-describedby', 'reference-help reference-error');
+    await expect(error).toBeInViewport({ ratio: 1 });
+    await expect(input).toBeInViewport({ ratio: 1 });
+    const nav = await page.getByRole('navigation', { name: 'Navigation Agent' }).boundingBox();
+    const inputBounds = await input.boundingBox();
+    expect(inputBounds!.y + inputBounds!.height).toBeLessThanOrEqual(nav!.y);
     await expect(page.locator('[role=alert]')).toHaveCount(1);
     const position = await error.evaluate(el => ({
-      beforeForm: Boolean(el.compareDocumentPosition(document.querySelector('form')!) & Node.DOCUMENT_POSITION_FOLLOWING),
-      beforeCameraAction: Boolean(el.compareDocumentPosition(document.querySelector('.actions')!) & Node.DOCUMENT_POSITION_FOLLOWING),
+      insideIdentification: Boolean(el.closest('form')),
+      beforeInput: Boolean(el.compareDocumentPosition(document.querySelector('#equipment-reference')!) & Node.DOCUMENT_POSITION_FOLLOWING),
     }));
-    expect(position).toEqual({ beforeForm: true, beforeCameraAction: true });
-    await error.scrollIntoViewIfNeeded();
+    expect(position).toEqual({ insideIdentification: true, beforeInput: true });
+    const open = page.getByRole('button', { name: 'Ouvrir la fiche matériel', exact: true });
+    await input.press('Tab');
+    await expect(open).toBeFocused();
+    const openBounds = await open.boundingBox();
+    expect(openBounds!.y + openBounds!.height).toBeLessThanOrEqual(nav!.y);
+    await input.focus();
     await info.attach(expected, { body: await page.screenshot(), contentType: 'image/png' });
     await noOverflow(page);
   }

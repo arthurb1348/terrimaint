@@ -22,7 +22,7 @@ et confidentialité utile restent présents. Les fins de parcours sont intitulé
 ni synchronisation. Les jeux restent fixes et les formulaires en mémoire, sans requête métier.
 README et [guide de revue](pixel-ux.md) portent explicitement ces limites.
 
-Les erreurs QR sont regroupées avant les commandes caméra, dans un bloc encadré avec titre,
+Les erreurs QR sont regroupées juste avant la saisie, dans la zone d’identification, dans un bloc encadré avec titre,
 message distinct invalide/inconnu et aide de correction/reprise. Une seule région `alert`
 est liée au champ ; le statut caméra ne répète plus l’échec QR. Focus et saisie sont conservés.
 Contrastes issus des jetons existants ; aucune nouvelle couleur porte seule l’information.

@@ -33,9 +33,11 @@ Le résolveur retourne l’objet existant, sans copie ni équipement inventé.
 Seul son `id` construit `['/agent/equipements', id]`. Aucun contenu brut du QR
 n’est rendu comme HTML, évalué, journalisé ou passé à une ouverture d’URL.
 Une erreur rend le focus au champ ; la correction et la reprise restent disponibles.
-Dans #58, le bloc encadré avant les commandes caméra distingue Référence invalide et
+Dans #58, le bloc encadré au-dessus de la saisie distingue Référence invalide et
 Référence inconnue, conserve `aria-describedby` et une seule région `alert`. Le statut
-caméra ne répète plus l’échec QR. Les limites des jeux locaux restent documentées ici
+caméra ne répète plus l’échec QR. Après rendu du bloc, le champ est focalisé puis
+dégagé de la navigation fixe ; erreur et saisie restent ensemble dans la fenêtre.
+Le callback ignore destruction, nouvelle navigation et erreur déjà effacée. Les limites des jeux locaux restent documentées ici
 et dans le README, sans badge de démonstration dans l’écran Scanner.
 Un verrou empêche plusieurs navigations à partir de reconnaissances répétées ou
 d’une saisie concurrente ; un échec/une annulation de navigation permet de réessayer.

@@ -36,7 +36,7 @@ Les photos conservent le comportement #55 : 3 fichiers de 5 Mio, JPEG/PNG/WebP, 
 redimensionnement ni nouvelle capture. Les routes restent publiques sans permissions serveur.
 Le contrôle HTTP réel Django reste sur l’accueil général, indépendant des parcours locaux.
 
-Le bloc Scanner près du scan distingue référence invalide et inconnue avec texte et bordure.
+Le bloc Scanner, juste au-dessus du champ d’identification, distingue référence invalide et inconnue avec texte et bordure.
 Le champ conserve association, focus et saisie ; correction et reprise restent disponibles.
 Une seule région `alert` annonce l’erreur QR, sans répétition par le statut caméra.
 

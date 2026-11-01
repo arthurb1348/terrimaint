@@ -13,13 +13,6 @@
     [hidden]="state() !== 'scanning'"
   ></video>
   <p role="status" aria-live="polite" aria-atomic="true">{{ message() }}</p>
-  <div id="reference-error" class="scan-error" role="alert" aria-atomic="true">
-    @if (referenceError()) {
-      <strong>Vérifiez le QR code ou la référence</strong>
-      <p>{{ referenceError() }}</p>
-      <p>Corrigez la saisie ci-dessous ou reprenez la caméra.</p>
-    }
-  </div>
   <div class="actions">
     <button
       type="button"
@@ -49,6 +42,13 @@
       Exemple : EQ-OUT-0001. Majuscules ou minuscules acceptées ; espaces de début et de fin
       ignorés.
     </p>
+    <div id="reference-error" class="scan-error" role="alert" aria-atomic="true">
+      @if (referenceError()) {
+        <strong>Vérifiez le QR code ou la référence</strong>
+        <p>{{ referenceError() }}</p>
+        <p>Corrigez la saisie ci-dessous ou reprenez la caméra.</p>
+      }
+    </div>
     <input
       #reference
       id="equipment-reference"

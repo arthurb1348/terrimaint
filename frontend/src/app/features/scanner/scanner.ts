@@ -1,10 +1,12 @@
 import { DOCUMENT } from '@angular/common';
 import {
+  afterNextRender,
   Component,
   DestroyRef,
   ElementRef,
   HostListener,
   inject,
+  Injector,
   signal,
   viewChild,
 } from '@angular/core';
@@ -22,6 +24,7 @@ import { QrCamera } from './qr-camera';
   styleUrl: './scanner.css',
 })
 export class Scanner {
+  private readonly injector = inject(Injector);
   private readonly camera = inject(QrCamera);
   private readonly router = inject(Router);
   private readonly document = inject(DOCUMENT);
@@ -97,7 +100,17 @@ export class Scanner {
       this.referenceError.set(result.error);
       // Une seule région annonce l’erreur ; le statut caméra ne la répète pas.
       if (!manual) this.message.set('');
-      this.referenceInput().nativeElement.focus();
+      // Le bloc ajouté déplace un champ parfois déjà focalisé : attendre le rendu
+      // puis le dégager explicitement de la navigation Agent fixe.
+      afterNextRender(
+        () => {
+          if (!this.alive || this.navigating || !this.referenceError()) return;
+          const input = this.referenceInput().nativeElement;
+          input.focus({ preventScroll: true });
+          input.scrollIntoView?.({ block: 'end' });
+        },
+        { injector: this.injector },
+      );
       return;
     }
     this.navigating = true;
