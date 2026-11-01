@@ -165,6 +165,9 @@ for (const space of ['agent', 'responsable']) {
       }
       measures.push({ orientation, before: oriented.length, ...actual });
       await page.getByRole('button', { name: /Supprimer la photo/ }).click();
+      // L’URL est révoquée immédiatement ; attendre aussi le rendu Angular pour
+      // ne pas mesurer l’ancien <img> avant que la prochaine photo soit affichée.
+      await expect(preview).toHaveCount(0);
     }
     for (const file of [
       await imageFile(page, 160, 80, 'image/png'),
@@ -190,6 +193,9 @@ for (const space of ['agent', 'responsable']) {
       expect(actual.bytes).toBeLessThanOrEqual(1.5 * 1024 * 1024);
       measures.push({ name: file.name, before: file.buffer.length, ...actual });
       await page.getByRole('button', { name: /Supprimer la photo/ }).click();
+      // L’URL est révoquée immédiatement ; attendre aussi le rendu Angular pour
+      // ne pas mesurer l’ancien <img> avant que la prochaine photo soit affichée.
+      await expect(preview).toHaveCount(0);
     }
     const large = await imageFile(page, 1600, 1200, 'image/png', true);
     expect(large.buffer.length).toBeGreaterThan(5 * 1024 * 1024);
