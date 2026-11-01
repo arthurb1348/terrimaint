@@ -5,7 +5,6 @@
     [queryParams]="query()"
     ><span aria-hidden="true">←</span><span>Retour aux interventions</span></a
   >
-  <p class="demo-label">Données de démonstration</p>
   @if (intervention(); as item) {
     <p class="reference">{{ item.id }}</p>
     <h1 id="intervention-detail-title">{{ item.title }}</h1>
@@ -35,7 +34,7 @@
         <p class="instructions">{{ instructions() }}</p>
       </section>
       <div class="origin">
-        <section class="origin-summary business-card" aria-labelledby="intervention-origin-title">
+        <section class="origin-summary business-card single-destination" aria-labelledby="intervention-origin-title">
           <h2 id="intervention-origin-title">Signalement d’origine</h2>
           @if (incident(); as source) {
             <p>
@@ -50,7 +49,7 @@
           }
         </section>
         <section
-          class="equipment-summary business-card"
+          class="equipment-summary business-card single-destination"
           aria-labelledby="intervention-equipment-title"
         >
           <h2 id="intervention-equipment-title">Matériel concerné</h2>
@@ -70,11 +69,8 @@
         </section>
       </div>
     </div>
-    <p class="help">
-      Ces statuts sont fictifs. Ils ne changent pas les états du signalement ou du matériel.
-    </p>
   } @else {
     <h1 id="intervention-detail-title">Intervention introuvable</h1>
-    <p>Aucune intervention de démonstration ne correspond à cet identifiant.</p>
+    <p>Aucune intervention ne correspond à cet identifiant.</p>
   }
 </section>

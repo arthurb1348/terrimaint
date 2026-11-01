@@ -3,7 +3,6 @@
     ><span aria-hidden="true">←</span><span>Retour à l’accueil Agent</span></a
   >
   <h1 id="scanner-title">Scanner</h1>
-  <p class="eyebrow">Données de démonstration</p>
   <h2>Scanner un QR code</h2>
   <p>Cadrez le QR code du matériel pour ouvrir sa fiche.</p>
   <video
@@ -43,6 +42,13 @@
       Exemple : EQ-OUT-0001. Majuscules ou minuscules acceptées ; espaces de début et de fin
       ignorés.
     </p>
+    <div id="reference-error" class="scan-error" role="alert" aria-atomic="true">
+      @if (referenceError()) {
+        <strong>Vérifiez le QR code ou la référence</strong>
+        <p>{{ referenceError() }}</p>
+        <p>Corrigez la saisie ci-dessous ou reprenez la caméra.</p>
+      }
+    </div>
     <input
       #reference
       id="equipment-reference"
@@ -53,7 +59,6 @@
       aria-describedby="reference-help reference-error"
       [attr.aria-invalid]="referenceError() ? 'true' : null"
     />
-    <p id="reference-error" role="alert" aria-atomic="true">{{ referenceError() }}</p>
     <button type="submit" class="page-action">Ouvrir la fiche matériel</button>
   </form>
 </section>

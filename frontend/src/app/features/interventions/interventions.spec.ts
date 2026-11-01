@@ -58,7 +58,7 @@ describe('Consultation locale des interventions', () => {
   it('affiche les informations de chaque relation, les effectifs réels et les dates calendaires', async () => {
     await harness.navigateByUrl(base, Interventions);
     expect(rows()).toHaveLength(6);
-    expect(content().textContent).toContain('Données de démonstration');
+    expect(content().textContent).not.toContain('Données de démonstration');
     expect(content().querySelector('[role="status"]')?.textContent?.trim()).toBe(
       '6 interventions trouvées sur 6.',
     );

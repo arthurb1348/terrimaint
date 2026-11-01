@@ -34,7 +34,7 @@ describe('Fiche de matériel de démonstration', () => {
         'EQ-OUT-0003',
         'Atelier municipal',
       ]);
-      expect(content().textContent).toContain('Données de démonstration');
+      expect(content().textContent).not.toContain('Données de démonstration');
       expect(returnUrl()).toBe(`/${space}/equipements`);
       expect(content().querySelector('a span[aria-hidden="true"]')?.textContent).toBe('←');
       expect(content().querySelector('a span:last-child')?.textContent).toBe('Retour au matériel');
@@ -52,7 +52,7 @@ describe('Fiche de matériel de démonstration', () => {
       expect(content().querySelector('h1')?.textContent).toBe('Équipement introuvable');
       expect(content().querySelector('dl')).toBeNull();
       expect(content().querySelector('.declaration-link')).toBeNull();
-      expect(content().textContent).toContain('Données de démonstration');
+      expect(content().textContent).not.toContain('Données de démonstration');
       expect(returnUrl()).toBe(`/${space}/equipements?q=Souffleur`);
     },
   );

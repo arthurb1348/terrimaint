@@ -2,7 +2,8 @@
 
 ## Référence et usage
 
-- Date de vérification ciblée : 2026-11-01 (Europe/Paris), main et préparation Hosting #61. Les autres preuves conservent leur date.
+
+- Date de vérification ciblée : 2026-11-01 (Europe/Paris), préparation Hosting #61 et revue Pixel #58. Les autres preuves conservent leur date.
 - Dépôt source : [arthurb1348/terrimaint](https://github.com/arthurb1348/terrimaint).
 - Code de référence : `main`, commit `5d1867a17a993f1005c87276665b29004787eab6` (PR #56 fusionnée), vérifié sur GitHub et par Git distant.
 - Périmètre : état constaté du code, des configurations et de la documentation ;
@@ -35,7 +36,8 @@ fusionnée le 31 octobre 2026 ; les programmations simulées ne créent aucune e
 L'harmonisation UX #51 est intégrée par la [PR #52](https://github.com/arthurb1348/terrimaint/pull/52),
 fusionnée le 31 octobre 2026 : incrément **4/10**. La correction de contraste
 [#53](https://github.com/arthurb1348/terrimaint/issues/53) est intégrée par la PR #54 fusionnée. #43 est intégrée par la [PR #55](https://github.com/arthurb1348/terrimaint/pull/55), incrément 5/10.
-Le Scanner QR #44 est **en revue jusqu’à fusion**, incrément 6/10.
+Le Scanner QR #44 est intégré par la PR #56 fusionnée. Les ajustements Pixel #58 sont
+**en revue jusqu’à fusion**, avant les photos #57 puis la mémoire partagée #59.
 PostgreSQL ([#38](https://github.com/arthurb1348/terrimaint/issues/38)) est **différé** et ne
 bloque pas cet incrément. La cible Django/DRF/PostgreSQL reste prévue ; la démonstration
 locale ne prétend pas fournir persistance, authentification ou permissions métier.
@@ -51,8 +53,7 @@ Aucune authentification, modèle métier ou API supplémentaire n'est ajouté. L
 reste sur l'accueil général ; aucun statut de synchronisation n'est simulé.
 
 Les nouvelles URL sous `/agent/…` et `/responsable/…` partagent les composants équipement et
-incident. Les anciennes URL redirigent. Scanner, profil et agents affichent seulement une
-explication de fonctionnalité à venir. Les décisions validées sur l'immobilisation réservée
+incident. Les anciennes URL redirigent. Scanner ouvre le lecteur QR intégré ; profil et agents restent indisponibles. Les décisions validées sur l'immobilisation réservée
 au Responsable et le retrait du type d'incident sont dans [decisions.md](decisions.md).
 Sur mobile jusqu'à 760 px, la navigation Agent affiche **Accueil, Matériel, Scanner et Plus**.
 Plus ouvre Incidents et Profil, indique leur état actif et gère fermeture et focus. De 761 à
@@ -370,11 +371,11 @@ limitée à 3 photos de 5 Mio sont intégrées. Les fichiers restent en mémoire
 fixe n’est pas alimentée. Le [guide photos](photos-demo.md) décrit provenance, ressources,
 tests, procédure et limites. Les tests photos et contrastes sont conservés pour #44.
 
-## Travaux en cours — Scanner QR Agent
+## Scanner QR Agent intégré
 
-L’[issue #44](https://github.com/arthurb1348/terrimaint/issues/44), branche
-`feat/44-agent-qr-scanner`, reste **en revue jusqu’à fusion**. La page d’attente est
-remplacée sur cette branche par activation/arrêt/reprise explicites, vrai décodage jsQR
+L’[issue #44](https://github.com/arthurb1348/terrimaint/issues/44) est intégrée par la
+[PR #56](https://github.com/arthurb1348/terrimaint/pull/56), fusionnée le 1er novembre 2026
+au commit de référence ci-dessus. La page d’attente est remplacée par activation/arrêt/reprise explicites, vrai décodage jsQR
 et saisie permanente. Les références sont résolues dans la source typée unique ; seuls
 les identifiants reconnus ouvrent la fiche Agent. Les résultats tardifs sont invalidés,
 les flux fermés, aucun média ni historique de scans conservé. Les accès #21/PR #29,
@@ -388,6 +389,20 @@ HTTPS sur téléphone et procédure de revue. Les tests distinguent décodage r�
 PNG et capteur/permissions simulés ; aucune caméra physique n’est validée. Les résultats
 locaux et les liens réels Backend/Frontend/Responsive du dernier commit sont dans la PR.
 Les cases de validation humaine restent à Arthur.
+
+## Travaux en cours — Revue Pixel #58
+
+Branche `fix/58-pixel-ux` depuis le dernier `origin/main` vérifié. #58 reste **en revue
+jusqu’à fusion** : liens de grandes cartes, dashboard Responsable sans raccourci Agent,
+retrait des avertissements techniques répétés et erreurs Scanner encadrées. Le sélecteur
+du shell, les filtres/retours, le menu Plus, le seuil Scanner et la santé réelle sur l’accueil
+sont conservés. Aucun dashboard calculé ni permission nouvelle.
+
+Les formulaires ne créent toujours aucun objet dans les listes fixes. Aucun envoi,
+notification, stockage distant ou synchronisation. Les sections historiques ci-dessus
+conservent les textes d’origine ; la décision #58 propose de déplacer les limites de
+l’interface vers le README et les guides. Voir [la procédure Pixel](pixel-ux.md) et les
+preuves du dernier commit dans la PR. Les validations humaines restent à Arthur.
 
 ## Fonctionnalités prévues et non implémentées
 
@@ -429,7 +444,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
 - Backend : **12 cas pytest-django** dans [test_health.py](../backend/tests/test_health.py)
   et [test_settings.py](../backend/tests/test_settings.py) : contrat santé JSON, méthodes,
   routes absentes, hôtes et configuration de la clé secrète. Aucun accès DB métier.
-- Frontend intégré : **199 cas Vitest dans 12 fichiers** :
+- Frontend intégré : **268 cas Vitest dans 19 fichiers** :
   [routage et navigation](../frontend/src/app/app.spec.ts),
   [service HTTP](../frontend/src/app/core/api-health.spec.ts),
   [accueil](../frontend/src/app/home/home.spec.ts),
@@ -444,7 +459,8 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   [détail des interventions](../frontend/src/app/features/interventions/intervention-detail.spec.ts).
   Ils couvrent l'attente, le succès, les JSON invalides, les erreurs HTTP/réseau,
   la relance, l'annulation, le délai de cinq secondes et les routes inconnues.
-  HTTP simulé ; aucun serveur réel requis.
+  Les sept autres fichiers couvrent images, photos en mémoire, résolveur QR, caméra
+  et décodeur. HTTP simulé ; aucun serveur réel requis.
 - La navigation intégrée inclut URL directes et historiques, contexte partagé,
   ouverture/fermeture des menus, focus et absence de synchronisation fictive.
 - Intégré par la [PR #19](https://github.com/arthurb1348/terrimaint/pull/19) :
@@ -458,7 +474,7 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   a été consultée : [CI réussie](https://github.com/arthurb1348/terrimaint/actions/runs/39932815516)
   et [Responsive réussi](https://github.com/arthurb1348/terrimaint/actions/runs/39932815661).
 - La [PR #20 fusionnée](https://github.com/arthurb1348/terrimaint/pull/20) ajoute
-  **12 cas Vitest** pour Matériel (inclus dans les 199 ci-dessus) et deux parcours Playwright
+  **12 cas Vitest** pour Matériel (inclus dans les 268 ci-dessus) et deux parcours Playwright
   dans quatre formats (soit **64 scénarios intégrés**). Les scénarios
   Matériel contrôlent la recherche dans les deux espaces, le résultat vide, l'effacement au
   clavier, le focus, le contexte et le débordement après saisie/effacement.
@@ -556,6 +572,11 @@ et de présentation est une étape future ; aucun connecteur ou automatisme n'es
   Les captures et la CI du dernier commit figurent dans la PR. La commande
   responsive standard locale s'arrête avant tout parcours faute de navigateur Playwright ;
   la variante locale utilise Chromium système 151.0.7922.173, sans modifier le dépôt ou la CI.
+- La PR #56 fusionnée intègre **268 tests Vitest dans 19 fichiers** et **328 scénarios
+  Playwright** : Scanner, ressources caméra et vrai décodage des PNG avec capteur simulé.
+  #58 conserve ces garanties et propose **360 scénarios**, dont 32 nouveaux pour les
+  surfaces de cartes, sélection du texte et erreurs QR. Les preuves du dernier commit
+  proposé sont dans sa PR ; les cases humaines restent à Arthur.
 - Aucun test de persistance ou de parcours métier complet présent.
 - Commandes : `uv run --locked python scripts/check.py` à la racine ;
   `npm run lint`, `npm test`, `npm run build`, `npm run test:responsive` dans `frontend/`.
@@ -625,8 +646,8 @@ SQLAlchemy/Alembic sont une ancienne orientation remplacée. PWA et hors connexi
 restent futurs. Tests et sécurité sont à définir dès la conception de chaque incrément,
 selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humaine.
 
-1. Relire #44 (Scanner QR), utiliser les QR locaux et effectuer le contrôle caméra physique ; décider de la fusion après revue.
-2. #43/PR #55 et #53/PR #54 sont intégrées ; poursuivre les incréments du programme frontend avec des critères validés par Arthur.
+1. Relire et tester sur Pixel #58, **en revue jusqu’à fusion** ; #56 est intégrée.
+2. Réaliser ensuite les photos #57 puis la mémoire partagée #59. #47 et #48 ne sont pas clôturées.
 3. Reprendre ultérieurement PostgreSQL #38, le modèle métier et les migrations Django,
    avec validation serveur, envoi et règles d'accès entre collectivités.
 4. Prévoir la validation des entrées, l'authentification, les autorisations, les tests d'accès
@@ -635,7 +656,7 @@ selon le [workflow](workflow.md), puis à vérifier en CI et en relecture humain
 
 La priorité frontend est validée pour préparer l'oral, sans annonce de déploiement métier.
 Aucune de ces protections métier n'est implémentée aujourd'hui. Le workflow responsive et ses
-268 scénarios sont déjà intégrés ; le parcours proposé complète les contrôles sans modifier les jobs `Backend`/`Frontend`
+328 scénarios sont déjà intégrés par #56 ; #58 propose 360 scénarios et complète les contrôles sans modifier les jobs `Backend`/`Frontend`
 ni les protections distantes.
 
 ## Règles de mise à jour du bilan

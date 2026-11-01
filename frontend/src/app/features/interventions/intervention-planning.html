@@ -16,10 +16,9 @@
       >
     }
   }
-  <p class="demo-label">Données de démonstration</p>
   @if (!incident()) {
     <h1 id="planning-heading" tabindex="-1">Signalement introuvable</h1>
-    <p>Aucun signalement de démonstration ne correspond à cet identifiant.</p>
+    <p>Aucun signalement ne correspond à cet identifiant.</p>
   } @else if (!equipment()) {
     <h1 id="planning-heading" tabindex="-1">Matériel introuvable</h1>
     <p>Le matériel associé à ce signalement est introuvable. La programmation est indisponible.</p>
@@ -39,14 +38,10 @@
           Vérifier l’intervention
         }
         @case ('complete') {
-          Programmation simulée
+          Programmation terminée
         }
       }
     </h1>
-    <p class="demo-notice">
-      Cette programmation est une démonstration. Aucune intervention n’est enregistrée et aucun
-      agent n’est notifié. La saisie est perdue en quittant ou en rechargeant cette page.
-    </p>
     <section class="origin-summary business-card" aria-labelledby="planning-origin-heading">
       <h2 id="planning-origin-heading">Signalement d’origine</h2>
       <p>
@@ -122,9 +117,7 @@
                 required
                 [attr.aria-invalid]="invalid('agentId')"
                 [attr.aria-describedby]="
-                  invalid('agentId')
-                    ? 'planning-agent-help planning-agent-error'
-                    : 'planning-agent-help'
+                  invalid('agentId') ? 'planning-agent-error' : null
                 "
               >
                 <option value="">Choisir un agent</option>
@@ -132,7 +125,6 @@
                   <option [value]="agent.id">{{ agent.name }}</option>
                 }
               </select>
-              <p class="help" id="planning-agent-help">Agents fictifs pour cette démonstration.</p>
               @if (invalid('agentId')) {
                 <p class="error" id="planning-agent-error">Choisissez un agent dans la liste.</p>
               }
@@ -196,14 +188,10 @@
             </dd>
           </div>
         </dl>
-        <p id="planning-demo-notice" class="demo-notice">
-          Démonstration : cette action n’enregistre aucune intervention et ne notifie aucun agent.
-        </p>
         <div class="actions">
           <button
             class="page-action"
             type="button"
-            aria-describedby="planning-demo-notice"
             (click)="complete()"
           >
             Programmer l’intervention
@@ -220,10 +208,6 @@
         </div>
       }
       @case ('complete') {
-        <p>
-          Aucune intervention n’a été réellement enregistrée ou transmise. Aucun agent n’a été
-          notifié.
-        </p>
         <a
           class="return-link page-action back-link"
           [routerLink]="['../../../incidents', incident()!.id]"

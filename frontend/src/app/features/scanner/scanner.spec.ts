@@ -66,6 +66,8 @@ describe('Scanner Agent', () => {
       expect(content().querySelector('input')!.getAttribute('aria-invalid')).toBe('true');
       expect(content().querySelector('script')).toBeNull();
       expect(TestBed.inject(Router).url).toBe('/agent/scanner');
+      expect(content().querySelectorAll('[role=alert]')).toHaveLength(1);
+      expect(content().querySelector('input')!.getAttribute('aria-describedby')).toContain('reference-error');
     },
   );
   it('ne navigue qu’une fois malgré les reconnaissances répétées et la saisie concurrente', () => {
@@ -86,6 +88,8 @@ describe('Scanner Agent', () => {
       expect(navigate).not.toHaveBeenCalled();
       expect(content().querySelector('[role=alert]')!.textContent).toMatch(/inconnue|invalide/);
       expect(content().querySelector('img')).toBeNull();
+      expect(content().querySelector('[role=status]')!.textContent).toBe('');
+      expect(content().querySelector('#reference-error strong')!.textContent).toContain('Vérifiez');
     },
   );
   it('arrête, reprend et permet de corriger un QR inconnu', () => {

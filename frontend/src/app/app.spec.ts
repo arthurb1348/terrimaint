@@ -78,16 +78,16 @@ describe('Shell et routage', () => {
     http.expectNone('/api/v1/health');
   });
 
-  it('permet au responsable de rejoindre l’espace Agent puis les rubriques communes', async () => {
+  it('conserve les accès métier Responsable et change d’espace par le shell', async () => {
     await navigate('/responsable');
     const links = element.querySelectorAll<HTMLAnchorElement>('main a');
     expect(Array.from(links, (link) => link.getAttribute('href'))).toEqual([
       '/responsable/equipements',
       '/responsable/incidents',
       '/responsable/interventions',
-      '/agent',
     ]);
-    element.querySelector<HTMLAnchorElement>('main a[href="/agent"]')?.click();
+    expect(element.querySelector('main a[href="/agent"]')).toBeNull();
+    element.querySelector<HTMLAnchorElement>('.space-links a[href="/agent"]')?.click();
     await fixture.whenStable();
     expect(router.url).toBe('/agent');
     expect(element.querySelector('h1')?.textContent).toBe('Accueil');
@@ -185,7 +185,7 @@ describe('Shell et routage', () => {
       assertNavigation();
       element.querySelector<HTMLButtonElement>('main button')!.click();
       await fixture.whenStable();
-      expect(element.querySelector('main h1')?.textContent).toContain('Signalement simulé');
+      expect(element.querySelector('main h1')?.textContent).toContain('Signalement terminé');
       assertNavigation();
       await navigate(`/${space}/incidents`);
       expect(element.querySelectorAll('main tbody tr')).toHaveLength(6);
@@ -262,7 +262,7 @@ describe('Shell et routage', () => {
     assertNavigation();
     element.querySelector<HTMLButtonElement>('main button')!.click();
     await fixture.whenStable();
-    expect(element.querySelector('main h1')?.textContent).toContain('Programmation simulée');
+    expect(element.querySelector('main h1')?.textContent).toContain('Programmation terminée');
     assertNavigation();
     await navigate('/responsable/interventions');
     expect(element.querySelectorAll('main tbody tr')).toHaveLength(6);

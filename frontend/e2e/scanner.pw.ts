@@ -119,6 +119,10 @@ for (const [reference, title] of [
       expect(navigations).toBe(1);
     } else {
       await expect(page.getByRole('alert')).toContainText('inconnue');
+      await expect(page.getByRole('status')).toHaveText('');
+      await expect(page.getByRole('alert')).toHaveCount(1);
+      await expect(page.getByRole('alert')).toHaveCSS('border-left-width', '6px');
+      await expect(page.getByRole('alert')).toContainText('Corrigez la saisie');
       await expect(
         page.getByRole('button', { name: 'Reprendre la caméra', exact: true }),
       ).toBeVisible();
@@ -208,5 +212,42 @@ test('Contexte non sécurisé simulé : aucune permission, saisie disponible', a
   expect((await stats(page)).requests).toBe(0);
   await page.getByLabel('Référence du matériel', { exact: true }).fill('EQ-OUT-0001');
   await page.getByRole('button', { name: 'Ouvrir la fiche matériel', exact: true }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Tondeuse autoportée');
+});
+
+
+test('Erreurs distinctes près du scan, association et correction sans navigation', async ({ page }, info) => {
+  await page.goto('/agent/scanner');
+  const input = page.getByLabel('Référence du matériel', { exact: true });
+  const error = page.getByRole('alert');
+  for (const [value, expected] of [['https://example.org', 'Référence invalide.'], ['EQ-OUT-9999', 'Référence inconnue.']]) {
+    await input.fill(value);
+    await input.press('Enter');
+    await expect(error).toContainText(expected);
+    await expect(error).toContainText('reprenez la caméra');
+    await expect(input).toBeFocused();
+    await expect(input).toHaveAttribute('aria-describedby', 'reference-help reference-error');
+    await expect(error).toBeInViewport({ ratio: 1 });
+    await expect(input).toBeInViewport({ ratio: 1 });
+    const nav = await page.getByRole('navigation', { name: 'Navigation Agent' }).boundingBox();
+    const inputBounds = await input.boundingBox();
+    expect(inputBounds!.y + inputBounds!.height).toBeLessThanOrEqual(nav!.y);
+    await expect(page.locator('[role=alert]')).toHaveCount(1);
+    const position = await error.evaluate(el => ({
+      insideIdentification: Boolean(el.closest('form')),
+      beforeInput: Boolean(el.compareDocumentPosition(document.querySelector('#equipment-reference')!) & Node.DOCUMENT_POSITION_FOLLOWING),
+    }));
+    expect(position).toEqual({ insideIdentification: true, beforeInput: true });
+    const open = page.getByRole('button', { name: 'Ouvrir la fiche matériel', exact: true });
+    await input.press('Tab');
+    await expect(open).toBeFocused();
+    const openBounds = await open.boundingBox();
+    expect(openBounds!.y + openBounds!.height).toBeLessThanOrEqual(nav!.y);
+    await input.focus();
+    await info.attach(expected, { body: await page.screenshot(), contentType: 'image/png' });
+    await noOverflow(page);
+  }
+  await input.fill('EQ-OUT-0001');
+  await input.press('Enter');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Tondeuse autoportée');
 });

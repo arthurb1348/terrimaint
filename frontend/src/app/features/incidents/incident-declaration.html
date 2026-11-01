@@ -15,12 +15,6 @@
     >
   }
 
-  <p class="demo-label">Données de démonstration</p>
-  <p class="demo-notice">
-    Cette simulation n'enregistre et n'envoie rien. La saisie reste uniquement en mémoire : elle est
-    perdue en quittant cette page ou en la rechargeant.
-  </p>
-
   @if (equipment(); as item) {
     <h1 id="incident-title-heading" tabindex="-1">
       @switch (step()) {
@@ -31,7 +25,7 @@
           Vérifier le signalement
         }
         @case ('complete') {
-          Signalement simulé
+          Signalement terminé
         }
       }
     </h1>
@@ -95,7 +89,7 @@
           <section aria-labelledby="photos-title">
             <h2 id="photos-title">Photos (facultatives)</h2>
             <label for="incident-photos">Choisir des photos</label>
-            <p id="photos-help" class="help">3 photos maximum, 5 Mio par photo. JPEG, PNG ou WebP. Le navigateur peut proposer la prise de vue ou le choix de fichiers. Les photos restent en mémoire, sans envoi.</p>
+            <p id="photos-help" class="help">3 photos maximum, 5 Mio par photo. JPEG, PNG ou WebP. Le navigateur peut proposer la prise de vue ou le choix de fichiers. Les photos choisies restent sur cet appareil pendant la saisie.</p>
             <input #photoInput id="incident-photos" type="file" accept="image/jpeg,image/png,image/webp"
               multiple aria-describedby="photos-help photos-status photos-errors" (change)="selectPhotos(photoInput)" />
             <p id="photos-status" role="status">{{ media.busy() ? 'Vérification des photos…' : media.photos().length + ' photo(s) sélectionnée(s).' }}</p>
@@ -188,14 +182,10 @@
           } @empty { <p>Aucune photo sélectionnée.</p> }
         </div>
         <p>Le statut du matériel reste inchangé.</p>
-        <p id="simulation-notice" class="demo-notice">
-          Démonstration : aucun signalement n'est réellement transmis ou enregistré.
-        </p>
         <div class="actions">
           <button
             class="page-action"
             type="button"
-            aria-describedby="simulation-notice"
             (click)="complete()"
           >
             Envoyer le signalement
@@ -212,10 +202,6 @@
         </div>
       }
       @case ('complete') {
-        <p>
-          Démonstration : aucun signalement n'est réellement transmis ou enregistré. Le statut du
-          matériel reste inchangé.
-        </p>
         <a
           class="return-link page-action back-link"
           [routerLink]="['../../../equipements', item.id]"
@@ -227,7 +213,7 @@
   } @else {
     <h1 id="incident-title-heading" tabindex="-1">Équipement introuvable</h1>
     <p>
-      Aucun équipement de démonstration ne correspond à cet identifiant. La déclaration est
+      Aucun équipement ne correspond à cet identifiant. La déclaration est
       indisponible.
     </p>
   }

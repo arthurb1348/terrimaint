@@ -1,7 +1,5 @@
 <section class="feature-page" aria-labelledby="incidents-title">
   <h1 id="incidents-title">Incidents</h1>
-  <p class="demo-label">Données de démonstration</p>
-  <p>Consultez les signalements fictifs. La déclaration simulée n'ajoute rien à cette liste.</p>
   <div class="filters" role="search" aria-label="Rechercher et filtrer les signalements">
     <div class="search-field">
       <label for="incident-search">Rechercher un signalement</label>
@@ -62,7 +60,7 @@
     <!-- Les rôles conservent la structure de tableau lorsque le CSS présente les lignes en cartes. -->
     <table role="table">
       <caption class="visually-hidden">
-        Signalements de démonstration correspondant aux filtres
+        Signalements correspondant aux filtres
       </caption>
       <thead role="rowgroup">
         <tr role="row">
@@ -75,7 +73,7 @@
       </thead>
       <tbody role="rowgroup">
         @for (row of filteredIncidents(); track row.incident.id) {
-          <tr role="row" class="business-card">
+          <tr role="row" class="business-card linked-row">
             <th scope="row" role="rowheader">
               <a [routerLink]="[row.incident.id]" [queryParams]="query()">
                 <span class="reference">{{ row.incident.id }}</span>

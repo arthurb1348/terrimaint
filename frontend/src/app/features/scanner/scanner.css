@@ -47,9 +47,18 @@ input:focus-visible {
   outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
-#reference-error {
+.scan-error:not(:empty) {
+  margin-block: 16px;
+  padding: 16px;
+  border: 2px solid var(--green);
+  border-inline-start-width: 6px;
+  border-radius: 8px;
+  background: var(--surface);
   color: var(--text);
 }
-#reference-error:empty {
-  margin: 12px 0;
+.scan-error p {
+  margin: 8px 0 0;
+}
+.scan-error:empty {
+  display: none;
 }

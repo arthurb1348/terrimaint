@@ -166,7 +166,7 @@ for (const space of ['agent', 'responsable']) {
       await page.goto(base);
       await expect(rows).toHaveCount(6);
       await expect(rows.first().locator('time')).toHaveText('28/10/2026');
-      await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+      await expect(main.getByText('Données de démonstration', { exact: true })).toHaveCount(0);
       await expect(main.getByRole('status')).toHaveText('6 signalements trouvés.');
       await expect(main.getByRole('table').getByRole('columnheader')).toHaveCount(5);
       const expectedDisplay =
@@ -365,8 +365,8 @@ for (const space of ['agent', 'responsable']) {
       (url) => url.pathname === declaration && url.searchParams.get('q') === query,
     );
     await expect(main.getByRole('heading', { level: 1 })).toHaveText('Déclarer un incident');
-    await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
-    await expect(main.locator('.demo-notice')).toContainText("n'enregistre et n'envoie rien");
+    await expect(main.getByText('Données de démonstration', { exact: true })).toHaveCount(0);
+    await expect(main.locator('.demo-notice')).toHaveCount(0);
     await expect(main.locator('.equipment-summary')).toContainText('Tondeuse autoportée');
     await expect(main.locator('.equipment-summary')).toContainText(
       'EQ-OUT-0001 · Centre technique municipal',
@@ -448,11 +448,11 @@ for (const space of ['agent', 'responsable']) {
     await page.keyboard.press('Tab');
     const finish = main.getByRole('button', { name: 'Envoyer le signalement', exact: true });
     await expectFocusedControlVisible(page, finish, space);
-    await expect(main.locator('#simulation-notice')).toBeInViewport({ ratio: 1 });
-    await expect(finish).toHaveAccessibleDescription(/Démonstration : aucun signalement/);
+    await expect(main.getByRole('button', { name: 'Envoyer le signalement', exact: true })).toBeInViewport({ ratio: 1 });
+    await expect(finish).toHaveAccessibleDescription('');
     await page.keyboard.press('Enter');
-    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement simulé');
-    await expect(main).toContainText("aucun signalement n'est réellement transmis ou enregistré");
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement terminé');
+    await expect(main.locator('.return-link')).toHaveAttribute('href', /\/equipements\/EQ-/);
     await expectIncidentsActive(page, space);
     await expectNoHorizontalOverflow(page);
     await capture(page, info, 'incident-simulation-terminee');
@@ -529,13 +529,11 @@ for (const space of ['agent', 'responsable']) {
     await page.keyboard.press('Tab');
     const send = main.getByRole('button', { name: 'Envoyer le signalement', exact: true });
     await expectFocusedControlVisible(page, send, space);
-    await expect(main.locator('#simulation-notice')).toBeInViewport({ ratio: 1 });
+    await expect(main.getByRole('button', { name: 'Envoyer le signalement', exact: true })).toBeInViewport({ ratio: 1 });
     await capture(page, info, 'signalement-sans-description');
     await page.keyboard.press('Enter');
-    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement simulé');
-    await expect(main).toContainText(
-      "Démonstration : aucun signalement n'est réellement transmis ou enregistré.",
-    );
+    await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement terminé');
+    await expect(main.locator('.return-link')).toHaveAttribute('href', /\/equipements\/EQ-/);
     await main.getByRole('link', { name: 'Retour à la fiche', exact: true }).click();
     await expect(page).toHaveURL(
       (url) =>
@@ -608,7 +606,7 @@ for (const space of ['agent', 'responsable']) {
     const items = main.getByRole('list', { name: 'Équipements' }).getByRole('listitem');
     const clear = main.getByRole('button', { name: 'Effacer la recherche' });
 
-    await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+    await expect(main.getByText('Données de démonstration', { exact: true })).toHaveCount(0);
     await expect(items).toHaveCount(6);
     await input.focus();
     await page.keyboard.type('  tONDeUSE  ');
@@ -686,7 +684,7 @@ for (const space of ['agent', 'responsable']) {
       (url) => url.pathname === `${base}/EQ-OUT-0001` && url.searchParams.get('q') === query,
     );
     await expect(main.getByRole('heading', { level: 1 })).toHaveText('Tondeuse autoportée');
-    await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+    await expect(main.getByText('Données de démonstration', { exact: true })).toHaveCount(0);
     await expect(main.getByText('EQ-OUT-0001', { exact: true })).toBeVisible();
     await expect(main.getByText('Centre technique municipal', { exact: true })).toBeVisible();
     await expect(page.locator('nav a[aria-current="page"]')).toHaveAttribute('href', base);
@@ -744,7 +742,7 @@ for (const space of ['agent', 'responsable']) {
     await page.goto(`${base}/inconnu?${new URLSearchParams({ q: query })}`);
     await expect(main.getByRole('heading', { level: 1 })).toHaveText('Équipement introuvable');
     await expect(main).not.toContainText('Fourgon de voirie');
-    await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+    await expect(main.getByText('Données de démonstration', { exact: true })).toHaveCount(0);
     await expect(page.locator('nav a[aria-current="page"]')).toHaveAttribute('href', base);
     await expectNoHorizontalOverflow(page);
     await capture(page, info, 'equipement-introuvable');
@@ -1076,8 +1074,8 @@ for (const timezoneId of ['Europe/Paris', 'America/New_York']) {
       const program = main.getByRole('button', { name: 'Programmer l’intervention', exact: true });
       await page.keyboard.press('Tab');
       await expectFocusedControlVisible(page, program, 'responsable');
-      await expect(program).toHaveAttribute('aria-describedby', 'planning-demo-notice');
-      await expect(main.locator('#planning-demo-notice')).toBeVisible();
+      await expect(program).not.toHaveAttribute('aria-describedby', /planning-demo/);
+      await expect(main.locator('#planning-demo-notice')).toHaveCount(0);
       await page.keyboard.press('Tab');
       const edit = main.getByRole('button', { name: 'Modifier l’intervention', exact: true });
       await expectFocusedControlVisible(page, edit, 'responsable');
@@ -1098,15 +1096,13 @@ for (const timezoneId of ['Europe/Paris', 'America/New_York']) {
       await expectFocusedControlVisible(page, program, 'responsable');
       await page.keyboard.press('Enter');
       const completeHeading = main.getByRole('heading', {
-        name: 'Programmation simulée',
+        name: 'Programmation terminée',
         exact: true,
       });
       await expect(completeHeading).toBeFocused();
-      await expect(main).toContainText(
-        'Aucune intervention n’a été réellement enregistrée ou transmise',
-      );
-      await expect(main).toContainText('Aucun agent n’a été notifié');
-      await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+      await expect(main.getByRole('link', { name: 'Retour au signalement', exact: true })).toHaveAttribute('href', /\/responsable\/incidents\/INC-/);
+      await expect(main).not.toContainText('notifié');
+      await expect(main.getByText('Données de démonstration', { exact: true })).toHaveCount(0);
       await expect(active).toHaveAttribute('href', '/responsable/interventions');
       await expectNoHorizontalOverflow(page);
       await capture(page, info, 'intervention-confirmation');
@@ -1249,7 +1245,7 @@ for (const timezoneId of ['Europe/Paris', 'America/New_York']) {
       await page.goto(base);
       await expect(rows).toHaveCount(6);
       await expect(main.getByRole('status')).toHaveText('6 interventions trouvées sur 6.');
-      await expect(main.getByText('Données de démonstration', { exact: true })).toBeVisible();
+      await expect(main.getByText('Données de démonstration', { exact: true })).toHaveCount(0);
       await expect(main.locator('.status-counts dd')).toHaveText(['2', '2', '2']);
       await expect(rows.locator('time')).toHaveText([
         '03/11/2026',
@@ -1456,7 +1452,7 @@ test('Déclarer et programmer restent des simulations sans ajout au jeu fixe de 
   await main.getByRole('radio', { name: 'Basse — intervention à planifier', exact: true }).check();
   await main.getByRole('button', { name: 'Vérifier le signalement', exact: true }).click();
   await main.getByRole('button', { name: 'Envoyer le signalement', exact: true }).click();
-  await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement simulé');
+  await expect(main.getByRole('heading', { level: 1 })).toHaveText('Signalement terminé');
   await navigate('Interventions');
   await expect(main.locator('tbody tr')).toHaveCount(6);
   expect(await main.locator('tbody').innerText()).toBe(initial);
@@ -1472,7 +1468,7 @@ test('Déclarer et programmer restent des simulations sans ajout au jeu fixe de 
   await main.getByLabel('Date prévue (obligatoire)', { exact: true }).fill('2026-11-03');
   await main.getByRole('button', { name: 'Vérifier l’intervention', exact: true }).click();
   await main.getByRole('button', { name: 'Programmer l’intervention', exact: true }).click();
-  await expect(main.getByRole('heading', { level: 1 })).toHaveText('Programmation simulée');
+  await expect(main.getByRole('heading', { level: 1 })).toHaveText('Programmation terminée');
   await navigate('Interventions');
   await expect(main.locator('tbody tr')).toHaveCount(6);
   expect(await main.locator('tbody').innerText()).toBe(initial);
@@ -1543,7 +1539,7 @@ for (const space of ['agent', 'responsable']) {
     await expect(main.locator('.back-link')).toHaveCount(0);
     await expectBusinessCard(main.getByRole('listitem'));
     const equipment = main.getByRole('link', { name: 'Débroussailleuse n°3', exact: true });
-    await expect(equipment).toHaveCSS('text-decoration-line', 'underline');
+    await expect(equipment.locator('h2')).toHaveCSS('text-decoration-line', 'underline');
     await equipment.focus();
     await page.keyboard.press('Enter');
     const back = main.getByRole('link', { name: 'Retour au matériel', exact: true });
@@ -1567,10 +1563,7 @@ for (const space of ['agent', 'responsable']) {
     await expectBackAction(page, formBack, space);
     await page.reload();
     await expect(formBack).toHaveAttribute('href', `${detail}?q=${encodeURIComponent(q)}`);
-    await expect(main.getByText('Données de démonstration', { exact: true })).toHaveCSS(
-      'background-color',
-      'rgb(228, 236, 232)',
-    );
+    await expect(main.getByText('Données de démonstration', { exact: true })).toHaveCount(0);
     await expectBusinessCard(main.locator('.equipment-summary'));
     await main
       .getByRole('textbox', { name: 'Intitulé', exact: true })
@@ -1684,7 +1677,7 @@ test('L’harmonisation de la programmation conserve les liens, Basse et les cri
   await expectNoHorizontalOverflow(page);
   await capture(page, info, 'ux-programmation-actions');
   await page.keyboard.press('Enter');
-  await expect(main.getByRole('heading', { level: 1 })).toHaveText('Programmation simulée');
+  await expect(main.getByRole('heading', { level: 1 })).toHaveText('Programmation terminée');
   const completedBack = main.getByRole('link', { name: 'Retour au signalement', exact: true });
   await expect(completedBack.locator('span[aria-hidden="true"]')).toHaveText('←');
   await expectPageAction(page, completedBack, 'primary', 'responsable');
